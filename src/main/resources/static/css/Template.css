@@ -1,0 +1,252 @@
+body{
+    width: 100%;
+    height: auto;
+    margin: 0;
+}
+
+/*-----------------header_navbar-----------------*/
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    padding-left: 7rem;
+    padding-right: 7rem;
+    border-bottom: 2px solid #BFBFBF;
+    transition: all 0.3 ease;
+}
+
+.navbar_logo {
+    flex-grow: 0.1;
+}
+
+.navbar_menu {
+    display: flex;
+    padding: 0;
+    flex-grow: 2.5;
+    justify-content: space-evenly;
+}
+
+.navbar_menu_detail {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 100%;
+    overflow: hidden;
+    width: 100%;
+    height: 0;
+    border-top: 1px solid #DDDDDD;
+    border-bottom: 1px solid #DDDDDD;
+    background: #fff;
+    z-index: 900;
+    opacity: 0;
+    transition: all 0.3s;
+}
+
+.navbar_menu_detail:hover {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 100%;
+    overflow: hidden;
+    width: 100%;
+    height: 0;
+    border-top: 1px solid #DDDDDD;
+    border-bottom: 1px solid #DDDDDD;
+    background: #fff;
+    z-index: 900;
+    opacity: 0;
+    transition: all 0.3s;
+}
+
+.navbar_menu_detail_category {
+    display: none;
+}
+
+.navbar_menu li {
+    list-style: none;
+    transition: all 0.3s ease;
+}
+
+.navbar_menu li:hover {
+    transform: scale(1.3);
+}
+
+.navbar_menu li a {
+    color: black;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: bold;
+    transition: color 0.3s ease; /* 애니메이션 효과를 위해 transition 사용 */
+}
+
+.navbar_menu li a:hover {
+    color: #0A369D;
+}
+
+.navbar_searchbar {
+    display: flex;
+    justify-content: center;
+    flex: 1;
+}
+
+.navbar_searchbar input {
+    width: 300px;
+    height: 40px;
+    padding-left: 40px;
+    background-image: url('../images/search_icon.svg');
+    background-position: 10px center;
+    background-repeat: no-repeat;
+    border-radius: 10px;
+    border: 2px solid #BFBFBF;
+    outline: none;
+}
+
+.navbar_member {
+    display: flex;
+    padding: 0;
+    flex-grow: 1.5;
+    justify-content: space-evenly;
+}
+
+.navbar_member li {
+    list-style: none;
+    transition: all 0.3s ease;
+}
+
+.navbar_member li:hover {
+    transform: scale(1.3);
+}
+
+.navbar_member li a {
+    color: black;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.navbar_member li a:hover {
+    color: #0A369D;
+}
+
+.navbar_alarm {
+    display: flex;
+    justify-content: center;
+    flex-grow: 0.1;
+}
+
+.navbar_alarm img {
+    width: 40px;
+    height: 40px;
+}
+
+/*--------------------main--------------------*/
+
+main{
+    width: 90%;
+    height: auto;
+    min-height: 100%;
+    padding-bottom: 20rem; /*footer의 높이*/
+    margin: 0 6rem;
+    background-color: #000000;
+}
+
+/*--------------------footer--------------------*/
+
+footer {
+    width: 90%;
+    height: 20rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #000000;
+    opacity: 70%;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    padding-left: 3rem;
+    padding-right: 3rem;
+    margin: 0 6rem;
+    position : relative;
+    box-sizing: border-box;
+    /* transform : translateY(-100%); */
+}
+
+footer p {
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.footer_contents {
+    flex-grow: 9;
+}
+
+.footer_contents_body {
+    display: flex;
+    align-items: center;
+}
+
+#footer_logo {
+    margin-right: 4rem;
+}
+
+.footer_icons {
+    flex-grow: 1;
+}
+
+.footer_contents_bttm {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    margin-top: 1.5rem;
+}
+
+.footer_contents_bttm p {
+    margin: 0;
+}
+
+.footer_contour {
+    border: 2px solid white;
+    height: 16rem;
+    margin-right: 7rem;
+}
+
+.footer_contents_body_content_menu {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.contour {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid white;
+    height: 0.9rem;
+    margin: 1rem;
+}
+
+.footer_contents_body_content_detail {
+    display: grid;
+    grid-template-columns: 1fr 30px 1fr;
+}
+
+.footer_contents_body_content_member {
+    display: flex;
+    align-items: center;
+}
+
+.footer_icons {
+    display: grid;
+    grid-template-columns: repeat(2, 0.1fr);
+    gap: 40px;
+}
+
+/* .footer_icons a img {
+    cursor: pointer;
+} */
+
+#facebook_icon {
+    margin: 0.3rem;
+}
