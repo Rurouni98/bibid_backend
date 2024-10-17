@@ -6,6 +6,7 @@ import bibid.repository.auction.AuctionRepository;
 import bibid.repository.specialAuction.AuctionInfoRepository;
 import bibid.repository.specialAuction.ChatRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 
 @Controller
 @RequiredArgsConstructor
+@Slf4j
 public class ChatController {
 
     private final AuctionRepository auctionRepository;
@@ -50,6 +52,8 @@ public class ChatController {
         Chat chat = chatDto.toEntity(auction.getChatRoom(), sender);
 
         Chat savedChat = chatRepository.save(chat);
+
+        log.info("savedChat : {}", savedChat);
 
         return savedChat.toDto();  // 클라이언트로 메시지를 그대로 전송
 

@@ -13,4 +13,11 @@ import java.util.List;
 public interface AuctionService {
     Page<AuctionDto> post(AuctionDto auctionDto, AuctionDetailDto auctionDetailDto, MultipartFile thumbnail, MultipartFile[] additionalImages, Member member, Pageable pageable);
 
+    Page<AuctionDto> findTopByViewCount(Pageable pageable);
+
+    Page<AuctionDto> findAll(Pageable pageable);
+
+    Page<AuctionDto> findByCategory(String category, Pageable pageable);
+
+    Page<AuctionDto> findConveyor(Pageable pageable);
 }

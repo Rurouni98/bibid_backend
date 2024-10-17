@@ -43,6 +43,7 @@ public class SecurityConfiguration {
                             "/v3/api-docs/**",
                             "/members/**",
                             "/ws/**",
+                            "/auction/**",
                             "/mypage/**"
                     ).permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();

@@ -2,7 +2,12 @@ package bibid.service.specialAuction.impl;
 
 import bibid.dto.AuctionDto;
 import bibid.entity.Auction;
+import bibid.entity.Streaming;
+import bibid.livestation.dto.LiveStationInfoDTO;
+import bibid.livestation.dto.LiveStationUrlDTO;
+import bibid.livestation.service.LiveStationService;
 import bibid.repository.specialAuction.SpecialAuctionRepository;
+import bibid.repository.specialAuction.StreamingRepository;
 import bibid.service.specialAuction.ChatRoomService;
 import bibid.service.specialAuction.SpecialAuctionService;
 import jakarta.transaction.Transactional;
@@ -15,6 +20,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
+
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +33,8 @@ public class SpecialAuctionServiceImpl implements SpecialAuctionService {
 
     private final SpecialAuctionRepository specialAuctionRepository;
     private final ChatRoomService chatRoomService;
+    private final LiveStationService liveStationService;
+    private final StreamingRepository streamingRepository;
 
     public enum AuctionType {
         REALTIME("실시간 경매"),
@@ -42,16 +51,17 @@ public class SpecialAuctionServiceImpl implements SpecialAuctionService {
         }
     }
 
-    @Transactional
-    @Scheduled(fixedRate = 600000) // 10분마다 실행
+//    // 경매 시작 시간이 30분 이내인 경매들 찾기 (찾아서 채팅방 생성)
+//    @Transactional
+//    @Scheduled(fixedRate = 60000) // 1분마다 실행
     public void checkAuctionStart() {
         log.info("checkAuctionStart() 실행됨");
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime past30Minutes = now.minusMinutes(30);
+        LocalDateTime thirtyMinutesLater = now.plusMinutes(3000);
 
         try {
-            // 경매 시작 시간이 15분 이내인 경매들을 찾음
-            List<Auction> upcomingAuctions = specialAuctionRepository.findAuctionsStartingBefore(past30Minutes, now);
+            // 경매 시작 시간이  이내인 경매들을 찾음
+            List<Auction> upcomingAuctions = specialAuctionRepository.findAuctionsStartingWithinThirtyMinutes(now, thirtyMinutesLater);
 
             for (Auction auction : upcomingAuctions) {
                 // 1. 채팅방이 생성되지 않은 경우 채팅방 생성
@@ -60,37 +70,37 @@ public class SpecialAuctionServiceImpl implements SpecialAuctionService {
                     auction.setChatRoomCreated(true); // 채팅방 생성 상태 업데이트
                 }
 
-//                // 2. 스트리밍이 생성되지 않은 경우 스트리밍 채널 생성
-//                if (!auction.isStreamingCreated()) {
-//                    String channelId = liveStationService.createChannel(auction.getProductName()); // LiveStation 채널 생성
-//                    LiveStationInfoDTO liveStationInfoDTO = liveStationService.getChannelInfo(channelId);
-//                    List<LiveStationUrlDTO> liveStationUrlDTOList = liveStationService.getServiceURL(channelId, "GENERAL");
-//
-//
-//                    Streaming streaming = Streaming.builder()
-//                            .channelId(channelId) // 실제 스트리밍 URL
-//                            .startTime(auction.getStartingLocalDateTime()) // 경매 시작 시간
-//                            .endTime(auction.getEndingLocalDateTime().plusMinutes(30)) // 스트리밍 종료 시간 설정
-//                            .auction(auction)
-//                            .channelName(liveStationInfoDTO.getChannelName())
-//                            .cdnInstanceNo(liveStationInfoDTO.getCdnInstanceNo())
-//                            .cdnStatus(liveStationInfoDTO.getCdnStatus())
-//                            .publishUrl(liveStationInfoDTO.getPublishUrl())
-//                            .channelStatus(liveStationInfoDTO.getChannelStatus())
-//                            .streamKey(liveStationInfoDTO.getStreamKey())
-//                            .streamUrl(liveStationUrlDTOList.get(0).getUrl())
-//                            .build();
-//
-//                    streamingRepository.save(streaming); // 스트리밍 정보 저장
-//                    auction.setStreamingCreated(true); // 스트리밍 생성 상태 업데이트
-//                }
+                // 2. 스트리밍이 생성되지 않은 경우 스트리밍 채널 생성
+                if (!auction.isStreamingCreated()) {
+                    String UUIDProductName = auction.getProductName() + "-" + UUID.randomUUID().toString();
+                    String channelId = liveStationService.createChannel(UUIDProductName); // LiveStation 채널 생성
+                    LiveStationInfoDTO liveStationInfoDTO = liveStationService.getChannelInfo(channelId);
+                    List<LiveStationUrlDTO> liveStationUrlDTOList = liveStationService.getServiceURL(channelId, "GENERAL");
+
+                    Streaming streaming = Streaming.builder()
+                            .channelId(channelId)
+                            .startTime(auction.getStartingLocalDateTime())
+                            .endTime(auction.getEndingLocalDateTime().plusMinutes(30)) // 스트리밍 종료 시간 설정
+                            .auction(auction)
+                            .channelName(liveStationInfoDTO.getChannelName())
+                            .cdnInstanceNo(liveStationInfoDTO.getCdnInstanceNo())
+                            .cdnStatus(liveStationInfoDTO.getCdnStatus())
+                            .publishUrl(liveStationInfoDTO.getPublishUrl())
+                            .channelStatus(liveStationInfoDTO.getChannelStatus())
+                            .streamKey(liveStationInfoDTO.getStreamKey())
+                            .streamUrl(liveStationUrlDTOList.get(0).getUrl())
+                            .build();
+
+                    streamingRepository.save(streaming); // 스트리밍 정보 저장
+                    auction.setStreamingCreated(true); // 스트리밍 생성 상태 업데이트
+                }
             }
         } catch (Exception e) {
             log.error("경매 시작 스케줄링 중 오류 발생: ", e);
         }
     }
 
-    // 경매 타입에 따른 경매 목록을 페이징 처리하여 반환
+    // 경매 타입과 종료 시간이 현재 이후인 (즉, 아직 경매가 끝나지 않은) 경매 목록을 페이징 처리하여 조회
     @Override
     public Page<AuctionDto> findAuctionsByType(String auctionType, Pageable pageable) {
         String koreanAuctionType = "";

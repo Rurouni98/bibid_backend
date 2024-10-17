@@ -57,5 +57,80 @@ public class AuctionController {
         }
     }
 
+    @GetMapping // 모든 상품 호출
+    public ResponseEntity<?> getAuctions(@PageableDefault(page = 0, size = 15) Pageable pageable) {
+        ResponseDto<AuctionDto> responseDto = new ResponseDto<>();
 
+        try {
+            Page<AuctionDto> auctionDtoList = auctionService.findAll(pageable);
+
+            log.info("getAuctions auctionDtoList: {}", auctionDtoList);
+
+            responseDto.setPageItems(auctionDtoList);
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("ok");
+
+            return ResponseEntity.ok(responseDto);
+        } catch(Exception e) {
+            log.error("getAuctions error: {}", e.getMessage());
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage(e.getMessage());
+            return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
+
+    @GetMapping("/top") //베스트 상품 6개 호출
+    public ResponseEntity<?> getTopAuctions(@PageableDefault(page = 0, size = 6) Pageable pageable) {
+        ResponseDto<AuctionDto> responseDto = new ResponseDto<>();
+
+        try {
+            Page<AuctionDto> topAuctions = auctionService.findTopByViewCount(pageable);
+            responseDto.setPageItems(topAuctions);
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("ok");
+
+            return ResponseEntity.ok(responseDto);
+        } catch (Exception e) {
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage(e.getMessage());
+            return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
+
+    @GetMapping("/best/{category}") // 카테고리별 상품 호출
+    public ResponseEntity<?> getAuctionsByCategory(@PathVariable String category,
+                                                   @PageableDefault(page = 0, size = 5) Pageable pageable) {
+        ResponseDto<AuctionDto> responseDto = new ResponseDto<>();
+
+        try {
+            Page<AuctionDto> auctionDtoList = auctionService.findByCategory(category, pageable); // 카테고리로 상품 찾기
+            responseDto.setPageItems(auctionDtoList);
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("ok");
+
+            return ResponseEntity.ok(responseDto);
+        } catch (Exception e) {
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage(e.getMessage());
+            return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
+
+    @GetMapping("/conveyor") // 마감시간이 가까운 상품 10개 호출
+    public ResponseEntity<?> getConveyor(@PageableDefault(page = 0, size = 10) Pageable pageable) {
+        ResponseDto<AuctionDto> responseDto = new ResponseDto<>();
+
+        try {
+            Page<AuctionDto> auctionConveyor = auctionService.findConveyor(pageable);
+            responseDto.setPageItems(auctionConveyor);
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("ok");
+
+            return ResponseEntity.ok(responseDto);
+        } catch (Exception e) {
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage(e.getMessage());
+            return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
 }
