@@ -53,7 +53,7 @@ public class QAccountUseHistory extends EntityPathBase<AccountUseHistory> {
     public QAccountUseHistory(Class<? extends AccountUseHistory> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.auction = inits.isInitialized("auction") ? new QAuction(forProperty("auction"), inits.get("auction")) : null;
-        this.member = inits.isInitialized("member") ? new QMember(forProperty("member")) : null;
+        this.member = inits.isInitialized("member") ? new QMember(forProperty("member"), inits.get("member")) : null;
     }
 
 }

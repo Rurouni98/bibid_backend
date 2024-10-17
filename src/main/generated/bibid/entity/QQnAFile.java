@@ -50,7 +50,7 @@ public class QQnAFile extends EntityPathBase<QnAFile> {
 
     public QQnAFile(Class<? extends QnAFile> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.member = inits.isInitialized("member") ? new QMember(forProperty("member")) : null;
+        this.member = inits.isInitialized("member") ? new QMember(forProperty("member"), inits.get("member")) : null;
         this.qna = inits.isInitialized("qna") ? new QQnA(forProperty("qna"), inits.get("qna")) : null;
     }
 
