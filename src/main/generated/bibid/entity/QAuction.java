@@ -94,7 +94,7 @@ public class QAuction extends EntityPathBase<Auction> {
         super(type, metadata, inits);
         this.auctionDetail = inits.isInitialized("auctionDetail") ? new QAuctionDetail(forProperty("auctionDetail"), inits.get("auctionDetail")) : null;
         this.chatRoom = inits.isInitialized("chatRoom") ? new QChatRoom(forProperty("chatRoom"), inits.get("chatRoom")) : null;
-        this.member = inits.isInitialized("member") ? new QMember(forProperty("member")) : null;
+        this.member = inits.isInitialized("member") ? new QMember(forProperty("member"), inits.get("member")) : null;
         this.streaming = inits.isInitialized("streaming") ? new QStreaming(forProperty("streaming"), inits.get("streaming")) : null;
     }
 

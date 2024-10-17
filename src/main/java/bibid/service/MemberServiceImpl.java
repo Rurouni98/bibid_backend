@@ -50,7 +50,7 @@ public class MemberServiceImpl implements MemberService {
         memberDto.setRole("ROLE_USER");
         memberDto.setMemberPw(passwordEncoder.encode(memberDto.getMemberPw()));
 
-        MemberDto joinedMemberDto = memberRepository.save(memberDto.toEntiy()).toDto();
+        MemberDto joinedMemberDto = memberRepository.save(memberDto.toEntity()).toDto();
 
         joinedMemberDto.setMemberPw("");
 

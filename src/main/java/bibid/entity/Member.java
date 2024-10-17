@@ -1,6 +1,7 @@
 package bibid.entity;
 
 import bibid.dto.MemberDto;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -34,8 +35,9 @@ public class Member {
     private String role;
     private String memberAddress;
     private String addressDetail;
-    private String profileUrl;
-    private boolean isSeller;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private ProfileImage profileImage;
 
     public MemberDto toDto() {
         return MemberDto.builder()
@@ -49,16 +51,7 @@ public class Member {
                 .role(this.role)
                 .memberAddress(this.memberAddress)
                 .addressDetail(this.addressDetail)
-                .profileUrl(this.profileUrl)
+                .profileImage(this.profileImage)
                 .build();
     }
-
-
-
-
-
-
-
-
-
 }

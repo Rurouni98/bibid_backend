@@ -42,7 +42,8 @@ public class SecurityConfiguration {
                             "/swagger-ui/**",
                             "/v3/api-docs/**",
                             "/members/**",
-                            "/ws/**"
+                            "/ws/**",
+                            "/mypage/**"
                     ).permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
                 })

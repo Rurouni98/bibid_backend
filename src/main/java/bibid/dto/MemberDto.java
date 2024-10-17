@@ -1,6 +1,7 @@
 package bibid.dto;
 
 import bibid.entity.Member;
+import bibid.entity.ProfileImage;
 import lombok.*;
 
 @Getter
@@ -20,10 +21,10 @@ public class MemberDto {
     private String role;
     private String memberAddress;
     private String addressDetail;
-    private String profileUrl;
+    private ProfileImage profileImage;
     private String token;
 
-    public Member toEntiy() {
+    public Member toEntity() {
         return Member.builder()
                 .memberIndex(this.memberIndex)
                 .name(this.name)
@@ -35,20 +36,7 @@ public class MemberDto {
                 .role(this.role)
                 .memberAddress(this.memberAddress)
                 .addressDetail(this.addressDetail)
-                .profileUrl(this.profileUrl)
+                .profileImage(this.profileImage)
                 .build();
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

@@ -1,6 +1,7 @@
 package bibid.entity;
 
 import bibid.dto.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,14 +22,14 @@ import java.time.LocalDateTime;
 public class ProfileImage {
     @Id
     @GeneratedValue(
-            strategy = GenerationType.IDENTITY,
+            strategy = GenerationType.SEQUENCE,
             generator = "profileSeqGenerator"
     )
     private Long profileIndex;
     @OneToOne
     @JoinColumn(name = "memberIndex")
+    @JsonBackReference
     private Member member;
-    private String filename;
     private String filepath;
     private String filetype;
     private Long filesize;
@@ -40,7 +41,6 @@ public class ProfileImage {
         return ProfileImageDto.builder()
                 .profileIndex(this.profileIndex)
                 .memberIndex(this.member.getMemberIndex())
-                .filename(this.filename)
                 .filepath(this.filepath)
                 .filetype(this.filetype)
                 .filesize(this.filesize)
@@ -49,13 +49,4 @@ public class ProfileImage {
                 .newfilename(this.newfilename)
                 .build();
     }
-
-
-
-
-
-
-
-
-
 }

@@ -2,7 +2,7 @@ package bibid.common;
 
 import bibid.config.NaverConfiguration;
 import bibid.dto.AuctionImageDto;
-import bibid.dto.MypageProfileFileDto;
+import bibid.dto.ProfileImageDto;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
@@ -45,10 +45,10 @@ public class FileUtils {
                 .build();
     }
 
-    public MypageProfileFileDto parserFileInfo(MultipartFile multipartFile, String directory) {
-        String bucketName = "bitcamp121";
+    public ProfileImageDto parserFileInfo(MultipartFile multipartFile, String directory) {
+        String bucketName = "bitcamp66";
 
-        MypageProfileFileDto boardFileDto = new MypageProfileFileDto();
+        ProfileImageDto profileImageDto = new ProfileImageDto();
 
         // 다른 사용자가 같은 파일명의 파일을 업로드 했을 때
         // 덮어써지는 것을 방지하기 위해서 파일명을 랜덤값_날짜시간_파일명으로 지정
@@ -89,19 +89,20 @@ public class FileUtils {
 
         if(!type.equals("")) {
             if(type.startsWith("image")) {
-                boardFileDto.setFiletype("image");
+                profileImageDto.setFiletype("image");
             } else {
-                boardFileDto.setFiletype("etc");
+                profileImageDto.setFiletype("etc");
             }
         } else {
-            boardFileDto.setFiletype("etc");
+            profileImageDto.setFiletype("etc");
         }
 
-        boardFileDto.setFilename(fileName);
-        boardFileDto.setFileoriginname(multipartFile.getOriginalFilename());
-        boardFileDto.setFilepath(directory);
+        profileImageDto.setNewfilename(fileName);
+        profileImageDto.setFilesize(multipartFile.getSize());
+        profileImageDto.setOriginalname(multipartFile.getOriginalFilename());
+        profileImageDto.setFilepath(directory);
 
-        return boardFileDto;
+        return profileImageDto;
     }
 
     public AuctionImageDto auctionImageParserFileInfo(MultipartFile multipartFile, String directory) {
