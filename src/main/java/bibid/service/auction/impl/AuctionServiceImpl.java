@@ -35,7 +35,6 @@ public class AuctionServiceImpl implements AuctionService {
     private final AuctionRepository auctionRepository;
     private final FileUtils fileUtils;
 
-
     @Override
     public Page<AuctionDto> post(AuctionDto auctionDto,
                                  AuctionDetailDto auctionDetailDto,
@@ -74,25 +73,6 @@ public class AuctionServiceImpl implements AuctionService {
         auctionRepository.save(auction);
 
         return auctionRepository.findAll(pageable).map(Auction::toDto);
-    }
-
-    @Override
-    public Page<AuctionDto> findAuctionsByType(String auctionType, Pageable pageable) {
-        String koreanAuctionType = "";
-
-        // 문자열 비교는 .equals()로 처리
-        if ("realtime".equals(auctionType)) {
-            koreanAuctionType = "실시간 경매";
-        } else if ("blind".equals(auctionType)) {
-            koreanAuctionType = "블라인드 경매";
-        }
-
-        // 로거를 통해 auctionType 출력
-        log.info("koreanAuctionType: {}", koreanAuctionType);
-
-        LocalDateTime currentTime = LocalDateTime.now();
-        return auctionRepository.findAuctionsByType(koreanAuctionType, currentTime, pageable)
-                .map(Auction::toDto);
     }
 
     @Override

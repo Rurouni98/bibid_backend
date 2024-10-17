@@ -57,33 +57,6 @@ public class AuctionController {
         }
     }
 
-    @GetMapping("/specialAuction")
-    public ResponseEntity<?> getAuctionsByType(
-            @RequestParam("auctionType") String auctionType,
-            @PageableDefault(page = 0, size = 10) Pageable pageable) {
-        ResponseDto<AuctionDto> responseDto = new ResponseDto<>();
-        // 로거를 통해 auctionType 출력
-        log.info("Received auctionType: {}", auctionType);
-
-        try {
-            // auctionType을 기반으로 경매 목록을 페이징 처리하여 가져옴
-            Page<AuctionDto> auctionDtoList = auctionService.findAuctionsByType(auctionType, pageable);
-
-            log.info("Received auctionDtoList: {}", auctionDtoList);
-
-            responseDto.setPageItems(auctionDtoList);
-            responseDto.setStatusCode(HttpStatus.OK.value());
-            responseDto.setStatusMessage("ok");
-
-            return ResponseEntity.ok(responseDto);
-        } catch (Exception e) {
-            log.error("getAuctionsByType error: {}", e.getMessage());
-            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            responseDto.setStatusMessage(e.getMessage());
-            return ResponseEntity.internalServerError().body(responseDto);
-        }
-    }
-
     @GetMapping // 모든 상품 호출
     public ResponseEntity<?> getAuctions(@PageableDefault(page = 0, size = 15) Pageable pageable) {
         ResponseDto<AuctionDto> responseDto = new ResponseDto<>();

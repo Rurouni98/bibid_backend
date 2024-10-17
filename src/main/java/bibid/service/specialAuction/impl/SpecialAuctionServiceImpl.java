@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -42,16 +43,17 @@ public class SpecialAuctionServiceImpl implements SpecialAuctionService {
         }
     }
 
+    // 경매 시작 시간이 30분 이내인 경매들 찾기 (찾아서 채팅방 생성)
     @Transactional
-    @Scheduled(fixedRate = 600000) // 10분마다 실행
+    @Scheduled(fixedRate = 60000) // 1분마다 실행
     public void checkAuctionStart() {
         log.info("checkAuctionStart() 실행됨");
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime past30Minutes = now.minusMinutes(30);
+        LocalDateTime thirtyMinutesLater = now.plusMinutes(3000);
 
         try {
-            // 경매 시작 시간이 15분 이내인 경매들을 찾음
-            List<Auction> upcomingAuctions = specialAuctionRepository.findAuctionsStartingBefore(past30Minutes, now);
+            // 경매 시작 시간이  이내인 경매들을 찾음
+            List<Auction> upcomingAuctions = specialAuctionRepository.findAuctionsStartingWithinThirtyMinutes(now, thirtyMinutesLater);
 
             for (Auction auction : upcomingAuctions) {
                 // 1. 채팅방이 생성되지 않은 경우 채팅방 생성
@@ -90,7 +92,7 @@ public class SpecialAuctionServiceImpl implements SpecialAuctionService {
         }
     }
 
-    // 경매 타입에 따른 경매 목록을 페이징 처리하여 반환
+    // 경매 타입과 종료 시간이 현재 이후인 (즉, 아직 경매가 끝나지 않은) 경매 목록을 페이징 처리하여 조회
     @Override
     public Page<AuctionDto> findAuctionsByType(String auctionType, Pageable pageable) {
         String koreanAuctionType = "";

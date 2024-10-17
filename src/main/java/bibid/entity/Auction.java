@@ -31,7 +31,7 @@ public class Auction {
             generator = "auctionSeqGenerator"
     )
     private Long auctionIndex;
-    
+
     // 경매 등록 멤버
     @ManyToOne
     @JoinColumn(name = "memberIndex")
