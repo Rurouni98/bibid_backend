@@ -11,5 +11,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface AuctionRepository extends JpaRepository<Auction, Long> {
+    // 경매 타입과 시작 시간이 현재 이후인 경매 목록을 페이징 처리하여 조회
+    @Query("SELECT a FROM Auction a WHERE a.auctionType = :auctionType AND a.startingLocalDateTime > :currentTime")
+    Page<Auction> findAuctionsByType(@Param("auctionType") String auctionType,
+                                     @Param("currentTime") LocalDateTime currentTime,
+                                     Pageable pageable);
 
+    Page<Auction> findByCategory(String category, Pageable sortedByViewCount);
+
+    @Query("SELECT a FROM Auction a WHERE a.endingLocalDateTime > :currentTime")
+    Page<Auction> findConveyor(@Param("currentTime") LocalDateTime currentTime, Pageable sortedByEndingLocalDateTime);
 }

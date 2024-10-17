@@ -17,7 +17,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -74,4 +76,46 @@ public class AuctionServiceImpl implements AuctionService {
         return auctionRepository.findAll(pageable).map(Auction::toDto);
     }
 
+    @Override
+    public Page<AuctionDto> findAuctionsByType(String auctionType, Pageable pageable) {
+        String koreanAuctionType = "";
+
+        // 문자열 비교는 .equals()로 처리
+        if ("realtime".equals(auctionType)) {
+            koreanAuctionType = "실시간 경매";
+        } else if ("blind".equals(auctionType)) {
+            koreanAuctionType = "블라인드 경매";
+        }
+
+        // 로거를 통해 auctionType 출력
+        log.info("koreanAuctionType: {}", koreanAuctionType);
+
+        LocalDateTime currentTime = LocalDateTime.now();
+        return auctionRepository.findAuctionsByType(koreanAuctionType, currentTime, pageable)
+                .map(Auction::toDto);
+    }
+
+    @Override
+    public Page<AuctionDto> findAll(Pageable pageable) {
+        return auctionRepository.findAll(pageable).map(Auction::toDto);
+    }
+
+    @Override
+    public Page<AuctionDto> findTopByViewCount(Pageable pageable) {
+        Pageable sortedByViewCount = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("viewCnt").descending());
+        return auctionRepository.findAll(sortedByViewCount).map(Auction::toDto);
+    }
+
+    @Override
+    public Page<AuctionDto> findByCategory(String category, Pageable pageable) {
+        Pageable sortedByViewCount = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("viewCnt").descending());
+        return auctionRepository.findByCategory(category, sortedByViewCount).map(Auction::toDto);
+    }
+
+    @Override
+    public Page<AuctionDto> findConveyor(Pageable pageable) {
+        LocalDateTime currentTime = LocalDateTime.now(); // 현재 시간을 가져옵니다.
+        Pageable sortedByEndingLocalDateTime = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("endingLocalDateTime").descending());
+        return auctionRepository.findConveyor(currentTime, sortedByEndingLocalDateTime).map(Auction::toDto);
+    }
 }
