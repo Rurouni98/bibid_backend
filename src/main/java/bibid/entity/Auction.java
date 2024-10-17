@@ -111,9 +111,7 @@ public class Auction {
                 .viewCnt(this.viewCnt)
                 .regdate(this.regdate)
                 .moddate(this.moddate)
-                .streamingDto(this.streaming != null ? this.streaming.toDto() : null)
                 .isStreamingCreated(this.isStreamingCreated)
-                .chatRoomDto(this.chatRoom != null ? this.chatRoom.toDto() : null)
                 .isChatRoomCreated(this.isChatRoomCreated)
                 .auctionImageDtoList(
                         Optional.ofNullable(auctionImageList).map(list -> list.stream().map(AuctionImage::toDto).toList())

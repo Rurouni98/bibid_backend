@@ -16,7 +16,7 @@ import java.util.List;
 public class StreamingDto {
     private Long streamingIndex;
     private Long auctionIndex;
-    private String streamUrl;
+    private List<String> streamUrlList;
 
     private String channelId;
     private String channelName;
@@ -35,7 +35,7 @@ public class StreamingDto {
         return Streaming.builder()
                 .streamingIndex(this.streamingIndex)
                 .auction(auction)
-                .streamUrl(this.streamUrl)
+                .streamUrlList(this.streamUrlList)
                 .cdnInstanceNo(this.cdnInstanceNo)
                 .cdnStatus(this.cdnStatus)
                 .publishUrl(this.publishUrl)
