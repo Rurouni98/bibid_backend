@@ -46,7 +46,7 @@ public class FileUtils {
     }
 
     public MypageProfileFileDto parserFileInfo(MultipartFile multipartFile, String directory) {
-        String bucketName = "bitcamp121";
+        String bucketName = "bitcamp73";
 
         MypageProfileFileDto boardFileDto = new MypageProfileFileDto();
 
@@ -105,7 +105,7 @@ public class FileUtils {
     }
 
     public AuctionImageDto auctionImageParserFileInfo(MultipartFile multipartFile, String directory) {
-        String bucketName = "bitcamp121";
+        String bucketName = "bitcamp73";
 
         AuctionImageDto auctionImageDto = new AuctionImageDto();
 

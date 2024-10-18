@@ -116,6 +116,25 @@ public class AuctionController {
         }
     }
 
+    @GetMapping("/category/{category}") // 카테고리별 상품 호출을 위한 엔드포인트 수정
+    public ResponseEntity<?> getAuctionsByCategory2(@PathVariable String category,
+                                                    @PageableDefault(page = 0, size = 5) Pageable pageable) {
+        ResponseDto<AuctionDto> responseDto = new ResponseDto<>();
+
+        try {
+            Page<AuctionDto> auctionDtoList = auctionService.findByCategory2(category, pageable);
+            responseDto.setPageItems(auctionDtoList);
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("ok");
+
+            return ResponseEntity.ok(responseDto);
+        } catch (Exception e) {
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage(e.getMessage());
+            return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
+
     @GetMapping("/conveyor") // 마감시간이 가까운 상품 10개 호출
     public ResponseEntity<?> getConveyor(@PageableDefault(page = 0, size = 10) Pageable pageable) {
         ResponseDto<AuctionDto> responseDto = new ResponseDto<>();
@@ -133,4 +152,6 @@ public class AuctionController {
             return ResponseEntity.internalServerError().body(responseDto);
         }
     }
+
+
 }
