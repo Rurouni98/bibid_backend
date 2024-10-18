@@ -56,9 +56,9 @@ public class SpecialAuctionServiceImpl implements SpecialAuctionService {
         }
     }
 
-    // 경매 시작 시간이 30분 이내인 경매들 찾기 (찾아서 채팅방 생성)
+//    // 경매 시작 시간이 30분 이내인 경매들 찾기 (찾아서 채팅방 생성)
 //    @Transactional
-//    @Scheduled(fixedRate = 60000) // 1분마다 실행
+//    @Scheduled(fixedRate = 6000) // 1분마다 실행
     public void checkAuctionStart() {
         log.info("checkAuctionStart() 실행됨");
         LocalDateTime now = LocalDateTime.now();
@@ -75,33 +75,36 @@ public class SpecialAuctionServiceImpl implements SpecialAuctionService {
                     auction.setChatRoomCreated(true); // 채팅방 생성 상태 업데이트
                 }
 
-                // 2. 스트리밍이 생성되지 않은 경우 스트리밍 채널 생성
-                if (!auction.isStreamingCreated()) {
-                    String UUIDProductName = auction.getProductName() + "-" + UUID.randomUUID().toString();
-                    String channelId = liveStationService.createChannel(UUIDProductName); // LiveStation 채널 생성
-                    LiveStationInfoDTO liveStationInfoDTO = liveStationService.getChannelInfo(channelId);
-                    List<LiveStationUrlDTO> liveStationUrlDTOList = liveStationService.getServiceURL(channelId, "GENERAL");
-
-                    Streaming streaming = Streaming.builder()
-                            .channelId(channelId)
-                            .channelName(liveStationInfoDTO.getChannelName())
-                            .channelStatus(liveStationInfoDTO.getChannelStatus())
-                            .cdnInstanceNo(liveStationInfoDTO.getCdnInstanceNo())
-                            .cdnStatus(liveStationInfoDTO.getCdnStatus())
-                            .publishUrl(liveStationInfoDTO.getPublishUrl())
-                            .streamKey(liveStationInfoDTO.getStreamKey())
-                            .startTime(auction.getStartingLocalDateTime())
-                            .endTime(auction.getEndingLocalDateTime().plusMinutes(30)) // 스트리밍 종료 시간 설정
-                            .auction(auction)
-                            .streamUrlList(liveStationUrlDTOList != null
-                                    ? liveStationUrlDTOList.stream().map(LiveStationUrlDTO::getUrl).toList()
-                                    : new ArrayList<>())
-                            .build();
-
-                    auction.setStreaming(streaming);
-                    auction.setStreamingCreated(true);
-                    auctionRepository.save(auction);
-                }
+//                // 2. 스트리밍이 생성되지 않은 경우 스트리밍 채널 생성
+//                if (!auction.isStreamingCreated()) {
+//                    String UUIDShort = UUID.randomUUID().toString().substring(0, 5); // UUID의 첫 5글자만 사용
+//                    String originalChannelName = auction.getAuctionIndex() + "_" + UUIDShort;
+//                    String channelName = originalChannelName.substring(0, Math.min(20, originalChannelName.length())); // 20자 이내로 자르기
+//                    log.info("channelName : {}", channelName);
+//                    String channelId = liveStationService.createChannel(channelName);
+//                    LiveStationInfoDTO liveStationInfoDTO = liveStationService.getChannelInfo(channelId);
+//                    List<LiveStationUrlDTO> liveStationUrlDTOList = liveStationService.getServiceURL(channelId, "GENERAL");
+//
+//                    Streaming streaming = Streaming.builder()
+//                            .channelId(channelId)
+//                            .channelName(liveStationInfoDTO != null ? liveStationInfoDTO.getChannelName() : null) // null이면 그대로 null
+//                            .channelStatus(liveStationInfoDTO != null ? liveStationInfoDTO.getChannelStatus() : null)
+//                            .cdnInstanceNo(liveStationInfoDTO != null ? liveStationInfoDTO.getCdnInstanceNo() : null)
+//                            .cdnStatus(liveStationInfoDTO != null ? liveStationInfoDTO.getCdnStatus() : null)
+//                            .publishUrl(liveStationInfoDTO != null ? liveStationInfoDTO.getPublishUrl() : null)
+//                            .streamKey(liveStationInfoDTO != null ? liveStationInfoDTO.getStreamKey() : null)
+//                            .startTime(auction.getStartingLocalDateTime())
+//                            .endTime(auction.getEndingLocalDateTime().plusMinutes(30)) // 스트리밍 종료 시간 설정
+//                            .auction(auction)
+//                            .streamUrlList(liveStationUrlDTOList != null
+//                                    ? liveStationUrlDTOList.stream().map(LiveStationUrlDTO::getUrl).toList()
+//                                    : new ArrayList<>())
+//                            .build();
+//
+//                    auction.setStreaming(streaming);
+//                    auction.setStreamingCreated(true);
+//                    auctionRepository.save(auction);
+//                }
             }
         } catch (Exception e) {
             log.error("경매 시작 스케줄링 중 오류 발생: ", e);
