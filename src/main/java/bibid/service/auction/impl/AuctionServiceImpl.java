@@ -78,7 +78,7 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     public Page<AuctionDto> findAll(Pageable pageable) {
         Pageable sortedByRegdate = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("regdate").descending());
-        return auctionRepository.findAll(sortedByRegdate).map(Auction::toDto);
+        return auctionRepository.findAllGeneralAuction(sortedByRegdate).map(Auction::toDto);
     }
 
     @Override
