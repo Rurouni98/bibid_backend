@@ -71,7 +71,9 @@ public class LiveStationService {
             //요청 바디 만들기
             CdnDTO cdnDTO = CdnDTO.builder()
                     .createCdn(true)
-                    .cdnType("CDN_PLUS")
+                    .cdnType("GLOBAL_EDGE")
+                    .profileId(null)
+                    .regionType("KOREA")
                     .build();
             RecordDTO recordDTO = RecordDTO.builder()
                     .type("AUTO_UPLOAD")
