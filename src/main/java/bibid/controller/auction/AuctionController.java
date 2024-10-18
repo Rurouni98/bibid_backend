@@ -152,6 +152,4 @@ public class AuctionController {
             return ResponseEntity.internalServerError().body(responseDto);
         }
     }
-
-
 }
