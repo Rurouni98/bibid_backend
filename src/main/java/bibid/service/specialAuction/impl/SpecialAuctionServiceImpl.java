@@ -45,7 +45,7 @@ public class SpecialAuctionServiceImpl implements SpecialAuctionService {
 
     // 경매 시작 시간이 30분 이내인 경매들 찾기 (찾아서 채팅방 생성)
     @Transactional
-    @Scheduled(fixedRate = 60000) // 1분마다 실행
+    @Scheduled(fixedRate = 60000) // 10분마다 실행
     public void checkAuctionStart() {
         log.info("checkAuctionStart() 실행됨");
         LocalDateTime now = LocalDateTime.now();
@@ -122,4 +122,5 @@ public class SpecialAuctionServiceImpl implements SpecialAuctionService {
 
         return auctionDtoPage;
     }
+
 }
