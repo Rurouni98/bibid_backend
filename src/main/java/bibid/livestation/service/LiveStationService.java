@@ -27,7 +27,7 @@ public class LiveStationService {
     String accessKey;
     @Value("${ncp.secretKey}")
     String secretKey;
-    @Value("${cloud.aws.s3.bucket.name}")
+    @Value("bucket119")
     String bucket;
 
     String liveStationUrl = "https://livestation.apigw.ntruss.com/api/v2/channels";

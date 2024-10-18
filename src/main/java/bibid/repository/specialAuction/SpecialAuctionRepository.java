@@ -19,4 +19,7 @@ public interface SpecialAuctionRepository extends JpaRepository<Auction, Long> {
     Page<Auction> findAuctionsByType(@Param("auctionType") String auctionType,
                                      @Param("currentTime") LocalDateTime currentTime,
                                      Pageable pageable);
+
+    @Query("SELECT COUNT(m) FROM Auction a JOIN a.member m WHERE a.auctionIndex = :auctionId AND m.memberIndex = :memberIndex")
+    Long countMembersByAuctionIdAndType(@Param("auctionId") Long auctionId);
 }
