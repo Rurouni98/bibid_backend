@@ -44,7 +44,7 @@ public class QStreaming extends EntityPathBase<Streaming> {
 
     public final StringPath streamKey = createString("streamKey");
 
-    public final StringPath streamUrl = createString("streamUrl");
+    public final ListPath<String, StringPath> streamUrlList = this.<String, StringPath>createList("streamUrlList", String.class, StringPath.class, PathInits.DIRECT2);
 
     public QStreaming(String variable) {
         this(Streaming.class, forVariable(variable), INITS);

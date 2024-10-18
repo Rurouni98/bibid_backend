@@ -39,9 +39,7 @@ public class AuctionDto {
     private LocalDateTime moddate; // 경매 수정시간
 
     private List<AuctionImageDto> auctionImageDtoList;
-    private StreamingDto streamingDto;
     private boolean isStreamingCreated;
-    private ChatRoomDto chatRoomDto;
     private boolean isChatRoomCreated;
     private List<AuctionInfoDto> auctionInfoDtoList;
     private AuctionDetailDto auctionDetailDto;

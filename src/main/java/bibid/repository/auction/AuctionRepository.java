@@ -14,6 +14,9 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
     @Query("SELECT a FROM Auction a WHERE a.category = :category AND a.auctionType = '일반 경매'")
     Page<Auction> findByCategory(@Param("category") String category, Pageable sortedByViewCount);
 
+    @Query("SELECT a FROM Auction a WHERE a.category = :category AND a.auctionType = '일반 경매' ORDER BY a.regdate DESC")
+    Page<Auction> findByCategory2(@Param("category") String category, Pageable pageable);
+
     @Query("SELECT a FROM Auction a WHERE a.endingLocalDateTime > :currentTime AND a.auctionType= '일반 경매'")
     Page<Auction> findConveyor(@Param("currentTime") LocalDateTime currentTime, Pageable sortedByEndingLocalDateTime);
 }

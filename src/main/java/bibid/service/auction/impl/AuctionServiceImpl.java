@@ -77,7 +77,8 @@ public class AuctionServiceImpl implements AuctionService {
 
     @Override
     public Page<AuctionDto> findAll(Pageable pageable) {
-        return auctionRepository.findAll(pageable).map(Auction::toDto);
+        Pageable sortedByRegdate = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("regdate").descending());
+        return auctionRepository.findAll(sortedByRegdate).map(Auction::toDto);
     }
 
     @Override
@@ -90,6 +91,12 @@ public class AuctionServiceImpl implements AuctionService {
     public Page<AuctionDto> findByCategory(String category, Pageable pageable) {
         Pageable sortedByViewCount = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("viewCnt").descending());
         return auctionRepository.findByCategory(category, sortedByViewCount).map(Auction::toDto);
+    }
+
+    @Override
+    public Page<AuctionDto> findByCategory2(String category, Pageable pageable) {
+        Pageable sortedByRegdate = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("regdate").descending());
+        return auctionRepository.findByCategory2(category, sortedByRegdate).map(Auction::toDto);
     }
 
     @Override
