@@ -1,6 +1,7 @@
 package bibid.dto;
 
 import bibid.entity.*;
+import jakarta.persistence.Transient;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -44,6 +45,9 @@ public class AuctionDto {
     private List<AuctionInfoDto> auctionInfoDtoList;
     private AuctionDetailDto auctionDetailDto;
 
+    private String searchKeyword;
+    private String searchCondition;
+
     public Auction toEntity(Member member) {
         return Auction.builder()
                 .auctionIndex(this.auctionIndex)
@@ -71,6 +75,8 @@ public class AuctionDto {
                 .chatRoom(null)
                 .isChatRoomCreated(this.isChatRoomCreated)
                 .auctionDetail(null)
+                .searchKeyword(this.searchKeyword)
+                .searchCondition(this.searchCondition)
                 .build();
     }
 

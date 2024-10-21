@@ -105,4 +105,11 @@ public class AuctionServiceImpl implements AuctionService {
         Pageable sortedByEndingLocalDateTime = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("endingLocalDateTime").descending());
         return auctionRepository.findConveyor(currentTime, sortedByEndingLocalDateTime).map(Auction::toDto);
     }
+
+    @Override
+    public Page<AuctionDto> searchFind(String searchCondition, String searchKeyword, Pageable pageable) {
+        return auctionRepository
+                .searchAll(searchCondition, searchKeyword, pageable)
+                .map(Auction::toDto);
+    }
 }

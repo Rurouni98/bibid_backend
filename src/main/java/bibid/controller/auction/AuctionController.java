@@ -152,4 +152,31 @@ public class AuctionController {
             return ResponseEntity.internalServerError().body(responseDto);
         }
     }
+
+    @GetMapping("/{searchCondition}/{searchKeyword}")
+    public ResponseEntity<?> getBoards(@PathVariable("searchCondition") String searchCondition,
+                                       @PathVariable("searchKeyword") String searchKeyword,
+                                       @PageableDefault(page = 0, size = 5) Pageable pageable) {
+        ResponseDto<AuctionDto> responseDto = new ResponseDto<>();
+
+        try {
+            Page<AuctionDto> auctionDtoList = auctionService.searchFind(searchCondition, searchKeyword, pageable);
+
+            log.info("getBoards auctionDtoList: {}", auctionDtoList);
+
+            responseDto.setPageItems(auctionDtoList);
+            responseDto.setItem(AuctionDto.builder()
+                    .searchCondition(searchCondition)
+                    .searchKeyword(searchKeyword)
+                    .build());
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("ok");
+
+            return ResponseEntity.ok(responseDto);
+        } catch(Exception e) {
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage(e.getMessage());
+            return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
 }

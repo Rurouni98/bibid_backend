@@ -22,4 +22,6 @@ public interface AuctionService {
     Page<AuctionDto> findByCategory2(String category, Pageable pageable);
 
     Page<AuctionDto> findConveyor(Pageable pageable);
+
+    Page<AuctionDto> searchFind(String searchCondition, String searchKeyword, Pageable pageable);
 }
