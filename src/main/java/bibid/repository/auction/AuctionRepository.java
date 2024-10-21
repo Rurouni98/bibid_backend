@@ -29,7 +29,8 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
             "(:searchCondition = 'productName' AND a.productName LIKE %:searchKeyword%) OR " +
             "(:searchCondition = 'category' AND a.category LIKE %:searchKeyword%) OR " +
             "(:searchCondition = 'productDescription' AND a.productDescription LIKE %:searchKeyword%)) " +
-            "AND a.auctionType = '일반 경매'")
+            "AND a.auctionType = '일반 경매' " +
+            "ORDER BY a.regdate DESC")
     Page<Auction> searchAll(@Param("searchCondition") String searchCondition,
                             @Param("searchKeyword") String searchKeyword,
                             Pageable pageable);
