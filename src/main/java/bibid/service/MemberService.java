@@ -14,4 +14,9 @@ public interface MemberService {
     MemberDto join(MemberDto memberDto);
 
     MemberDto login(MemberDto memberDto);
+
+    String findByEmail(String email);
+
+    String modifyPasswd(String newPasswd);
+
 }

@@ -27,7 +27,7 @@ public class MailService {
 
             try{message.setFrom(email);
             message.setRecipients(MimeMessage.RecipientType.TO, email);
-            message.setSubject("이메일 인증");
+            message.setSubject("[BIBID] 요청하신 통합회원 인증번호를 안내해드립니다.");
             String body = "<html>" +
                     "<head>" +
                     "<style>" +
@@ -39,8 +39,8 @@ public class MailService {
                     "</head>" +
                     "<body>" +
                     "<h3>이메일 인증코드</h3>" +
-                    "<p>성공적인 경매를 위한 BIBID 서비스에 가입하신 것을 환영합니다.</p>" +
-                    "<p>아래의 인증코드를 입력하시면 가입이 정상적으로 완료됩니다.</p>" +
+                    "<p>BIBID에 입력한 이메일 주소가 올바른지 확인하기 위한 인증번호입니다.\n</p>" +
+                    "<p>아래의 인증번호를 복사하여 이메일 인증을 완료해주세요.</p>" +
                     "<h1>" + number + "</h1>" +
                     "<p>감사합니다.</p>" +
                     "<div class='footer'>" +

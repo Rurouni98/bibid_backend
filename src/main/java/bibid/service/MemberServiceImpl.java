@@ -8,7 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -16,6 +18,7 @@ public class MemberServiceImpl implements MemberService {
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
     private final JwtProvider jwtProvider;
+    private Optional<Member> optionalMember = Optional.empty();
 
     @Override
     public Map<String, String> memberIdCheck(String memberId) {
@@ -74,4 +77,33 @@ public class MemberServiceImpl implements MemberService {
 
         return loginMemberDto;
     }
+
+    @Override
+    public String findByEmail(String email) {
+        optionalMember = memberRepository.findByEmail(email);
+
+        if (optionalMember.isPresent()) {
+            Member member = optionalMember.get();
+            return member.getMemberId();
+        } else {
+            System.out.println("이메일에 해당하는 사용자가 없습니다.");
+            return null;
+        }
+    }
+
+    @Override
+    public String modifyPasswd(String newPasswd) {
+
+        if (optionalMember.isPresent()) {
+            Member member = optionalMember.get();
+            member.setMemberPw(passwordEncoder.encode(newPasswd));
+
+            memberRepository.save(member);
+            return "비밀번호 변경을 완료했습니다.";
+        } else {
+            System.out.println("이메일에 해당하는 사용자가 없습니다.");
+            return null;
+        }
+    }
+
 }

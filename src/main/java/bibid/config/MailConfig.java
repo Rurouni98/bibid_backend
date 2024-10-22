@@ -18,8 +18,8 @@ public class MailConfig {
         mailSender.setPort(587);
 
         // 고정된 이메일 주소와 비밀번호 사용
-        mailSender.setUsername("your-email@gmail.com"); // SMTP 인증용 이메일
-        mailSender.setPassword("your-email-password"); // SMTP 인증용 비밀번호
+        mailSender.setUsername("bibidcrown@gmail.com"); // SMTP 인증용 이메일
+        mailSender.setPassword("fgukxychnfrcbrvs"); // SMTP 인증용 비밀번호
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
