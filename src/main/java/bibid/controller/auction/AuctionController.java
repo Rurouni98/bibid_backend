@@ -35,7 +35,7 @@ public class AuctionController {
                                   @RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail,
                                   @RequestPart(value = "additionalImages", required = false) MultipartFile[] additionalImages,
                                   @AuthenticationPrincipal CustomUserDetails customUserDetails,
-                                  @PageableDefault(page = 0, size = 15) Pageable pageable
+                                  @PageableDefault(page = 0, size = 5) Pageable pageable
     ) {
         ResponseDto<AuctionDto> responseDto = new ResponseDto<>();
 
@@ -118,7 +118,7 @@ public class AuctionController {
 
     @GetMapping("/category/{category}") // 카테고리별 상품 호출을 위한 엔드포인트 수정
     public ResponseEntity<?> getAuctionsByCategory2(@PathVariable String category,
-                                                    @PageableDefault(page = 0, size = 5) Pageable pageable) {
+                                                    @PageableDefault( page = 0, size = 5) Pageable pageable) {
         ResponseDto<AuctionDto> responseDto = new ResponseDto<>();
 
         try {

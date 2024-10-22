@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface AuctionRepository extends JpaRepository<Auction, Long> {
-    @Query("SELECT a FROM Auction a WHERE a.category = :category AND a.auctionType = '일반 경매'")
+    @Query("SELECT a FROM Auction a WHERE a.category = :category AND a.auctionType = '일반 경매' ORDER BY a.regdate DESC")
     Page<Auction> findByCategory(@Param("category") String category, Pageable sortedByViewCount);
 
     @Query("SELECT a FROM Auction a WHERE a.auctionType = '일반 경매'")
@@ -25,10 +25,12 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
     Page<Auction> findConveyor(@Param("currentTime") LocalDateTime currentTime, Pageable sortedByEndingLocalDateTime);
 
     @Query("SELECT a FROM Auction a WHERE " +
-            "(:searchCondition IS NULL OR " +
+            "(:searchCondition = 'all' AND (a.productName LIKE %:searchKeyword% OR " +
+            "a.category LIKE %:searchKeyword% OR " +
+            "a.productDescription LIKE %:searchKeyword%)) OR " +
             "(:searchCondition = 'productName' AND a.productName LIKE %:searchKeyword%) OR " +
             "(:searchCondition = 'category' AND a.category LIKE %:searchKeyword%) OR " +
-            "(:searchCondition = 'productDescription' AND a.productDescription LIKE %:searchKeyword%)) " +
+            "(:searchCondition = 'productDescription' AND a.productDescription LIKE %:searchKeyword%) " +
             "AND a.auctionType = '일반 경매' " +
             "ORDER BY a.regdate DESC")
     Page<Auction> searchAll(@Param("searchCondition") String searchCondition,
