@@ -27,7 +27,7 @@ public class LiveStationService {
     String accessKey;
     @Value("${ncp.secretKey}")
     String secretKey;
-    @Value("${cloud.aws.s3.bucket.name}")
+    @Value("bucket119")
     String bucket;
 
     String liveStationUrl = "https://livestation.apigw.ntruss.com/api/v2/channels";
@@ -71,7 +71,9 @@ public class LiveStationService {
             //요청 바디 만들기
             CdnDTO cdnDTO = CdnDTO.builder()
                     .createCdn(true)
-                    .cdnType("CDN_PLUS")
+                    .cdnType("GLOBAL_EDGE")
+                    .profileId(null)
+                    .regionType("KOREA")
                     .build();
             RecordDTO recordDTO = RecordDTO.builder()
                     .type("AUTO_UPLOAD")

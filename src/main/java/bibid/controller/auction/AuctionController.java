@@ -57,8 +57,8 @@ public class AuctionController {
         }
     }
 
-    @GetMapping // 모든 상품 호출
-    public ResponseEntity<?> getAuctions(@PageableDefault(page = 0, size = 15) Pageable pageable) {
+    @GetMapping("/all") // 모든 상품 호출
+    public ResponseEntity<?> getAuctions(@PageableDefault(page = 0, size = 5) Pageable pageable) {
         ResponseDto<AuctionDto> responseDto = new ResponseDto<>();
 
         try {
@@ -97,13 +97,32 @@ public class AuctionController {
         }
     }
 
-    @GetMapping("/best/{category}") // 카테고리별 상품 호출
+    @GetMapping("/best/{category}") // 카테고리별 상품을 viewcnt 높은 순으로 호출
     public ResponseEntity<?> getAuctionsByCategory(@PathVariable String category,
                                                    @PageableDefault(page = 0, size = 5) Pageable pageable) {
         ResponseDto<AuctionDto> responseDto = new ResponseDto<>();
 
         try {
             Page<AuctionDto> auctionDtoList = auctionService.findByCategory(category, pageable); // 카테고리로 상품 찾기
+            responseDto.setPageItems(auctionDtoList);
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("ok");
+
+            return ResponseEntity.ok(responseDto);
+        } catch (Exception e) {
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage(e.getMessage());
+            return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
+
+    @GetMapping("/category/{category}") // 카테고리별 상품 호출을 위한 엔드포인트 수정
+    public ResponseEntity<?> getAuctionsByCategory2(@PathVariable String category,
+                                                    @PageableDefault(page = 0, size = 5) Pageable pageable) {
+        ResponseDto<AuctionDto> responseDto = new ResponseDto<>();
+
+        try {
+            Page<AuctionDto> auctionDtoList = auctionService.findByCategory2(category, pageable);
             responseDto.setPageItems(auctionDtoList);
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setStatusMessage("ok");

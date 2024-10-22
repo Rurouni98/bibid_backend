@@ -17,6 +17,12 @@ public class CdnDTO {
     @JsonProperty("cdnType")
     String cdnType;
 
+    @JsonProperty("profileId")
+    String profileId;
+
+    @JsonProperty("regionType")
+    String regionType;
+
     @JsonProperty("instanceNo")
     private int instanceNo;
 

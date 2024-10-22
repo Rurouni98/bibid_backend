@@ -32,7 +32,7 @@ public class Streaming {
     @JoinColumn(name = "auctionIndex", nullable = true) // 외래 키: 경매 ID
     private Auction auction;
 
-    private String streamUrl; // 스트리밍 URL 등
+    private List<String> streamUrlList; // 스트리밍 URL 리스트
 
     private String channelId;
     private String channelName;
@@ -51,7 +51,7 @@ public class Streaming {
         return StreamingDto.builder()
                 .streamingIndex(this.streamingIndex)
                 .auctionIndex(this.auction.getAuctionIndex())
-                .streamUrl(this.streamUrl)
+                .streamUrlList(this.streamUrlList)
                 .channelId(this.channelId)
                 .channelName(this.channelName)
                 .channelStatus(this.channelStatus)
