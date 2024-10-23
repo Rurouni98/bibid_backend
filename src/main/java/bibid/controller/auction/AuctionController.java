@@ -35,7 +35,7 @@ public class AuctionController {
                                   @RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail,
                                   @RequestPart(value = "additionalImages", required = false) MultipartFile[] additionalImages,
                                   @AuthenticationPrincipal CustomUserDetails customUserDetails,
-                                  @PageableDefault(page = 0, size = 15) Pageable pageable
+                                  @PageableDefault(page = 0, size = 5) Pageable pageable
     ) {
         ResponseDto<AuctionDto> responseDto = new ResponseDto<>();
 
@@ -118,7 +118,7 @@ public class AuctionController {
 
     @GetMapping("/category/{category}") // 카테고리별 상품 호출을 위한 엔드포인트 수정
     public ResponseEntity<?> getAuctionsByCategory2(@PathVariable String category,
-                                                    @PageableDefault(page = 0, size = 5) Pageable pageable) {
+                                                    @PageableDefault( page = 0, size = 5) Pageable pageable) {
         ResponseDto<AuctionDto> responseDto = new ResponseDto<>();
 
         try {
@@ -147,6 +147,41 @@ public class AuctionController {
 
             return ResponseEntity.ok(responseDto);
         } catch (Exception e) {
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage(e.getMessage());
+            return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
+
+    @GetMapping("/{searchCondition}/{searchKeyword}")
+    public ResponseEntity<?> getBoards(@PathVariable("searchCondition") String searchCondition,
+                                       @PathVariable("searchKeyword") String searchKeyword,
+                                       @PageableDefault(page = 0, size = 5) Pageable pageable) {
+        ResponseDto<AuctionDto> responseDto = new ResponseDto<>();
+
+        // 유효성 검사
+        if (searchCondition == null || searchCondition.isEmpty() || searchKeyword == null) {
+            responseDto.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            responseDto.setStatusMessage("Invalid search condition or keyword");
+            return ResponseEntity.badRequest().body(responseDto);
+        }
+
+        try {
+            Page<AuctionDto> auctionDtoList = auctionService.searchFind(searchCondition, searchKeyword, pageable);
+
+            log.info("getBoards auctionDtoList: {}", auctionDtoList);
+
+            responseDto.setPageItems(auctionDtoList);
+            responseDto.setItem(AuctionDto.builder()
+                    .searchCondition(searchCondition)
+                    .searchKeyword(searchKeyword)
+                    .build());
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("ok");
+
+            return ResponseEntity.ok(responseDto);
+        } catch(Exception e) {
+            log.error("Error occurred: {}", e.getMessage()); // 오류 메시지 로깅
             responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
             responseDto.setStatusMessage(e.getMessage());
             return ResponseEntity.internalServerError().body(responseDto);

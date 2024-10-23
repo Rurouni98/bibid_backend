@@ -89,6 +89,12 @@ public class Auction {
     @JsonManagedReference
     private AuctionDetail auctionDetail;
 
+    // 검색 키워드
+    @Transient
+    private String searchKeyword;
+    @Transient
+    private String searchCondition;
+
     public AuctionDto toDto() {
         return AuctionDto.builder()
                 .auctionIndex(this.auctionIndex)
@@ -120,6 +126,8 @@ public class Auction {
                         Optional.ofNullable(auctionInfoList).map(list -> list.stream().map(AuctionInfo::toDto).toList())
                                 .orElse(new ArrayList<>()))
                 .auctionDetailDto(this.auctionDetail != null ? this.auctionDetail.toDto() : null)
+                .searchKeyword(this.searchKeyword)
+                .searchCondition(this.searchCondition)
                 .build();
     }
 
