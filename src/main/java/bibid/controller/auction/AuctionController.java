@@ -153,9 +153,9 @@ public class AuctionController {
         }
     }
 
-    @GetMapping("/{searchCondition}/{searchKeyword}")
-    public ResponseEntity<?> getBoards(@PathVariable("searchCondition") String searchCondition,
-                                       @PathVariable("searchKeyword") String searchKeyword,
+    @GetMapping
+    public ResponseEntity<?> getBoards(@RequestParam("searchCondition") String searchCondition,
+                                       @RequestParam("searchKeyword") String searchKeyword,
                                        @PageableDefault(page = 0, size = 5) Pageable pageable) {
         ResponseDto<AuctionDto> responseDto = new ResponseDto<>();
 

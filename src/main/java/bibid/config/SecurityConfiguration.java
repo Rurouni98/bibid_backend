@@ -44,6 +44,7 @@ public class SecurityConfiguration {
                             "/members/**",
                             "/ws/**",
                             "/auction/**",
+                            "/category/**",
                             "/api/ncloud/**",
                             "/mypage/**"
                     ).permitAll();
