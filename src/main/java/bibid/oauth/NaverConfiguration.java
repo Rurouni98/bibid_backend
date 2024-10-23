@@ -1,4 +1,4 @@
-package bibid.config;
+package bibid.oauth;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;

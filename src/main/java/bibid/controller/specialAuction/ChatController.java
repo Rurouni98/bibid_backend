@@ -2,8 +2,8 @@ package bibid.controller.specialAuction;
 
 import bibid.dto.ChatDto;
 import bibid.entity.*;
+import bibid.entity.CustomUserDetails;
 import bibid.repository.auction.AuctionRepository;
-import bibid.repository.specialAuction.AuctionInfoRepository;
 import bibid.repository.specialAuction.ChatRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
