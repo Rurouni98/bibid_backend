@@ -159,6 +159,13 @@ public class AuctionController {
                                        @PageableDefault(page = 0, size = 5) Pageable pageable) {
         ResponseDto<AuctionDto> responseDto = new ResponseDto<>();
 
+        // 유효성 검사
+        if (searchCondition == null || searchCondition.isEmpty() || searchKeyword == null) {
+            responseDto.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            responseDto.setStatusMessage("Invalid search condition or keyword");
+            return ResponseEntity.badRequest().body(responseDto);
+        }
+
         try {
             Page<AuctionDto> auctionDtoList = auctionService.searchFind(searchCondition, searchKeyword, pageable);
 
@@ -174,6 +181,7 @@ public class AuctionController {
 
             return ResponseEntity.ok(responseDto);
         } catch(Exception e) {
+            log.error("Error occurred: {}", e.getMessage()); // 오류 메시지 로깅
             responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
             responseDto.setStatusMessage(e.getMessage());
             return ResponseEntity.internalServerError().body(responseDto);

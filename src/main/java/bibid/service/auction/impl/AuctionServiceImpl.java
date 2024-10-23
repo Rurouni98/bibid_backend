@@ -101,15 +101,14 @@ public class AuctionServiceImpl implements AuctionService {
 
     @Override
     public Page<AuctionDto> findConveyor(Pageable pageable) {
-        LocalDateTime currentTime = LocalDateTime.now(); // 현재 시간을 가져옵니다.
+        LocalDateTime currentTime = LocalDateTime.now();
         Pageable sortedByEndingLocalDateTime = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("endingLocalDateTime").descending());
         return auctionRepository.findConveyor(currentTime, sortedByEndingLocalDateTime).map(Auction::toDto);
     }
 
     @Override
     public Page<AuctionDto> searchFind(String searchCondition, String searchKeyword, Pageable pageable) {
-        return auctionRepository
-                .searchAll(searchCondition, searchKeyword, pageable)
-                .map(Auction::toDto);
+        Pageable sortedByRegdate = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("regdate").descending());
+        return auctionRepository.searchAll(searchCondition, searchKeyword, sortedByRegdate).map(Auction::toDto);
     }
 }
