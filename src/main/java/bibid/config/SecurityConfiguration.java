@@ -47,7 +47,8 @@ public class SecurityConfiguration {
                             "/category/**",
                             "/api/ncloud/**",
                             "/mypage/**",
-                            "/auth/**"
+                            "/auth/**",
+                            "/specialAuction/list"
                     ).permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
                 })
