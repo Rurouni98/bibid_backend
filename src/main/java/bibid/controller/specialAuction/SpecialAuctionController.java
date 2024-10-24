@@ -29,7 +29,7 @@ public class SpecialAuctionController {
     private final LiveStationChannelRepository channelRepository;
     private final LiveStationPoolManager liveStationPoolManager;
 
-    @GetMapping
+    @GetMapping("/list")
     public ResponseEntity<?> getAuctionsByType(
             @RequestParam("auctionType") String auctionType,
             @PageableDefault(page = 0, size = 10) Pageable pageable) {
