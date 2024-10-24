@@ -17,17 +17,18 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
 public class LiveStationService {
-    @Value("${ncp.accessKey}")
+    @Value("${live.ncp.accessKey}")
     String accessKey;
-    @Value("${ncp.secretKey}")
+    @Value("${live.ncp.secretKey}")
     String secretKey;
-    @Value("bucket119")
+    @Value("${live.cloud.aws.s3.bucket.name}")
     String bucket;
 
     String liveStationUrl = "https://livestation.apigw.ntruss.com/api/v2/channels";
@@ -125,6 +126,57 @@ public class LiveStationService {
         }
     }
 
+    public List<LiveStationChannelDTO> getChannelList() {
+        try {
+            StringBuilder urlBuilder = new StringBuilder();
+            urlBuilder.append(liveStationUrl);
+            String url = urlBuilder.toString();
+
+            String signUrl = url.substring(url.indexOf(".com") + 4);
+
+            String timestamp = String.valueOf(System.currentTimeMillis());
+            String method = "GET";
+            String sig = makeSignature(timestamp, method, signUrl);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("x-ncp-apigw-timestamp", timestamp);
+            headers.set("x-ncp-iam-access-key", accessKey);
+            headers.set("x-ncp-apigw-signature-v2", sig);
+            headers.set("x-ncp-region_code", "KR");
+
+            HttpEntity<LiveStationResponseDTO> httpEntity = new HttpEntity<>(headers);
+
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<LiveStationResponseListDTO> response = restTemplate.exchange(new URI(url), HttpMethod.GET, httpEntity, LiveStationResponseListDTO.class);
+
+            List<LiveStationChannelDTO> channelDTOList = new ArrayList<>();
+
+            for (ContentDTO contentDTO : response.getBody().getContent()) {
+
+                String channelId = contentDTO.getChannelId();
+
+                LiveStationChannelDTO channelDTO = LiveStationChannelDTO.builder()
+                        .channelId(channelId)
+                        .channelStatus(contentDTO.getChannelStatus())
+                        .cdnInstanceNo(contentDTO.getCdn().getInstanceNo())
+                        .cdnStatusName(contentDTO.getCdn().getStatusName())
+                        .publishUrl(contentDTO.getPublishUrl())
+                        .streamKey(contentDTO.getStreamKey())
+                        .isAvailable(false)
+                        .build();
+
+                channelDTOList.add(channelDTO);
+            }
+            return channelDTOList;
+
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
     public LiveStationInfoDTO getChannelInfo(String channelID) {
         try {
             StringBuilder urlBuilder = new StringBuilder();
@@ -159,7 +211,7 @@ public class LiveStationService {
                     .channelName(response.getBody().getContent().getChannelName())
                     .channelStatus(response.getBody().getContent().getChannelStatus())
                     .cdnInstanceNo(response.getBody().getContent().getCdn().getInstanceNo())
-                    .cdnStatus(response.getBody().getContent().getCdn().getStatusName())
+                    .cdnStatusName(response.getBody().getContent().getCdn().getStatusName())
                     .publishUrl(response.getBody().getContent().getPublishUrl())
                     .streamKey(response.getBody().getContent().getStreamKey())
                     .build();
@@ -312,7 +364,7 @@ public class LiveStationService {
             }
 
             return dto;
-        }catch (URISyntaxException e) {
+        } catch (URISyntaxException e) {
             throw new RuntimeException(e.getMessage());
         }
     }

@@ -3,7 +3,6 @@ package bibid.dto;
 import bibid.entity.Chat;
 import bibid.entity.ChatRoom;
 import bibid.entity.Member;
-import bibid.entity.Streaming;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import lombok.*;

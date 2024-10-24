@@ -1,6 +1,7 @@
 package bibid.entity;
 
 import bibid.dto.AuctionDto;
+import bibid.livestation.entity.LiveStationChannel;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -65,19 +66,10 @@ public class Auction {
     @JsonManagedReference
     private List<AuctionImage> auctionImageList;
 
-    // 스트리밍과의 비식별 1:1 관계
-    @OneToOne(mappedBy = "auction", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference
-    private Streaming streaming;
-
-    private boolean isStreamingCreated;
-
     // 채팅방과의 비식별 1:1 관계
     @OneToOne(mappedBy = "auction", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
     private ChatRoom chatRoom;
-
-    private boolean isChatRoomCreated;
 
     // 경매 정보
     @OneToMany(mappedBy = "auction", cascade = CascadeType.ALL)
@@ -88,6 +80,10 @@ public class Auction {
     @OneToOne(mappedBy = "auction", cascade = CascadeType.ALL)
     @JsonManagedReference
     private AuctionDetail auctionDetail;
+
+    @OneToOne
+    @JoinColumn(name = "liveStationChannelIndex")
+    private LiveStationChannel liveStationChannel;
 
     // 검색 키워드
     @Transient
@@ -117,8 +113,6 @@ public class Auction {
                 .viewCnt(this.viewCnt)
                 .regdate(this.regdate)
                 .moddate(this.moddate)
-                .isStreamingCreated(this.isStreamingCreated)
-                .isChatRoomCreated(this.isChatRoomCreated)
                 .auctionImageDtoList(
                         Optional.ofNullable(auctionImageList).map(list -> list.stream().map(AuctionImage::toDto).toList())
                                 .orElse(new ArrayList<>()))

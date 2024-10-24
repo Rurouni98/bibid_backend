@@ -10,9 +10,8 @@ import bibid.entity.ChatRoom;
 import bibid.entity.Member;
 import bibid.livestation.service.LiveStationService;
 import bibid.repository.auction.AuctionRepository;
-import bibid.repository.specialAuction.StreamingRepository;
+import bibid.schedular.SpecialAuctionScheduler;
 import bibid.service.auction.AuctionService;
-import bibid.service.specialAuction.ChatRoomService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +31,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class AuctionServiceImpl implements AuctionService {
+    private final SpecialAuctionScheduler specialAuctionScheduler;
     private final AuctionRepository auctionRepository;
     private final FileUtils fileUtils;
 
@@ -44,10 +44,21 @@ public class AuctionServiceImpl implements AuctionService {
                                  Pageable pageable) {
         auctionDto.setRegdate(LocalDateTime.now());
         auctionDto.setModdate(LocalDateTime.now());
+        auctionDto.setAuctionStatus("대기중");
 
         Auction auction = auctionDto.toEntity(member);
         AuctionDetail auctionDetail = auctionDetailDto.toEntity(auction);
         auction.setAuctionDetail(auctionDetail);
+
+        if(auctionDto.getAuctionType().equals("실시간 경매")){
+            ChatRoom chatRoom = ChatRoom.builder()
+                    .roomName("경매 " + auctionDto.getProductName() + " 채팅방")
+                    .createdAt(LocalDateTime.now())
+                    .auction(auction)
+                    .build();
+            auction.setChatRoom(chatRoom);
+            specialAuctionScheduler.scheduleChannelAllocation(auctionDto.getAuctionIndex(), auctionDto.getStartingLocalDateTime());
+        }
 
         if (thumbnail != null) {
 
