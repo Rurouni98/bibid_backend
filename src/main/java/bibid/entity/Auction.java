@@ -22,7 +22,6 @@ import java.util.Optional;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-
 public class Auction {
 
     @Id
