@@ -30,11 +30,9 @@ public class QChatRoom extends EntityPathBase<ChatRoom> {
 
     public final ListPath<ChatRoomManagement, QChatRoomManagement> chatRoomManagementList = this.<ChatRoomManagement, QChatRoomManagement>createList("chatRoomManagementList", ChatRoomManagement.class, QChatRoomManagement.class, PathInits.DIRECT2);
 
-    public final DateTimePath<java.time.LocalDateTime> endTime = createDateTime("endTime", java.time.LocalDateTime.class);
+    public final DateTimePath<java.time.LocalDateTime> createdAt = createDateTime("createdAt", java.time.LocalDateTime.class);
 
     public final StringPath roomName = createString("roomName");
-
-    public final DateTimePath<java.time.LocalDateTime> startTime = createDateTime("startTime", java.time.LocalDateTime.class);
 
     public QChatRoom(String variable) {
         this(ChatRoom.class, forVariable(variable), INITS);

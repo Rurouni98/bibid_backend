@@ -1,6 +1,6 @@
 package bibid.common;
 
-import bibid.oauth.NaverConfiguration;
+import bibid.config.NaverConfiguration;
 import bibid.dto.AuctionImageDto;
 import bibid.dto.ProfileImageDto;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -11,6 +11,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,6 +25,10 @@ import java.util.UUID;
 
 @Component
 public class FileUtils {
+
+    @Value("${cloud.aws.s3.bucket.name}")
+    String bucket;
+
     private final AmazonS3 s3;
 
     public FileUtils(NaverConfiguration naverConfiguration) {
@@ -46,7 +51,7 @@ public class FileUtils {
     }
 
     public ProfileImageDto parserFileInfo(MultipartFile multipartFile, String directory) {
-        String bucketName = "bitcamp119";
+        String bucketName = bucket;
 
         ProfileImageDto profileImageDto = new ProfileImageDto();
 
@@ -106,7 +111,7 @@ public class FileUtils {
     }
 
     public AuctionImageDto auctionImageParserFileInfo(MultipartFile multipartFile, String directory) {
-        String bucketName = "bitcamp119";
+        String bucketName = bucket;
 
         AuctionImageDto auctionImageDto = new AuctionImageDto();
 

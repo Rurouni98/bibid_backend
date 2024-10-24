@@ -68,7 +68,12 @@ dependencies {
     implementation 'org.apache.httpcomponents.client5:httpclient5:5.2.1'
 
     implementation 'com.google.firebase:firebase-admin:9.3.0'
+
+    // oauth2
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+    // redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
 }
 

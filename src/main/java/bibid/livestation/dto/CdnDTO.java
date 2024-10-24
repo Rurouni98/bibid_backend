@@ -29,7 +29,7 @@ public class CdnDTO {
     @JsonProperty("serviceName")
     private String serviceName;
 
-    @JsonProperty("statusName")
+    @JsonProperty("statusName") // RUNNING, PUBLISHING, STOPPING, STOPPED, CREATING, CHANGING, CDN_NOT_FOUND
     private String statusName;
 
     @JsonProperty("cdnDomain")

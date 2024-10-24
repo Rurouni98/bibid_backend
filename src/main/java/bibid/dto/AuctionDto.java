@@ -40,8 +40,6 @@ public class AuctionDto {
     private LocalDateTime moddate; // 경매 수정시간
 
     private List<AuctionImageDto> auctionImageDtoList;
-    private boolean isStreamingCreated;
-    private boolean isChatRoomCreated;
     private List<AuctionInfoDto> auctionInfoDtoList;
     private AuctionDetailDto auctionDetailDto;
 
@@ -70,10 +68,7 @@ public class AuctionDto {
                 .regdate(this.regdate)
                 .moddate(this.moddate)
                 .auctionImageList(new ArrayList<>())
-                .streaming(null)
-                .isStreamingCreated(this.isStreamingCreated)
                 .chatRoom(null)
-                .isChatRoomCreated(this.isChatRoomCreated)
                 .auctionDetail(null)
                 .searchKeyword(this.searchKeyword)
                 .searchCondition(this.searchCondition)

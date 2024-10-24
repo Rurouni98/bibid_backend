@@ -59,7 +59,7 @@ public class ContentDTO {
     @JsonProperty("qualitySetName")
     private String qualitySetName;
 
-    @JsonProperty("channelStatus")
+    @JsonProperty("channelStatus") // CREATING, READY, PUBLISH, DELETED,BLOCK, FORCE_BLOCK, FORCE_DELETED
     private String channelStatus;
 
     @JsonProperty("isRecording")

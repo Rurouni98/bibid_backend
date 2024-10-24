@@ -2,6 +2,13 @@ package bibid.controller.specialAuction;
 
 import bibid.dto.AuctionDto;
 import bibid.dto.ResponseDto;
+import bibid.entity.Auction;
+import bibid.livestation.dto.LiveStationChannelDTO;
+import bibid.livestation.entity.LiveStationChannel;
+import bibid.livestation.repository.LiveStationChannelRepository;
+import bibid.livestation.service.LiveStationPoolManager;
+import bibid.livestation.service.LiveStationService;
+import bibid.repository.specialAuction.SpecialAuctionRepository;
 import bibid.service.specialAuction.SpecialAuctionService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -11,10 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -25,6 +29,9 @@ import java.util.List;
 public class SpecialAuctionController {
 
     private final SpecialAuctionService specialAuctionService;
+    private final SpecialAuctionRepository specialAuctionRepository;
+    private final LiveStationChannelRepository channelRepository;
+    private final LiveStationPoolManager liveStationPoolManager;
 
     @GetMapping
     public ResponseEntity<?> getAuctionsByType(
@@ -56,5 +63,70 @@ public class SpecialAuctionController {
             return ResponseEntity.internalServerError().body(responseDto);
         }
     }
+
+    // 라이브 종료 요청
+    @PostMapping("/endLive/{auctionIndex}")
+    public ResponseEntity<?> endLive(@PathVariable Long auctionIndex) {
+
+        Auction auction = specialAuctionRepository.findById(auctionIndex).orElseThrow(
+                () -> new RuntimeException("해당 옥션은 없습니다.")
+        );
+        LiveStationChannel channel = auction.getLiveStationChannel();
+        liveStationPoolManager.releaseChannel(channel);
+
+        auction.setAuctionStatus("방송종료");
+        auction.setLiveStationChannel(null);
+        specialAuctionRepository.save(auction);
+
+        return ResponseEntity.ok("라이브가 종료되었습니다.");
+    }
+
+    // 라이브 시작
+    @PostMapping("/startLive/{auctionIndex}/")
+    public ResponseEntity<?> startLive(@PathVariable Long auctionIndex) {
+
+        Auction auction = specialAuctionRepository.findById(auctionIndex).orElseThrow(
+                () -> new RuntimeException("해당 옥션은 없습니다.")
+        );
+
+        LiveStationChannel channel = auction.getLiveStationChannel();
+
+        auction.setAuctionStatus("방송중");
+        specialAuctionRepository.save(auction);
+
+        channel.setChannelStatus("PUBLISH");
+        channel.setAvailable(true);
+        channelRepository.save(channel);
+
+        return ResponseEntity.ok("라이브가 시작되었습니다.");
+    }
+
+    // 채널 정보 요청
+    @GetMapping("/channelInfo/{auctionIndex}")
+    public ResponseEntity<?> getChannelInfo(@PathVariable Long auctionIndex) {
+
+        ResponseDto<LiveStationChannelDTO> responseDto = new ResponseDto<>();
+
+        try {
+
+            Auction auction = specialAuctionRepository.findById(auctionIndex).orElseThrow(
+                    () -> new RuntimeException("해당 옥션은 없습니다.")
+            );
+
+            LiveStationChannelDTO channelDTO = auction.getLiveStationChannel().toDto();
+
+            responseDto.setItem(channelDTO);
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("ok");
+
+            return ResponseEntity.ok(responseDto);
+        } catch(Exception e) {
+
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage(e.getMessage());
+            return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
+
 
 }

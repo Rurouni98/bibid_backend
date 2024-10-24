@@ -18,10 +18,9 @@ public class ChatRoomDto {
 
     private Long chatRoomIndex;
     private String roomName;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
     private Long auctionIndex; // 경매 ID
 
+    private LocalDateTime createdAt;
     private List<ChatDto> chatDtoList;
     private List<ChatRoomManagementDto> chatRoomManagementDtoList;
 
@@ -29,9 +28,8 @@ public class ChatRoomDto {
         return ChatRoom.builder()
                 .chatRoomIndex(this.chatRoomIndex)
                 .roomName(this.roomName)
-                .startTime(this.startTime)
-                .endTime(this.endTime)
                 .auction(auction)
+                .createdAt(this.createdAt)
                 .chatList(new ArrayList<>())
                 .chatRoomManagementList(new ArrayList<>())
                 .build();
