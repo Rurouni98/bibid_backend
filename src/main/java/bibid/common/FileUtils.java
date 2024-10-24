@@ -1,6 +1,6 @@
 package bibid.common;
 
-import bibid.oauth.NaverConfiguration;
+import bibid.config.NaverConfiguration;
 import bibid.dto.AuctionImageDto;
 import bibid.dto.ProfileImageDto;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
