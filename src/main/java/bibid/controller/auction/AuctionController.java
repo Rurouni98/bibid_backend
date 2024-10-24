@@ -156,7 +156,7 @@ public class AuctionController {
     @GetMapping
     public ResponseEntity<?> getBoards(@RequestParam("searchCondition") String searchCondition,
                                        @RequestParam("searchKeyword") String searchKeyword,
-                                       @PageableDefault(page = 0, size = 5) Pageable pageable) {
+                                       @PageableDefault(page = 0, size = 100) Pageable pageable) {
         ResponseDto<AuctionDto> responseDto = new ResponseDto<>();
 
         // 유효성 검사
