@@ -37,5 +37,6 @@ public interface AuctionRepository extends JpaRepository<Auction, Long>, Auction
 //                            @Param("searchKeyword") String searchKeyword,
 //                            Pageable pageable);
 
+    long countByMember_MemberIndex(Long memberIndex);
 
 }
