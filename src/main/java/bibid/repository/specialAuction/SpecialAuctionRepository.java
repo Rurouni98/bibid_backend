@@ -15,9 +15,9 @@ public interface SpecialAuctionRepository extends JpaRepository<Auction, Long> {
     @Query("SELECT b FROM Auction b WHERE b.startingLocalDateTime BETWEEN :now AND :thirtyMinutesLater")
     List<Auction> findAuctionsStartingWithinThirtyMinutes(@Param("now") LocalDateTime now, @Param("thirtyMinutesLater") LocalDateTime thirtyMinutesLater);
 
-    @Query("SELECT a FROM Auction a WHERE a.auctionType = :auctionType AND a.endingLocalDateTime > :currentTime")
+    @Query("SELECT a FROM Auction a WHERE a.auctionType = :auctionType AND a.endingLocalDateTime > :oneDayAgo")
     Page<Auction> findAuctionsByType(@Param("auctionType") String auctionType,
-                                     @Param("currentTime") LocalDateTime currentTime,
+                                     @Param("oneDayAgo") LocalDateTime oneDayAgo,
                                      Pageable pageable);
 
     @Query("SELECT COUNT(m) FROM Auction a JOIN a.member m WHERE a.auctionIndex = :auctionId AND m.memberIndex = :memberIndex")
