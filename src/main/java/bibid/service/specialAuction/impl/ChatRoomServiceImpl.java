@@ -6,10 +6,12 @@ import bibid.repository.auction.AuctionRepository;
 import bibid.repository.specialAuction.ChatRoomRepository;
 import bibid.service.specialAuction.ChatRoomService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatRoomServiceImpl implements ChatRoomService {
@@ -22,6 +24,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         // 경매 정보 조회
         Auction auction = auctionRepository.findById(auctionIndex)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid auction ID"));
+
+        log.info("auction: ", auction);
 
         // 채팅방 생성
         ChatRoom chatRoom = ChatRoom.builder()

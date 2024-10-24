@@ -46,7 +46,7 @@ public class MypageServiceImpl implements MypageService {
             MultipartFile file = uploadProfiles[uploadProfiles.length - 1];
             if(!file.getOriginalFilename().equalsIgnoreCase("")
                     && file.getOriginalFilename() != null){
-                ProfileImageDto addProfileFileDto = fileUtils.parserFileInfo(file, "bitcamp73/");
+                ProfileImageDto addProfileFileDto = fileUtils.parserFileInfo(file, "bitcamp119/");
 
                 addProfileFileDto.setMemberIndex(memberDto.getMemberIndex());
                 addProfileFileDto.setFilestatus("I");

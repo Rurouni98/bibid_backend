@@ -61,8 +61,8 @@ public class SpecialAuctionServiceImpl implements SpecialAuctionService {
 //    @Scheduled(fixedRate = 6000) // 1분마다 실행
     public void checkAuctionStart() {
         log.info("checkAuctionStart() 실행됨");
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime thirtyMinutesLater = now.plusMinutes(3000);
+        LocalDateTime now = LocalDateTime.now().minusYears(10);
+        LocalDateTime thirtyMinutesLater = LocalDateTime.now().plusMinutes(3000);
 
         try {
             // 경매 시작 시간이  이내인 경매들을 찾음

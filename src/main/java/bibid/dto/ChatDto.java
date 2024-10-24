@@ -21,6 +21,8 @@ public class ChatDto {
     private Long chatRoomIndex;
 
     private String chatMessage;
+    private int participantCount;
+    private String participantStatus;
     private Long senderIndex;
     private String senderNickname;
     private LocalDateTime sendTime;

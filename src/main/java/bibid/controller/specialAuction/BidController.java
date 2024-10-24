@@ -8,6 +8,7 @@ import bibid.entity.Member;
 import bibid.repository.auction.AuctionRepository;
 import bibid.repository.specialAuction.AuctionInfoRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 
 @Controller
 @RequiredArgsConstructor
+@Slf4j
 public class BidController {
     private final AuctionRepository auctionRepository;
     private final AuctionInfoRepository auctionInfoRepository;
@@ -49,6 +51,7 @@ public class BidController {
         AuctionInfo auctionInfo = auctionInfoDto.toEntity(auction, bidder);
         auctionInfo.setBidTime(LocalDateTime.now());
         AuctionInfo savedAuctionInfo = auctionInfoRepository.save(auctionInfo);
+        log.info("Saved auction info: {}", savedAuctionInfo);
 
         return savedAuctionInfo.toDto(); // 저장된 입찰 정보 반환
     }
