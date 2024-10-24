@@ -21,6 +21,7 @@ public class AuctionInfoDto {
     private Long bidderIndex;
     private LocalDateTime bidTime; // 입찰시간
     private Long bidAmount; // 입찰금액
+    private String bidderNickname;
 
     public AuctionInfo toEntity(Auction auction, Member bidder) {
         return AuctionInfo.builder()
@@ -29,6 +30,7 @@ public class AuctionInfoDto {
                 .bidder(bidder)
                 .bidTime(this.bidTime)
                 .bidAmount(this.bidAmount)
+                .bidderNickname(this.bidderNickname)
                 .build();
     }
 }

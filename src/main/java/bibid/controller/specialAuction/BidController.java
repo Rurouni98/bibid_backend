@@ -49,6 +49,7 @@ public class BidController {
 
         // 입찰 정보를 DB에 저장
         AuctionInfo auctionInfo = auctionInfoDto.toEntity(auction, bidder);
+        auctionInfo.setBidderNickname(bidder.getNickname());
         auctionInfo.setBidTime(LocalDateTime.now());
         AuctionInfo savedAuctionInfo = auctionInfoRepository.save(auctionInfo);
         log.info("Saved auction info: {}", savedAuctionInfo);
