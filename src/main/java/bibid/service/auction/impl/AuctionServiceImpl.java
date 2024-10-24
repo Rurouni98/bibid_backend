@@ -8,24 +8,20 @@ import bibid.entity.Auction;
 import bibid.entity.AuctionDetail;
 import bibid.entity.ChatRoom;
 import bibid.entity.Member;
-import bibid.livestation.service.LiveStationService;
 import bibid.repository.auction.AuctionRepository;
-import bibid.schedular.SpecialAuctionScheduler;
+import bibid.service.specialAuction.impl.SpecialAuctionScheduler;
 import bibid.service.auction.AuctionService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

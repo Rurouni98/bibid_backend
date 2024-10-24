@@ -1,7 +1,6 @@
 package bibid.entity;
 
 import bibid.dto.AuctionDto;
-import bibid.livestation.entity.LiveStationChannel;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;

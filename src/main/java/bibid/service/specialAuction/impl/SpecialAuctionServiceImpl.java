@@ -2,7 +2,7 @@ package bibid.service.specialAuction.impl;
 
 import bibid.dto.AuctionDto;
 import bibid.entity.Auction;
-import bibid.livestation.service.LiveStationPoolManager;
+import bibid.service.livestation.LiveStationPoolManager;
 import bibid.repository.specialAuction.SpecialAuctionRepository;
 import bibid.service.specialAuction.SpecialAuctionService;
 import lombok.AllArgsConstructor;
