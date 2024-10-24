@@ -30,6 +30,8 @@ public class QAuctionInfo extends EntityPathBase<AuctionInfo> {
 
     public final QMember bidder;
 
+    public final StringPath bidderNickname = createString("bidderNickname");
+
     public final DateTimePath<java.time.LocalDateTime> bidTime = createDateTime("bidTime", java.time.LocalDateTime.class);
 
     public QAuctionInfo(String variable) {
