@@ -4,7 +4,7 @@ import bibid.dto.AuctionDetailDto;
 import bibid.dto.AuctionDto;
 import bibid.dto.ResponseDto;
 import bibid.entity.CustomUserDetails;
-import bibid.repository.MemberRepository;
+import bibid.repository.member.MemberRepository;
 import bibid.service.auction.AuctionService;
 import bibid.service.specialAuction.SpecialAuctionService;
 import lombok.RequiredArgsConstructor;

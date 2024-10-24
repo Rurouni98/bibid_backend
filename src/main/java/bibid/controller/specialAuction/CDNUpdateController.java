@@ -1,8 +1,8 @@
 package bibid.controller.specialAuction;
 
-import bibid.livestation.dto.LiveStationServiceUrlDTO;
-import bibid.livestation.entity.LiveStationChannel;
-import bibid.livestation.entity.LiveStationServiceUrl;
+import bibid.dto.livestation.LiveStationServiceUrlDTO;
+import bibid.entity.LiveStationChannel;
+import bibid.entity.LiveStationServiceUrl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;

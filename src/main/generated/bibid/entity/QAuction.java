@@ -48,7 +48,7 @@ public class QAuction extends EntityPathBase<Auction> {
 
     public final NumberPath<Long> instantPurchasePrice = createNumber("instantPurchasePrice", Long.class);
 
-    public final bibid.livestation.entity.QLiveStationChannel liveStationChannel;
+    public final QLiveStationChannel liveStationChannel;
 
     public final QMember member;
 
@@ -90,7 +90,7 @@ public class QAuction extends EntityPathBase<Auction> {
         super(type, metadata, inits);
         this.auctionDetail = inits.isInitialized("auctionDetail") ? new QAuctionDetail(forProperty("auctionDetail"), inits.get("auctionDetail")) : null;
         this.chatRoom = inits.isInitialized("chatRoom") ? new QChatRoom(forProperty("chatRoom"), inits.get("chatRoom")) : null;
-        this.liveStationChannel = inits.isInitialized("liveStationChannel") ? new bibid.livestation.entity.QLiveStationChannel(forProperty("liveStationChannel")) : null;
+        this.liveStationChannel = inits.isInitialized("liveStationChannel") ? new QLiveStationChannel(forProperty("liveStationChannel")) : null;
         this.member = inits.isInitialized("member") ? new QMember(forProperty("member"), inits.get("member")) : null;
     }
 

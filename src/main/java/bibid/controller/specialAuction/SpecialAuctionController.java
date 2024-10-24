@@ -3,14 +3,12 @@ package bibid.controller.specialAuction;
 import bibid.dto.AuctionDto;
 import bibid.dto.ResponseDto;
 import bibid.entity.Auction;
-import bibid.livestation.dto.LiveStationChannelDTO;
-import bibid.livestation.entity.LiveStationChannel;
-import bibid.livestation.repository.LiveStationChannelRepository;
-import bibid.livestation.service.LiveStationPoolManager;
-import bibid.livestation.service.LiveStationService;
+import bibid.dto.livestation.LiveStationChannelDTO;
+import bibid.entity.LiveStationChannel;
+import bibid.repository.livestation.LiveStationChannelRepository;
+import bibid.service.livestation.LiveStationPoolManager;
 import bibid.repository.specialAuction.SpecialAuctionRepository;
 import bibid.service.specialAuction.SpecialAuctionService;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -19,8 +17,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/specialAuction")
