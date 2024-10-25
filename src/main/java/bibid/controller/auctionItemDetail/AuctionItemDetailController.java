@@ -28,6 +28,9 @@ public class AuctionItemDetailController {
         ResponseDto<AuctionResponseDto> responseDto = new ResponseDto<>();
 
         try {
+
+            log.info("auctionIndex 확인 : {}", auctionIndex);
+
             AuctionDto auctionItem = auctionItemDetailService.findAuctionItem(auctionIndex);
             MemberDto seller = auctionItemDetailService.findSeller(auctionIndex); // 판매자 정보 가져오기
 
