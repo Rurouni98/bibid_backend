@@ -14,4 +14,5 @@ public class AuctionResponseDto {
     private List<MemberDto> biddingMember;
     private List<String> infoExtension;
     private SellerInfoDto sellerDetailInfo;
+    private List<String> auctionImages;
 }

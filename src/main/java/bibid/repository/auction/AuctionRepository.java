@@ -4,6 +4,7 @@ import bibid.entity.Auction;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -38,5 +39,10 @@ public interface AuctionRepository extends JpaRepository<Auction, Long>, Auction
 //                            Pageable pageable);
 
     long countByMember_MemberIndex(Long memberIndex);
+
+    @Modifying
+    @Query("UPDATE Auction a SET a.auctionStatus = '완료' WHERE a.endingLocalDateTime <= :currentTime AND a.auctionStatus = '진행중'")
+    void updateCompletedAuctions(@Param("currentTime") LocalDateTime currentTime);
+
 
 }

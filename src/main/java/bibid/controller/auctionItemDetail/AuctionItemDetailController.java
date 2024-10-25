@@ -41,6 +41,9 @@ public class AuctionItemDetailController {
             SellerInfoDto sellerDetailInfo = auctionItemDetailService.findSellerInfo(auctionIndex);
 //            System.out.println(sellerDetailInfo); // 판매자의 맴버디테일, 셀러인포. 상호명 대표자 등.
 
+            List<String> auctionImages = auctionItemDetailService.findAuctionImagesByAuctionIndex(auctionIndex);
+            System.out.println(auctionImages); // 옥션이미지경로, 필수값 , 첫번째 값으로 썸네일저장
+
 
             AuctionResponseDto auctionResponse = new AuctionResponseDto();
             auctionResponse.setAuctionItem(auctionItem);
@@ -51,6 +54,8 @@ public class AuctionItemDetailController {
 
             auctionResponse.setInfoExtension(infoExtension);
             auctionResponse.setSellerDetailInfo(sellerDetailInfo);
+
+            auctionResponse.setAuctionImages(auctionImages);
 
             responseDto.setItem(auctionResponse);
             responseDto.setStatusCode(HttpStatus.OK.value());

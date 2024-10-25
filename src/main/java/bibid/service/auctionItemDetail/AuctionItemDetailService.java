@@ -21,4 +21,8 @@ public interface AuctionItemDetailService {
     SellerInfoDto findSellerInfo(Long auctionIndex);
 
     AuctionInfoDto updateAuctionItemDetail(Long auctionIndex, BidRequestDto bidRequestDto);
+
+    void updateAuctionBiddingState();
+
+    List<String> findAuctionImagesByAuctionIndex(Long auctionIndex);
 }
