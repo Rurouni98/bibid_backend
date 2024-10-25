@@ -18,7 +18,7 @@ public class CdnDTO {
     String cdnType;
 
     @JsonProperty("profileId")
-    String profileId;
+    int profileId;
 
     @JsonProperty("regionType")
     String regionType;

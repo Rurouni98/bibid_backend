@@ -9,6 +9,8 @@ import bibid.entity.AuctionDetail;
 import bibid.entity.ChatRoom;
 import bibid.entity.Member;
 import bibid.repository.auction.AuctionRepository;
+import bibid.service.livestation.LiveStationPoolManager;
+import bibid.service.livestation.LiveStationService;
 import bibid.service.specialAuction.impl.SpecialAuctionScheduler;
 import bibid.service.auction.AuctionService;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,7 @@ public class AuctionServiceImpl implements AuctionService {
     private final SpecialAuctionScheduler specialAuctionScheduler;
     private final AuctionRepository auctionRepository;
     private final FileUtils fileUtils;
+    private final LiveStationPoolManager liveStationPoolManager;
 
     @Override
     public Page<AuctionDto> post(AuctionDto auctionDto,

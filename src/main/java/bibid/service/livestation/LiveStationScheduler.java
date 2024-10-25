@@ -62,13 +62,13 @@ public class LiveStationScheduler {
                 }
             }
 
-            // cdnStatusName과 channelStatus를 기반으로 'AVAILABLE' 상태 업데이트
-            boolean newAvailableStatus = cdnStatusName.equals("RUNNING") && channelStatus.equals("READY");
-            if (channelEntity.isAvailable() != newAvailableStatus) {
-                log.info("채널 사용 가능 상태 업데이트: {} -> {} (Channel ID: {})", channelEntity.isAvailable(), newAvailableStatus, channelId);
-                channelEntity.setAvailable(newAvailableStatus);
-                isUpdated = true;
-            }
+//            // cdnStatusName과 channelStatus를 기반으로 'AVAILABLE' 상태 업데이트
+//            boolean newAvailableStatus = cdnStatusName.equals("RUNNING") && channelStatus.equals("READY");
+//            if (channelEntity.isAvailable() != newAvailableStatus) {
+//                log.info("채널 사용 가능 상태 업데이트: {} -> {} (Channel ID: {})", channelEntity.isAvailable(), newAvailableStatus, channelId);
+//                channelEntity.setAvailable(newAvailableStatus);
+//                isUpdated = true;
+//            }
 
             // 변경된 내용이 있을 경우에만 저장
             if (isUpdated) {

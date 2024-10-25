@@ -6,6 +6,7 @@ import bibid.exception.errorCode.MakeSignatureException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class LiveStationService {
     @Value("${live.ncp.accessKey}")
     String accessKey;
@@ -30,8 +32,11 @@ public class LiveStationService {
     String secretKey;
     @Value("${live.cloud.aws.s3.bucket.name}")
     String bucket;
+    @Value("${live.ncp.profileName}")
+    String profileName;
 
     String liveStationUrl = "https://livestation.apigw.ntruss.com/api/v2/channels";
+    String globalEdgeUrl = "https://edge.apigw.ntruss.com/api/v1/profiles";
 
     public String makeSignature(String timestamp, String method, String signUrl) {
         try {
@@ -61,6 +66,55 @@ public class LiveStationService {
         }
     }
 
+    public int getProfileId(String profileName) {
+        try {
+
+            StringBuilder urlBuilder = new StringBuilder();
+            urlBuilder.append(globalEdgeUrl);
+            String url = urlBuilder.toString();
+            String signUrl = url.substring(url.indexOf(".com") + 4);
+
+            String timestamp = String.valueOf(System.currentTimeMillis());
+            String method = "GET";
+            String sig = makeSignature(timestamp, method, signUrl);
+
+            //요청 헤더 만들기
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("x-ncp-apigw-timestamp", timestamp);
+            headers.set("x-ncp-iam-access-key", accessKey);
+            headers.set("x-ncp-apigw-signature-v2", sig);
+            headers.set("x-ncp-region_code", "KR");
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonBody = objectMapper.writeValueAsString(null);
+            HttpEntity<String> body = new HttpEntity<>(jsonBody, headers);
+
+            RestTemplate restTemplate = new RestTemplate();
+            restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+
+            ResponseEntity<GlobalEdgeResponseDTO> response = restTemplate.exchange(new URI(url), HttpMethod.GET, body, GlobalEdgeResponseDTO.class);
+
+            log.info("조회된 response.boby : {}", response.getBody());
+
+            return response.getBody()
+                    .getResult()
+                    .stream()
+                    .filter(result -> profileName.equals(result.getProfileName())) // profileName 필터
+                    .map(ResultDTO::getId) // customerId 추출
+                    .findFirst() // 첫 번째 일치하는 요소를 반환
+                    .orElseThrow(() -> new RuntimeException("해당 profileName에 맞는 profileId가 없습니다."));
+
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e.getMessage());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+
     public String createChannel(String name) {
         try {
             String title = name.replaceAll(" ", "");
@@ -68,12 +122,15 @@ public class LiveStationService {
             urlBuilder.append(liveStationUrl);
             String url = urlBuilder.toString();
             String signUrl = url.substring(url.indexOf(".com") + 4);
+            int profileId = getProfileId(profileName);
+
+            log.info("조회된 profileId : {}", profileId);
 
             //요청 바디 만들기
             CdnDTO cdnDTO = CdnDTO.builder()
                     .createCdn(true)
                     .cdnType("GLOBAL_EDGE")
-                    .profileId(null)
+                    .profileId(profileId)
                     .regionType("KOREA")
                     .build();
             RecordDTO recordDTO = RecordDTO.builder()
