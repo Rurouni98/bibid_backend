@@ -67,12 +67,17 @@ public class SpecialAuctionController {
         Auction auction = specialAuctionRepository.findById(auctionIndex).orElseThrow(
                 () -> new RuntimeException("해당 옥션은 없습니다.")
         );
-        LiveStationChannel channel = auction.getLiveStationChannel();
-        liveStationPoolManager.releaseChannel(channel);
 
-        auction.setAuctionStatus("방송종료");
-        auction.setLiveStationChannel(null);
-        specialAuctionRepository.save(auction);
+        LiveStationChannel channel = auction.getLiveStationChannel();
+
+        if (channel != null) {
+            liveStationPoolManager.releaseChannel(channel);
+
+            auction.setAuctionStatus("방송종료");
+            auction.setLiveStationChannel(null);
+            specialAuctionRepository.save(auction);
+            log.info("경매 종료로 채널 반납: auctionIndex : {} ", auctionIndex);
+        }
 
         return ResponseEntity.ok("라이브가 종료되었습니다.");
     }

@@ -8,6 +8,7 @@ import bibid.repository.livestation.LiveStationChannelRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.TaskScheduler;
@@ -18,12 +19,12 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class LiveStationPoolManager {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final LiveStationService liveStationService;
     private final LiveStationChannelRepository channelRepository;
-//    private final RedisTemplate<String, LiveStationChannel> redisTemplate; // Redis 사용
     private final TaskScheduler taskScheduler;
 
     @PostConstruct
@@ -32,12 +33,13 @@ public class LiveStationPoolManager {
         List<LiveStationChannel> existingChannels = channelRepository.findAll();
 
         if (existingChannels.isEmpty()) {
-            System.out.println("DB에 채널이 없습니다. API로부터 채널을 가져옵니다.");
+            log.info("DB에 채널이 없습니다. API로부터 채널을 가져옵니다.");
             List<LiveStationChannelDTO> preCreatedChannelDTOList = liveStationService.getChannelList();
 
             for (LiveStationChannelDTO preCreatedChannelDTO : preCreatedChannelDTOList) {
                 LiveStationChannel preCreatedChannel = configureChannel(preCreatedChannelDTO);
                 channelRepository.save(preCreatedChannel);
+                log.info("채널 저장 완료: {}", preCreatedChannel.getChannelId());
             }
         }
 
@@ -46,7 +48,6 @@ public class LiveStationPoolManager {
         for (LiveStationChannel channel : channelsNeedingCdnUpdate) {
             checkCdnStatusAndUpdate(channel);  // CDN 상태를 다시 확인하여 업데이트 작업 재시작
         }
-
     }
 
     private LiveStationChannel configureChannel(LiveStationChannelDTO preCreatedChannelDTO) {
@@ -66,6 +67,7 @@ public class LiveStationPoolManager {
                     )
                     .toList();
             preCreatedChannel.setServiceUrlList(serviceUrlList);
+            log.info("CDN 상태 'RUNNING' - 서비스 URL 리스트 저장 완료: {}", channelId);
         }
 
         preCreatedChannel.setAvailable(cdnStatusName.equals("RUNNING") && channelStatus.equals("READY"));
@@ -73,29 +75,27 @@ public class LiveStationPoolManager {
         return preCreatedChannel;
     }
 
-
     @Transactional
     public LiveStationChannel allocateChannel() {
-
         LiveStationChannel allocatedChannel = channelRepository.findFirstByIsAvailableTrue()
                 .orElseGet(() -> {
-                    System.out.println("사용 가능한 채널이 없으므로 새 채널을 생성합니다.");
+                    log.info("사용 가능한 채널이 없으므로 새 채널을 생성합니다.");
                     return createNewChannel();
                 });
 
         allocatedChannel.setChannelStatus("PUBLISH");
         allocatedChannel.setAvailable(false);
+        log.info("채널 할당: Channel ID: {}", allocatedChannel.getChannelId());
 
         if (!allocatedChannel.getCdnStatusName().equals("RUNNING")) {
-            System.out.println("CDN 준비 중, 상태 업데이트 대기: " + allocatedChannel.getChannelId());
+            log.info("CDN 준비 중, 상태 업데이트 대기: Channel ID: {}", allocatedChannel.getChannelId());
             checkCdnStatusAndUpdate(allocatedChannel);
         }
 
-        return  channelRepository.save(allocatedChannel);
+        return channelRepository.save(allocatedChannel);
     }
 
     private LiveStationChannel createNewChannel() {
-
         String channelId = liveStationService.createChannel("새로운 채널 이름");
         LiveStationInfoDTO liveStationInfoDTO = liveStationService.getChannelInfo(channelId);
 
@@ -109,11 +109,11 @@ public class LiveStationPoolManager {
                 .isAvailable(false)
                 .build();
 
+        log.info("새로운 채널 생성 및 저장: Channel ID: {}", channelId);
         return channelRepository.save(createdChannel);
     }
 
     private void checkCdnStatusAndUpdate(LiveStationChannel channel) {
-
         final long CHECK_INTERVAL_MS = 5 * 60 * 1000;  // 5분
 
         taskScheduler.schedule(() -> {
@@ -136,26 +136,21 @@ public class LiveStationPoolManager {
                     channelRepository.save(channel);
 
                     messagingTemplate.convertAndSend("/topic/cdn-updates", channel.getServiceUrlList());
-                    System.out.println("CDN 상태 업데이트 및 서비스 URL 저장 완료: " + channel.getChannelId());
-
-                    System.out.println("CDN 상태 업데이트 및 서비스 URL 저장 완료: " + channel.getChannelId());
-
+                    log.info("CDN 상태 업데이트 및 서비스 URL 저장 완료: {}", channel.getChannelId());
                 } else {
-                    System.out.println("CDN 생성 중 또는 채널 상태 대기 중: " + channel.getChannelId());
+                    log.info("CDN 생성 중 또는 채널 상태 대기 중: Channel ID: {}", channel.getChannelId());
                     taskScheduler.schedule(() -> checkCdnStatusAndUpdate(channel), new Date(System.currentTimeMillis() + CHECK_INTERVAL_MS));
                 }
             } catch (Exception e) {
-                System.err.println("CDN 상태 확인 중 오류 발생: " + e.getMessage());
+                log.error("CDN 상태 확인 중 오류 발생: {} (Channel ID: {})", e.getMessage(), channel.getChannelId());
             }
         }, new Date(System.currentTimeMillis() + CHECK_INTERVAL_MS));  // 5분 후 첫 확인
     }
 
     public void releaseChannel(LiveStationChannel channel) {
-
         channel.setChannelStatus("READY");
         channel.setAvailable(true);
-
         channelRepository.save(channel);
+        log.info("채널 반납 완료: Channel ID: {}", channel.getChannelId());
     }
-
 }

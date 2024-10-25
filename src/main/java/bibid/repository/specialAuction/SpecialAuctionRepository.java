@@ -26,4 +26,6 @@ public interface SpecialAuctionRepository extends JpaRepository<Auction, Long> {
     List<Auction> findByAuctionStatusInAndAuctionType(List<String> statusList, String auctionType);
 
     List<Auction> findAllByAuctionTypeAndStartingLocalDateTimeAfter(String auctionType, LocalDateTime now);
+
+    List<Auction> findAllByAuctionTypeAndStartingLocalDateTimeBeforeAndLiveStationChannelIsNotNull(String auctionType, LocalDateTime localDateTime);
 }

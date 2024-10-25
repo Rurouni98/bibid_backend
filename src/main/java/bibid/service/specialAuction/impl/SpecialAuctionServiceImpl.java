@@ -2,11 +2,10 @@ package bibid.service.specialAuction.impl;
 
 import bibid.dto.AuctionDto;
 import bibid.entity.Auction;
+import bibid.entity.AuctionType;
 import bibid.service.livestation.LiveStationPoolManager;
 import bibid.repository.specialAuction.SpecialAuctionRepository;
 import bibid.service.specialAuction.SpecialAuctionService;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -23,15 +22,6 @@ public class SpecialAuctionServiceImpl implements SpecialAuctionService {
 
 
     private final SpecialAuctionRepository specialAuctionRepository;
-    private final LiveStationPoolManager liveStationPoolManager;
-
-    @Getter
-    @AllArgsConstructor
-    public enum AuctionType {
-        REALTIME("실시간 경매"),
-        BLIND("블라인드 경매");
-        private final String koreanName;
-    }
 
     @Override
     public Page<AuctionDto> findAuctionsByType(String auctionType, Pageable pageable) {
