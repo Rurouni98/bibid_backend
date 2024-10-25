@@ -65,6 +65,26 @@ public class AuctionRepositoryCustomImpl implements AuctionRepositoryCustom {
     }
 
     @Override
+    public Page<Auction> findBest(Pageable pageable) {
+        QAuction auction = QAuction.auction;
+
+        List<Auction> results = queryFactory
+                .selectFrom(auction)
+                .where(auction.auctionType.eq("일반 경매"))
+                .orderBy(auction.regdate.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        long total = queryFactory
+                .selectFrom(auction)
+                .where(auction.auctionType.eq("일반 경매"))
+                .fetchCount();
+
+        return new PageImpl<>(results, pageable, total);
+    }
+
+    @Override
     public Page<Auction> findAllGeneralAuction(Pageable pageable) {
         QAuction auction = QAuction.auction;
 

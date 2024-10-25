@@ -91,7 +91,7 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     public Page<AuctionDto> findTopByViewCount(Pageable pageable) {
         Pageable sortedByViewCount = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("viewCnt").descending());
-        return auctionRepository.findAll(sortedByViewCount).map(Auction::toDto);
+        return auctionRepository.findBest(sortedByViewCount).map(Auction::toDto);
     }
 
     @Override

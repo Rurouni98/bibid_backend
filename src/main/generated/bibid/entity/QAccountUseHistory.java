@@ -28,8 +28,6 @@ public class QAccountUseHistory extends EntityPathBase<AccountUseHistory> {
 
     public final StringPath changeAccount = createString("changeAccount");
 
-    public final NumberPath<Long> historyIndex = createNumber("historyIndex", Long.class);
-
     public final QMember member;
 
     public final StringPath useType = createString("useType");
