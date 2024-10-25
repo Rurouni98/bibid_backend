@@ -53,7 +53,7 @@ public class LiveStationPoolManager {
     private LiveStationChannel configureChannel(LiveStationChannelDTO preCreatedChannelDTO) {
         String channelId = preCreatedChannelDTO.getChannelId();
         String cdnStatusName = preCreatedChannelDTO.getCdnStatusName();
-        String channelStatus = preCreatedChannelDTO.getChannelStatus();
+//        String channelStatus = preCreatedChannelDTO.getChannelStatus();
 
         LiveStationChannel preCreatedChannel = preCreatedChannelDTO.toEntity();
 
@@ -70,7 +70,7 @@ public class LiveStationPoolManager {
             log.info("CDN 상태 'RUNNING' - 서비스 URL 리스트 저장 완료: {}", channelId);
         }
 
-        preCreatedChannel.setAvailable(cdnStatusName.equals("RUNNING") && channelStatus.equals("READY"));
+//        preCreatedChannel.setAvailable(cdnStatusName.equals("RUNNING") && channelStatus.equals("READY"));
 
         return preCreatedChannel;
     }
@@ -96,6 +96,7 @@ public class LiveStationPoolManager {
     }
 
     private LiveStationChannel createNewChannel() {
+        // 채널이름 UUID로
         String channelId = liveStationService.createChannel("새로운 채널 이름");
         LiveStationInfoDTO liveStationInfoDTO = liveStationService.getChannelInfo(channelId);
 
@@ -111,6 +112,22 @@ public class LiveStationPoolManager {
 
         log.info("새로운 채널 생성 및 저장: Channel ID: {}", channelId);
         return channelRepository.save(createdChannel);
+    }
+
+    public LiveStationChannel testCreateNewChannel() {
+
+        LiveStationChannel allocatedChannel = createNewChannel();
+
+        allocatedChannel.setChannelStatus("PUBLISH");
+        allocatedChannel.setAvailable(false);
+        log.info("채널 할당: Channel ID: {}", allocatedChannel.getChannelId());
+
+        if (!allocatedChannel.getCdnStatusName().equals("RUNNING")) {
+            log.info("CDN 준비 중, 상태 업데이트 대기: Channel ID: {}", allocatedChannel.getChannelId());
+            checkCdnStatusAndUpdate(allocatedChannel);
+        }
+
+        return channelRepository.save(allocatedChannel);
     }
 
     private void checkCdnStatusAndUpdate(LiveStationChannel channel) {
@@ -133,6 +150,8 @@ public class LiveStationPoolManager {
                             .toList();
                     channel.setServiceUrlList(serviceUrlList);
                     channel.setCdnStatusName("RUNNING");
+
+                    int cdnInstanceNo = liveStationService.getChannelInfo(channel.getChannelId()).getCdnInstanceNo();
                     channelRepository.save(channel);
 
                     messagingTemplate.convertAndSend("/topic/cdn-updates", channel.getServiceUrlList());

@@ -39,6 +39,7 @@ public class SpecialAuctionSchedulerInitializer {
             if (auction.getLiveStationChannel() == null) {
                 if (auctionStartTime.isBefore(thirtyMinutesLater)) {
                     LiveStationChannel channel = liveStationPoolManager.allocateChannel();
+//                    LiveStationChannel channel = liveStationPoolManager.testCreateNewChannel();
 
                     auction.setAuctionStatus("준비중");
                     auction.setLiveStationChannel(channel);
