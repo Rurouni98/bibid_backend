@@ -7,4 +7,6 @@ public interface MypageService {
     MemberDto modify(MemberDto memberDto, MultipartFile[] uploadProfiles);
 
     MemberDto findById(long id);
+
+    MemberDto findByMemberIndex(long memberIndex);
 }
