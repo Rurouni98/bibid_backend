@@ -4,7 +4,7 @@ import bibid.dto.*;
 import bibid.entity.AuctionImage;
 import bibid.entity.AuctionInfo;
 import bibid.entity.Member;
-import bibid.entity.SellerInfo;
+import bibid.repository.AuctionImageRepository;
 import bibid.repository.SellerInfoRepository;
 import bibid.repository.auction.AuctionRepository;
 import bibid.repository.member.MemberRepository;
@@ -28,7 +28,7 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
     private final AuctionInfoRepository auctionInfoRepository; // specialAuction 패키지 내부에 존재
     private final MemberRepository memberRepository;
     private final SellerInfoRepository sellerInfoRepository;
-    private final bibid.repository.auctionImageRepository auctionImageRepository;
+    private final AuctionImageRepository auctionImageRepository;
 
     @Override
     public AuctionDto findAuctionItem(Long auctionIndex) {
