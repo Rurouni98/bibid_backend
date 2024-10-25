@@ -47,7 +47,7 @@ public class MypageController {
             log.info("modify memberDto: {}", memberDto);
 
             if(uploadProfiles != null){
-                log.info("uploadProfile: {}", uploadProfiles);
+                log.info("uploadProfile: {}",  (Object[]) uploadProfiles);
             }
             MemberDto modifiedMemberDto = mypageService.modify(memberDto, uploadProfiles);
 

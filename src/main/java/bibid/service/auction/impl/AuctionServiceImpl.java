@@ -53,7 +53,6 @@ public class AuctionServiceImpl implements AuctionService {
                     .auction(auction)
                     .build();
             auction.setChatRoom(chatRoom);
-            specialAuctionScheduler.scheduleChannelAllocation(auctionDto.getAuctionIndex(), auctionDto.getStartingLocalDateTime());
         }
 
         if (thumbnail != null) {
@@ -77,7 +76,12 @@ public class AuctionServiceImpl implements AuctionService {
             });
         }
 
-        auctionRepository.save(auction);
+        Auction savedAuction = auctionRepository.save(auction);
+
+        if(auctionDto.getAuctionType().equals("실시간 경매")){
+            specialAuctionScheduler.scheduleChannelAllocation(savedAuction.getAuctionIndex(), auctionDto.getStartingLocalDateTime());
+            specialAuctionScheduler.scheduleChannelRelease(savedAuction.getAuctionIndex(), auctionDto.getStartingLocalDateTime());
+        }
 
         return auctionRepository.findAll(pageable).map(Auction::toDto);
     }
