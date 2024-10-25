@@ -1,6 +1,7 @@
 package bibid.service.auctionItemDetail.impl;
 
 import bibid.dto.*;
+import bibid.entity.AuctionImage;
 import bibid.entity.AuctionInfo;
 import bibid.entity.Member;
 import bibid.entity.SellerInfo;
@@ -9,7 +10,9 @@ import bibid.repository.auction.AuctionRepository;
 import bibid.repository.member.MemberRepository;
 import bibid.repository.specialAuction.AuctionInfoRepository;
 import bibid.service.auctionItemDetail.AuctionItemDetailService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -25,6 +28,7 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
     private final AuctionInfoRepository auctionInfoRepository; // specialAuction 패키지 내부에 존재
     private final MemberRepository memberRepository;
     private final SellerInfoRepository sellerInfoRepository;
+    private final bibid.repository.auctionImageRepository auctionImageRepository;
 
     @Override
     public AuctionDto findAuctionItem(Long auctionIndex) {
@@ -71,8 +75,8 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
     public List<String> findAuctionInfoEtc(Long auctionIndex) {
         List<String> extension = new ArrayList<>();
         String bidCount = "" + auctionInfoRepository.countByAuction_AuctionIndex(auctionIndex);
-        String maxNowPrice = "" + ( auctionInfoRepository.findMaxBidAmountByAuctionIndex(auctionIndex).orElseThrow(
-                () -> new RuntimeException("not found auctionMaxBidInfo : findAuctionInfoEtc")
+        String maxNowPrice = "" + ( auctionInfoRepository.findMaxBidAmountByAuctionIndex(auctionIndex).orElse(
+                (auctionRepository.findById(auctionIndex).get().getStartingPrice())
         ));
         String ownerBidCount = "" + (auctionRepository.countByMember_MemberIndex(
                 findSeller(auctionIndex).getMemberIndex())
@@ -116,4 +120,39 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
         auctionInfoRepository.save(auctionInfo);
         return auctionInfo.toDto();
     }
+
+
+    @Override
+    @Scheduled(fixedRate = 60000)
+    @Transactional
+    public void updateAuctionBiddingState() {
+        auctionRepository.updateCompletedAuctions(LocalDateTime.now());
+    }
+
+    @Override
+    public List<String> findAuctionImagesByAuctionIndex(Long auctionIndex) {
+
+        List<String> imagePathList = new ArrayList<>();
+
+        List<AuctionImage> auctionImages = auctionImageRepository.findByAuction_AuctionIndex(auctionIndex);
+
+        auctionImages.stream()
+                .filter(AuctionImage::isThumbnail)
+                .findFirst()
+                .ifPresent(thumbnail -> {
+                    String fullPath = thumbnail.getFilepath() + "/" + thumbnail.getFilename() + '.' + thumbnail.getFiletype();
+                    imagePathList.add(fullPath);
+                });
+
+        // 리스트의 0번에 썸네일을 저장한 후에 나머지 일반 이미지를 리스트에 추가
+        auctionImages.stream()
+                .filter(image -> !image.isThumbnail())
+                .forEach(image -> {
+                    String fullPath = image.getFilepath() + "/" + image.getFilename() + '.' + image.getFiletype();
+                    imagePathList.add(fullPath);
+                });
+
+        return imagePathList;
+    }
+
 }
