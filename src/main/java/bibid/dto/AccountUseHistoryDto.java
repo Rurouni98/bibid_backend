@@ -15,7 +15,6 @@ public class AccountUseHistoryDto {
     private Long accountUseHistoryIndex;
     private Long memberIndex;
     private Long auctionIndex;
-    private Long historyIndex;
     private String useType;
     private String changeAccount;
 

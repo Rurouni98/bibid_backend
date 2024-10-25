@@ -32,7 +32,6 @@ public class AccountUseHistory {
     @OneToOne
     @JoinColumn(name = "auctionIndex")
     private Auction auction;
-    private Long historyIndex;
     private String useType;
     private String changeAccount;
 
