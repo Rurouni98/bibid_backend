@@ -22,7 +22,7 @@ public class AuctionItemDetailController {
     private final AuctionItemDetailService auctionItemDetailService;
 
 
-    @GetMapping("/api/category-item-detail/{auctionIndex}")
+    @GetMapping("/category-item-detail/{auctionIndex}")
     public ResponseEntity<?> getItemDetail(@PathVariable("auctionIndex") Long auctionIndex){
 
         ResponseDto<AuctionResponseDto> responseDto = new ResponseDto<>();
