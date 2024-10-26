@@ -31,8 +31,8 @@ public class Notification {
     private String alertTitle;
     private String alertContent;
     private LocalDateTime alertDate;
-    private boolean viewEd;
-    private String alertCat;
+    private String alertCate;
+    private boolean read;
 
     public NotificationDto toDto() {
         return NotificationDto.builder()
@@ -41,8 +41,8 @@ public class Notification {
                 .alertTitle(this.alertTitle)
                 .alertContent(this.alertContent)
                 .alertDate(this.alertDate)
-                .viewEd(this.viewEd)
-                .alertCat(this.alertCat)
+                .read(this.read)
+                .alertCate(this.alertCate)
                 .build();
     }
 

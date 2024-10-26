@@ -17,8 +17,8 @@ public class NotificationDto {
     private String alertTitle;
     private String alertContent;
     private LocalDateTime alertDate;
-    private boolean viewEd;
-    private String alertCat;
+    private String alertCate; // "경매", "메시지"
+    private boolean read;
 
     public Notification toEntiy(Member member) {
         return Notification.builder()
@@ -27,8 +27,8 @@ public class NotificationDto {
                 .alertTitle(this.alertTitle)
                 .alertContent(this.alertContent)
                 .alertDate(this.alertDate)
-                .viewEd(this.viewEd)
-                .alertCat(this.alertCat)
+                .read(this.read)
+                .alertCate(this.alertCate)
                 .build();
     }
 
