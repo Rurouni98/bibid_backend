@@ -33,8 +33,8 @@ public class Notification {
     private String alertTitle;
     private String alertContent;
     private LocalDateTime alertDate;
-    private String alertCate;
-    private boolean isRead;
+    private String alertCategory; // "구매/판매", "입금/출금","상위 입찰", "실시간 경매 시작"
+    private boolean isViewed;
 
     public NotificationDto toDto() {
         return NotificationDto.builder()
@@ -43,8 +43,8 @@ public class Notification {
                 .alertTitle(this.alertTitle)
                 .alertContent(this.alertContent)
                 .alertDate(this.alertDate)
-                .isRead(this.isRead)
-                .alertCate(this.alertCate)
+                .isViewed(this.isViewed)
+                .alertCategory(this.alertCategory)
                 .build();
     }
 

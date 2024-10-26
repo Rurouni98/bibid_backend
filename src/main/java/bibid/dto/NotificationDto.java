@@ -17,8 +17,8 @@ public class NotificationDto {
     private String alertTitle;
     private String alertContent;
     private LocalDateTime alertDate;
-    private String alertCate; // "경매", "메시지"
-    private boolean isRead;
+    private String alertCategory; // "구매/판매", "입금/출금","상위 입찰", "실시간 경매 시작"
+    private boolean isViewed;
 
     public Notification toEntity(Member member) {
         return Notification.builder()
@@ -27,8 +27,8 @@ public class NotificationDto {
                 .alertTitle(this.alertTitle)
                 .alertContent(this.alertContent)
                 .alertDate(this.alertDate)
-                .isRead(this.isRead)
-                .alertCate(this.alertCate)
+                .isViewed(this.isViewed)
+                .alertCategory(this.alertCategory)
                 .build();
     }
 
