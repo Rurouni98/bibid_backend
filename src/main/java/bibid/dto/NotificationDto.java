@@ -18,16 +18,16 @@ public class NotificationDto {
     private String alertContent;
     private LocalDateTime alertDate;
     private String alertCate; // "경매", "메시지"
-    private boolean read;
+    private boolean isRead;
 
-    public Notification toEntiy(Member member) {
+    public Notification toEntity(Member member) {
         return Notification.builder()
                 .notificationIndex(this.notificationIndex)
                 .member(member)
                 .alertTitle(this.alertTitle)
                 .alertContent(this.alertContent)
                 .alertDate(this.alertDate)
-                .read(this.read)
+                .isRead(this.isRead)
                 .alertCate(this.alertCate)
                 .build();
     }

@@ -30,11 +30,11 @@ public class QNotification extends EntityPathBase<Notification> {
 
     public final StringPath alertTitle = createString("alertTitle");
 
+    public final BooleanPath isRead = createBoolean("isRead");
+
     public final QMember member;
 
     public final NumberPath<Long> notificationIndex = createNumber("notificationIndex", Long.class);
-
-    public final BooleanPath read = createBoolean("read");
 
     public QNotification(String variable) {
         this(Notification.class, forVariable(variable), INITS);

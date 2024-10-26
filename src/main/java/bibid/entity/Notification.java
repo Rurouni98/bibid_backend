@@ -21,18 +21,20 @@ import java.time.LocalDateTime;
 public class Notification {
     @Id
     @GeneratedValue(
-            strategy = GenerationType.IDENTITY,
+            strategy = GenerationType.SEQUENCE,
             generator = "notificationSeqGenerator"
     )
     private Long notificationIndex;
-    @OneToOne
+
+    @ManyToOne
     @JoinColumn(name = "memberIndex")
     private Member member;
+
     private String alertTitle;
     private String alertContent;
     private LocalDateTime alertDate;
     private String alertCate;
-    private boolean read;
+    private boolean isRead;
 
     public NotificationDto toDto() {
         return NotificationDto.builder()
@@ -41,7 +43,7 @@ public class Notification {
                 .alertTitle(this.alertTitle)
                 .alertContent(this.alertContent)
                 .alertDate(this.alertDate)
-                .read(this.read)
+                .isRead(this.isRead)
                 .alertCate(this.alertCate)
                 .build();
     }
