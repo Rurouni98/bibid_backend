@@ -41,6 +41,7 @@ public class LiveStationChannel {
     private List<LiveStationServiceUrl> serviceUrlList;
 
     private boolean isAvailable;
+    private boolean isAllocated;
 
     public LiveStationChannelDTO toDto(){
         return LiveStationChannelDTO.builder()
@@ -52,6 +53,7 @@ public class LiveStationChannel {
                 .publishUrl(this.publishUrl)
                 .streamKey(this.streamKey)
                 .isAvailable(this.isAvailable)
+                .isAllocated(this.isAllocated)
                 .serviceUrlList(this.serviceUrlList != null ?
                         this.serviceUrlList.stream().map(LiveStationServiceUrl::getServiceUrl)
                                 .collect(Collectors.toList()) : new ArrayList<>())

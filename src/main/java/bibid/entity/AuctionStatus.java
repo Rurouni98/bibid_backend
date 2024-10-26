@@ -10,7 +10,6 @@ public enum AuctionStatus {
     WAITING("대기중"),      // 경매 대기 중
     BROADCASTING("방송중"), // 방송 중
     BID_COMPLETE("낙찰"),   // 낙찰 완료
-    BROADCAST_ENDED("방송종료"), // 방송 종료
     COMPLETED("경매종료");   // 경매 종료
 
     private final String status;

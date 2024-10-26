@@ -221,6 +221,7 @@ public class LiveStationService {
                         .publishUrl(contentDTO.getPublishUrl())
                         .streamKey(contentDTO.getStreamKey())
                         .isAvailable(false)
+                        .isAllocated(false)
                         .build();
 
                 channelDTOList.add(channelDTO);

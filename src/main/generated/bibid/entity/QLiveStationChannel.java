@@ -28,6 +28,8 @@ public class QLiveStationChannel extends EntityPathBase<LiveStationChannel> {
 
     public final StringPath channelStatus = createString("channelStatus");
 
+    public final BooleanPath isAllocated = createBoolean("isAllocated");
+
     public final BooleanPath isAvailable = createBoolean("isAvailable");
 
     public final NumberPath<Long> liveStationChannelIndex = createNumber("liveStationChannelIndex", Long.class);

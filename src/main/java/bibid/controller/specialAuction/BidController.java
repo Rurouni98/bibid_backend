@@ -47,6 +47,11 @@ public class BidController {
         Auction auction = auctionRepository.findById(auctionIndex)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid auction ID"));
 
+        // 경매 상태 확인
+        if (!"방송중".equals(auction.getAuctionStatus())) {
+            throw new IllegalStateException("이 경매는 현재 입찰할 수 없습니다.");
+        }
+
         // 입찰 정보를 DB에 저장
         AuctionInfo auctionInfo = auctionInfoDto.toEntity(auction, bidder);
         auctionInfo.setBidderNickname(bidder.getNickname());

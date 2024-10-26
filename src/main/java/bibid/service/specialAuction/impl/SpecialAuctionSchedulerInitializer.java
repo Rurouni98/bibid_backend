@@ -70,5 +70,16 @@ public class SpecialAuctionSchedulerInitializer {
             specialAuctionRepository.save(auction);
             log.info("1시간 경과로 강제 채널 반납: 경매 ID {}", auction.getAuctionIndex());
         }
+
+        // 경매 종료 스케줄링 추가
+        List<Auction> auctionsToEnd = specialAuctionRepository.findAllByAuctionTypeAndEndingLocalDateTimeAfter(
+                "실시간 경매", now
+        );
+
+        for (Auction auction : auctionsToEnd) {
+            specialAuctionScheduler.scheduleAuctionEnd(auction.getAuctionIndex(), auction.getEndingLocalDateTime());
+            log.info("경매 종료 스케줄 등록: 경매 ID {}", auction.getAuctionIndex());
+        }
+
     }
 }

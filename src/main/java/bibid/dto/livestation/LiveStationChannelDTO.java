@@ -25,6 +25,7 @@ public class LiveStationChannelDTO {
     private List<String> serviceUrlList;
 
     private boolean isAvailable;
+    private boolean isAllocated;
 
     public LiveStationChannel toEntity() {
         return LiveStationChannel.builder()
@@ -36,6 +37,7 @@ public class LiveStationChannelDTO {
                 .publishUrl(this.publishUrl)
                 .streamKey(this.streamKey)
                 .isAvailable(this.isAvailable)
+                .isAllocated(this.isAllocated)
                 .serviceUrlList(new ArrayList<>())
                 .build();
     }
