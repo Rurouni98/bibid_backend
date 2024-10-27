@@ -1,13 +1,15 @@
-package bibid.service.member;
+package bibid.service;
 
 import bibid.dto.MemberDto;
 import bibid.entity.Member;
-import bibid.repository.member.MemberRepository;
 import bibid.jwt.JwtProvider;
+import bibid.repository.member.MemberRepository;
+import bibid.service.member.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -79,10 +81,9 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public String findByEmail(String email) {
-        optionalMember = memberRepository.findByEmail(email);
+        Member member = memberRepository.findByEmail(email);
 
-        if (optionalMember.isPresent()) {
-            Member member = optionalMember.get();
+        if (member != null) {
             return member.getMemberId();
         } else {
             System.out.println("이메일에 해당하는 사용자가 없습니다.");

@@ -15,13 +15,12 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     long countByNickname(String nickname);
 
-    Optional<Member> findByEmail(String email);
+    Member findByEmail(String email);
 
     //    Optional<Member> findMemberByAuction_AuctionIndex(Long auctionIndex);
     @Query("SELECT a.member FROM Auction a WHERE a.auctionIndex = :auctionIndex")
     Optional<Member> findMemberByAuction_AuctionIndex(@Param("auctionIndex") Long auctionIndex);
 
     List<Member> findByMemberIndex(Long memberIndex);
-
 
 }
