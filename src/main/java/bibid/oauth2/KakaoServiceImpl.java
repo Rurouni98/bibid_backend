@@ -20,6 +20,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.http.HttpResponse;
 import java.util.Base64;
+import java.util.List;
 
 
 @Service
@@ -183,11 +184,11 @@ public class KakaoServiceImpl {
 
 
     // ㅁ [4-1번] DB에서 리프레시토큰 가져오기
-//    public String findToken (Long memberIndex) {
+//    public String findToken () {
 //
+//        String findMemberIndex = jwtProvider.validateAndGetSubject(getJwtValue());
 //
-//
-//        Member member = memberRepository.findByMemberIndex(memberIndex);
+//        Member member = memberRepository.findByNickname(findMemberIndex);
 //
 //        MemberDto memberDto = member.toDto();
 //
