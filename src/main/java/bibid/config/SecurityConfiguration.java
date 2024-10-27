@@ -53,7 +53,7 @@ public class SecurityConfiguration {
                     ).permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
                 })
-                .addFilterAt(jwtAuthenticationFilter, CorsFilter.class)
+                .addFilterAfter(jwtAuthenticationFilter, CorsFilter.class)
                 .build();
     }
 }
