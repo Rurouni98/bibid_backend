@@ -22,7 +22,7 @@ public class QNotification extends EntityPathBase<Notification> {
 
     public static final QNotification notification = new QNotification("notification");
 
-    public final StringPath alertCate = createString("alertCate");
+    public final StringPath alertCategory = createString("alertCategory");
 
     public final StringPath alertContent = createString("alertContent");
 
@@ -30,7 +30,7 @@ public class QNotification extends EntityPathBase<Notification> {
 
     public final StringPath alertTitle = createString("alertTitle");
 
-    public final BooleanPath isRead = createBoolean("isRead");
+    public final BooleanPath isViewed = createBoolean("isViewed");
 
     public final QMember member;
 
