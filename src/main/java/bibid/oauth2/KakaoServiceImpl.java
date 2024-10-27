@@ -180,8 +180,12 @@ public class KakaoServiceImpl {
 
     }
 
+
+
     // ㅁ [4-1번] DB에서 리프레시토큰 가져오기
 //    public String findToken (Long memberIndex) {
+//
+//
 //
 //        Member member = memberRepository.findByMemberIndex(memberIndex);
 //
@@ -199,12 +203,26 @@ public class KakaoServiceImpl {
         return jwtValue;
     }
 
-//    public Long getMemberIndex(String jwtValue) {
-//
-//        jwtProvider.validateAndGetSubject(jwtValue);
-//
-//        return
-//    }
+    // ㅁ [5번] OAuth 로그아웃
+    public void logout(){
+        RestTemplate rt = new RestTemplate();
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("client_id", "wa3QkzrBALL4WACeB12Z");
+        params.add("logout_redirect_uri", "http://localhost:3000/members/logout");
+
+        HttpEntity<MultiValueMap<String, String>> logout =
+                new HttpEntity<>(params);
+
+        ResponseEntity<Void> logoutResponse = rt.exchange(
+          "https://kauth.kakao.com/oauth/logout",
+                HttpMethod.GET,
+                logout,
+                Void.class
+        );
+
+    }
+
 
 
 

@@ -114,6 +114,7 @@ public class OauthController {
                 if ("ACCESS_TOKEN".equals(cookie.getName())) {
                     String token = cookie.getValue();
                     kakaoServiceImpl.setJwtValue(token);
+                    System.out.println("토큰값:" + token);
                     return token;
                 }
             }

@@ -28,7 +28,7 @@ public class JwtProvider {
 
         return Jwts.builder()
                 .signWith(key, SignatureAlgorithm.HS256)
-                .claim("number", member.getMemberIndex())
+                .subject(member.getMemberId())
                 .issuer("final backend")
                 .issuedAt(new Date())
                 .expiration(expireDate)
@@ -41,7 +41,7 @@ public class JwtProvider {
 
         return Jwts.builder()
                 .signWith(key, SignatureAlgorithm.HS256)
-                .claim("username", member.getNickname())
+                .setSubject(member.getNickname())
                 .issuer("final backend")
                 .issuedAt(new Date())
                 .expiration(expireDate)
