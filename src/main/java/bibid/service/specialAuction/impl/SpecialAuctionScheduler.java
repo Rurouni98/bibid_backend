@@ -127,9 +127,8 @@ public class SpecialAuctionScheduler {
         }
     }
 
-    // WebSocket 메시지를 전송하는 메서드
     public void sendAuctionEndDetails(Auction auction) {
-        // 경매 종료 후 WebSocket으로 정보 전송
+        log.info("Sending auction end details for auction ID: {}", auction.getAuctionIndex());
         messagingTemplate.convertAndSend("/topic/auction/" + auction.getAuctionIndex(), auction.getAuctionDetail().toDto());
     }
 
