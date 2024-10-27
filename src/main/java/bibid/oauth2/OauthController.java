@@ -3,7 +3,7 @@ package bibid.oauth2;
 import bibid.dto.ResponseDto;
 
 import bibid.jwt.JwtProvider;
-import bibid.service.MemberServiceImpl;
+import bibid.service.member.MemberServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.Cookie;
 import org.springframework.web.client.RestTemplate;
+
+import java.security.Principal;
 
 @RestController //(1)
 @RequestMapping("/auth")
@@ -106,21 +108,18 @@ public class OauthController {
         }
     }
 
-    @GetMapping("/api/token")
-    public String getToken(HttpServletRequest request) {
+    @GetMapping("/api/token/type")
+    public ResponseEntity<?> getTokenAndType(HttpServletRequest request, Principal principal) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if ("ACCESS_TOKEN".equals(cookie.getName())) {
-                    String token = cookie.getValue();
-                    kakaoServiceImpl.setJwtValue(token);
-                    System.out.println("토큰값:" + token);
-                    return token;
+                    String jwtTokenValue = cookie.getValue();
+
+                    return kakaoServiceImpl.getTokenAndType(jwtTokenValue, principal);
                 }
             }
         }
-        System.out.println("토큰값을 가져올 수 없습니다..");
-
-        return null;
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("토큰값을 가져올 수 없습니다.");
     }
 }

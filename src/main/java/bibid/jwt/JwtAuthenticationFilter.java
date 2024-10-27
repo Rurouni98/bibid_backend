@@ -80,8 +80,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // JwtProvider의 validateAndGetSubject 메소드로 토큰의 유효성 검사 및
                 // username 가져오기
                 String username = jwtProvider.validateAndGetSubject(token);
+                log.info("Username from token: {}", username);
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                log.info("Loaded user details: {}", userDetails);
 
                 // Security Context에 등록될 Authentication Token 객체 생성
                 AbstractAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(

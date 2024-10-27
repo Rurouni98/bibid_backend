@@ -3,6 +3,7 @@ package bibid.controller.member;
 
 import bibid.dto.MemberDto;
 import bibid.dto.ResponseDto;
+import bibid.entity.Member;
 import bibid.oauth2.KakaoServiceImpl;
 import bibid.service.member.MemberService;
 import jakarta.servlet.http.Cookie;
@@ -17,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -115,13 +117,14 @@ public class MemberController {
     }
 
     @GetMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response, Principal principal) {
 
-        MemberDto memberDto = new MemberDto();
+        Member member = new Member();
 
         ResponseDto<Map<String, String>> responseDto = new ResponseDto<>();
 
         try {
+
             Map<String, String> logoutMsgMap = new HashMap<>();
 
             SecurityContext securityContext = SecurityContextHolder.getContext();
@@ -146,12 +149,6 @@ public class MemberController {
                     }
                 }
             }
-
-//
-//            if(memberDto.toEntity().getOauthType() == "Kakao"){
-//                System.out.println("Kakao Logout 실행");
-//                kakaoService.logout();
-//            }
 
             return ResponseEntity.ok(responseDto);
         } catch (Exception e) {

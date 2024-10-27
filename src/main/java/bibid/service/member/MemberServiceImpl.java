@@ -1,4 +1,4 @@
-package bibid.service;
+package bibid.service.member;
 
 import bibid.dto.MemberDto;
 import bibid.entity.Member;

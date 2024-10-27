@@ -1,38 +1,44 @@
 package bibid.oauth2;
 
 import bibid.dto.MemberDto;
+import bibid.dto.ResponseDto;
+import bibid.entity.CustomUserDetails;
 import bibid.entity.Member;
 import bibid.jwt.JwtProvider;
 import bibid.repository.member.MemberRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import jakarta.servlet.http.Cookie;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.http.HttpResponse;
-import java.util.Base64;
-import java.util.List;
+import java.security.Principal;
+import java.util.*;
 
 
 @Service
+@RequiredArgsConstructor
 public class KakaoServiceImpl {
 
-    @Autowired
-    MemberRepository memberRepository;
-
-    @Autowired
-    JwtProvider jwtProvider;
-
-    String jwtValue;
+    private final MemberRepository memberRepository;
+    private final JwtProvider jwtProvider;
+    private final UserDetailsService userDetailsService;
+    private String jwtValue;
 
     // ㅁ [1번] 코드로 카카오에서 토큰 받기
     public OauthTokenDto getAccessToken(String code) {
@@ -70,7 +76,7 @@ public class KakaoServiceImpl {
         try {
             oauthToken = objectMapper.readValue(accessTokenResponse.getBody(), OauthTokenDto.class);
 
-            System.out.println(oauthToken);
+            System.out.println("oauthToken: " + oauthToken);
             refreshTokenMember = Member.builder()
                     .refreshToken(oauthToken.getRefresh_token())
                     .build();
@@ -131,9 +137,9 @@ public class KakaoServiceImpl {
 
         if (kakaoMember == null) {
             kakaoMember = Member.builder()
+                    .memberId(profile.getKakao_account().getProfile().getNickname())
                     .nickname(profile.getKakao_account().getProfile().getNickname())
                     .email(profile.getKakao_account().getEmail())
-//                    .refreshToken(profile.getKakao_account().)
                     .role("ROLE_USER")
                     .oauthType("Kakao")
                     .build();
@@ -156,7 +162,7 @@ public class KakaoServiceImpl {
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "refresh_token");
-        params.add("client_id", "wa3QkzrBALL4WACeB12Z");
+        params.add("client_id", "29e81fa9fda262c573f312af9934fa5c");
 //        params.add("refresh_token", refreshToken);
 
         HttpEntity<MultiValueMap<String, String>> kakaoLeloadRequest =
@@ -184,45 +190,70 @@ public class KakaoServiceImpl {
 
 
     // ㅁ [4-1번] DB에서 리프레시토큰 가져오기
-//    public String findToken () {
+    public ResponseEntity<?> getTokenAndType (String jwtTokenValue, Principal principal) {
+
+        ResponseDto<Map<String, String>> responseDto = new ResponseDto<>();
+        Map<String, String> item = new HashMap<>();
+        Member member = null;
+        try {
+            if (principal == null) {
+                throw new IllegalStateException("현재 인증된 사용자를 찾을 수 없습니다.");
+            }
+
+            String username = principal.getName();
+
+            CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(username);
+
+            Member memberId = userDetails.getMember();
+
+            String findMemberNickname = memberId.getNickname();
+
+            member = memberRepository.findByNickname(findMemberNickname);
+
+            String token = member.getRefreshToken();
+            String type = member.getOauthType();
+
+            item.put("token", token);
+            item.put("type", type);
+
+            responseDto.setItem(item);
+
+            return ResponseEntity.ok(responseDto);
+
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+//    public String findType(String token, Principal principal){
+//        if (principal == null) {
+//            throw new IllegalStateException("현재 인증된 사용자를 찾을 수 없습니다.");
+//        }
 //
-//        String findMemberIndex = jwtProvider.validateAndGetSubject(getJwtValue());
+//        String username = principal.getName();
+//        System.out.println("현재 사용자명:" + username);
 //
-//        Member member = memberRepository.findByNickname(findMemberIndex);
+//        CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(username);
+//        if (userDetails == null) {
+//            throw new RuntimeException("사용자를 찾을 수 없습니다.");
+//        }
 //
-//        MemberDto memberDto = member.toDto();
+//        Member memberId = userDetails.getMember();
+//        if (memberId == null) {
+//            throw new RuntimeException("Member 정보를 찾을 수 없습니다.");
+//        }
 //
-//        return memberDto.getRefreshToken();
+//        String findMemberNickname = memberId.getNickname();
+//
+//        Member member = memberRepository.findByNickname(findMemberNickname);
+//        if(member == null){
+//            throw new RuntimeException("Member not found");
+//        }
+//
+//        return member.getOauthType();
 //
 //    }
-
-    public void setJwtValue(String token){
-        this.jwtValue = token;
-    }
-
-    public String getJwtValue(){
-        return jwtValue;
-    }
-
-    // ㅁ [5번] OAuth 로그아웃
-    public void logout(){
-        RestTemplate rt = new RestTemplate();
-
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("client_id", "wa3QkzrBALL4WACeB12Z");
-        params.add("logout_redirect_uri", "http://localhost:3000/members/logout");
-
-        HttpEntity<MultiValueMap<String, String>> logout =
-                new HttpEntity<>(params);
-
-        ResponseEntity<Void> logoutResponse = rt.exchange(
-          "https://kauth.kakao.com/oauth/logout",
-                HttpMethod.GET,
-                logout,
-                Void.class
-        );
-
-    }
 
 
 

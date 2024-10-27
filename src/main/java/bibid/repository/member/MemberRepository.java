@@ -1,5 +1,6 @@
 package bibid.repository.member;
 
+import bibid.dto.MemberDto;
 import bibid.entity.Member;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,5 +23,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findMemberByAuction_AuctionIndex(@Param("auctionIndex") Long auctionIndex);
 
     List<Member> findByMemberIndex(Long memberIndex);
+
+    Member findByNickname(String nickname);
 
 }
