@@ -30,7 +30,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setHandshakeHandler(new CustomHandshakeHandler(jwtProvider))
                 .withSockJS();
 
-        // 새로운 알림용 엔드포인트
         registry.addEndpoint("/ws-notifications")
                 .setAllowedOrigins("http://localhost:3000")
                 .setHandshakeHandler(new CustomHandshakeHandler(jwtProvider))
