@@ -33,8 +33,12 @@ public class Notification {
     private String alertTitle;
     private String alertContent;
     private LocalDateTime alertDate;
-    private String alertCategory; // "구매/판매", "입금/출금","상위 입찰", "실시간 경매 시작"
+
+    @Enumerated(EnumType.STRING)
+    private NotificationType  alertCategory; // "경매 시작", "낙찰", "서버 점검", "상위 입찰" etc
+
     private boolean isViewed;
+    private Long referenceIndex;
 
     public NotificationDto toDto() {
         return NotificationDto.builder()
@@ -45,6 +49,7 @@ public class Notification {
                 .alertDate(this.alertDate)
                 .isViewed(this.isViewed)
                 .alertCategory(this.alertCategory)
+                .referenceIndex(this.referenceIndex)
                 .build();
     }
 

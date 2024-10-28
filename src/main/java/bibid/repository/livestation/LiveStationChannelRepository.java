@@ -9,11 +9,7 @@ import java.util.Optional;
 public interface LiveStationChannelRepository extends JpaRepository<LiveStationChannel, Long> {
     Optional<LiveStationChannel> findByChannelId(String channelId);
 
-    Optional<LiveStationChannel> findFirstByIsAvailableTrue();
-
     List<LiveStationChannel> findAllByIsAvailableFalse();
 
-    Optional<LiveStationChannel> findFirstByIsAvailableTrueAndChannelStatusAndCdnStatusName(String channelStatus, String cdnStatusName);
-
-    Optional<LiveStationChannel> findFirstByIsAllocatedFalse();
+    Optional<LiveStationChannel> findFirstByIsAllocatedFalseAndIsAvailableTrue();
 }
