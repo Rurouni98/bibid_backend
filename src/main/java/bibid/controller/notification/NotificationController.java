@@ -38,6 +38,4 @@ public class NotificationController {
         messagingTemplate.convertAndSend("/topic/notifications", message);
         return ResponseEntity.ok("Notification sent!");
     }
-
-
 }
