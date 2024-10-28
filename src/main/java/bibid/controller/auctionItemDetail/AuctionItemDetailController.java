@@ -1,6 +1,7 @@
 package bibid.controller.auctionItemDetail;
 
 import bibid.dto.*;
+import bibid.entity.CustomUserDetails;
 import bibid.service.auction.AuctionService;
 import bibid.service.auctionItemDetail.AuctionItemDetailService;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,9 +20,7 @@ import java.util.List;
 @Slf4j
 public class AuctionItemDetailController {
 
-    @Autowired
     private final AuctionItemDetailService auctionItemDetailService;
-
 
     @GetMapping("/category-item-detail/{auctionIndex}")
     public ResponseEntity<?> getItemDetail(@PathVariable("auctionIndex") Long auctionIndex){
@@ -78,6 +78,7 @@ public class AuctionItemDetailController {
 
     @PostMapping("/api/category-item-detail/{auctionIndex}")
     public ResponseEntity<?> biddingItem(@PathVariable("auctionIndex") Long auctionIndex,
+                                         @AuthenticationPrincipal CustomUserDetails customUserDetails,
                                          @RequestBody BidRequestDto bidRequestDto){
         ResponseDto<BidRequestDto> bidResponseDto = new ResponseDto<>();
 
