@@ -4,9 +4,14 @@ import bibid.dto.NotificationDto;
 import bibid.service.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -25,4 +30,12 @@ public class NotificationController {
         log.info("Notification sent to /topic/notifications/{}", notificationDto.getMemberIndex());
     }
 
+    @GetMapping("/send-test-notification")
+    public ResponseEntity<String> sendTestNotification() {
+        Map<String, String> message = new HashMap<>();
+        message.put("title", "Test Notification");
+        message.put("content", "This is a test message.");
+        messagingTemplate.convertAndSend("/topic/notifications", message);
+        return ResponseEntity.ok("Notification sent!");
+    }
 }

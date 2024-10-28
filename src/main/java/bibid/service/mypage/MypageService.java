@@ -9,4 +9,6 @@ public interface MypageService {
     MemberDto findById(long id);
 
     MemberDto findByMemberIndex(long memberIndex);
+
+    MemberDto findByNickname(String nickname);
 }

@@ -43,4 +43,9 @@ public class SpecialAuctionServiceImpl implements SpecialAuctionService {
         return auctionDtoPage;
     }
 
+    @Override
+    public boolean registerAlarm(Auction auction) {
+        return false;
+    }
+
 }
