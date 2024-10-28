@@ -57,6 +57,8 @@ public class OauthController {
             cookie.setMaxAge(3600); // 쿠키의 만료 시간 설정 (1시간)
             response.addCookie(cookie); // 쿠키 추가
 
+
+//            responseDto.setItem(memberDto);
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setStatusMessage("Sent to Client");
 

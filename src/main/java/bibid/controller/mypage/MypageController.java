@@ -64,12 +64,13 @@ public class MypageController {
         }
     }
 
-    @GetMapping("/{memberIndex}")
+    @GetMapping("/userInfo/{memberIndex}")
     public ResponseEntity<?> getMemberByMemberIndex(@PathVariable Long memberIndex) {
         ResponseDto<MemberDto> responseDto = new ResponseDto<>();
 
         try {
             MemberDto findMember = mypageService.findByMemberIndex(memberIndex);
+            log.info("fingMember : {}", findMember);
 
             responseDto.setItem(findMember);
             responseDto.setStatusCode(HttpStatus.OK.value());
