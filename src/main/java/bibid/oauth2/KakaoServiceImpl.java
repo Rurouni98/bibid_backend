@@ -38,7 +38,6 @@ public class KakaoServiceImpl {
     private final MemberRepository memberRepository;
     private final JwtProvider jwtProvider;
     private final UserDetailsService userDetailsService;
-    private String jwtValue;
 
     // ㅁ [1번] 코드로 카카오에서 토큰 받기
     public OauthTokenDto getAccessToken(String code) {
@@ -134,7 +133,6 @@ public class KakaoServiceImpl {
 
         kakaoMember = memberRepository.findByEmail(profile.getKakao_account().getEmail());
 
-
         if (kakaoMember == null) {
             kakaoMember = Member.builder()
                     .memberId(profile.getKakao_account().getProfile().getNickname())
@@ -186,8 +184,6 @@ public class KakaoServiceImpl {
         return oauthToken;
 
     }
-
-
 
     // ㅁ [4-1번] DB에서 리프레시토큰 가져오기
     public ResponseEntity<?> getTokenAndType (String jwtTokenValue, Principal principal) {

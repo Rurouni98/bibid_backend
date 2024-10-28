@@ -8,15 +8,12 @@ import bibid.repository.member.MemberRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.security.Principal;
@@ -27,7 +24,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 
-public class NaverServiceImpl {
+public class GoogleServiceImpl {
 
     private final MemberRepository memberRepository;
     private final JwtProvider jwtProvider;
@@ -46,29 +43,43 @@ public class NaverServiceImpl {
         //(3) 어떤 내용을 보내줄 건지
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
-        params.add("client_id", "wa3QkzrBALL4WACeB12Z");
-        params.add("client_secret", "aW5bQUet2D");
-        params.add("redirect_uri", "http://localhost:3000/auth/naver/callback");
+        params.add("client_id", "255369569867-roag3v486bjk47771oeu1o9js0dbgdvh.apps.googleusercontent.com");
+        params.add("client_secret", "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r");
+        params.add("redirect_uri", "http://localhost:3000/auth/google/callback");
         params.add("code", code);
+        System.out.println("code:" + code);
 
         //(4) 어디에 담아줄 건지
-        HttpEntity<MultiValueMap<String, String>> naverTokenRequest =
+        HttpEntity<MultiValueMap<String, String>> googleTokenRequest =
                 new HttpEntity<>(params, headers);
 
         //(5) 무엇을 주고 받을건지
-        ResponseEntity<String> accessTokenResponse = rt.exchange(
-                "https://nid.naver.com/oauth2.0/token",
-                HttpMethod.POST,
-                naverTokenRequest,
-                String.class
-        );
+        ResponseEntity<String> accessTokenResponse = null;
+        try {
+            accessTokenResponse = rt.exchange(
+                    "https://oauth2.googleapis.com/token",
+                    HttpMethod.POST,
+                    googleTokenRequest,
+                    String.class
+            );
+        } catch (RestClientException e) {
+            System.err.println("Error fetching access token: " + e.getMessage());
+            throw new RuntimeException("accessTokenResponse 에러:" + e.getMessage());
+        }
+
+        if (accessTokenResponse.getStatusCode() != HttpStatus.OK) {
+            throw new RuntimeException("Failed to get access token, status code: " + accessTokenResponse.getStatusCode());
+        }
+
+        System.out.println("accessTokenResponse.getBody():" +  accessTokenResponse.getBody());
 
         //(6) Json 방식을 java로 받을 때 어떻게 받을건지
         ObjectMapper objectMapper = new ObjectMapper();
         OauthTokenDto oauthToken = null;
         try {
             oauthToken = objectMapper.readValue(accessTokenResponse.getBody(), OauthTokenDto.class);
-            findProfile(oauthToken.getAccess_token());
+            System.out.println("oauthToken:" + oauthToken);
+
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -76,52 +87,52 @@ public class NaverServiceImpl {
     }
 
 //     ㅁ [2번] 카카오에서 받은 액세스 토큰으로 카카오에서 사용자 정보 받아오기
-    public NaverProfileDto findProfile(String naverAccessToken) {
+    public GoogleProfileDto findProfile(String googleAccessToken) {
 
         //(1-2)
         RestTemplate rt = new RestTemplate();
 
         //(1-3)
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer " + naverAccessToken); //(1-4)
+        headers.add("Authorization", "Bearer " + googleAccessToken); //(1-4)
         headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
 
         //(1-5)
-        HttpEntity<MultiValueMap<String, String>> naverProfileRequest =
+        HttpEntity<MultiValueMap<String, String>> googleProfileRequest =
                 new HttpEntity<>(headers);
 
         //(1-6)
         // Http 요청 (POST 방식) 후, response 변수에 응답을 받음
-        ResponseEntity<String> naverProfileResponse = rt.exchange(
-                "https://openapi.naver.com/v1/nid/me",
+        ResponseEntity<String> googleProfileResponse = rt.exchange(
+                "https://openapi.google.com/v1/nid/me",
                 HttpMethod.POST,
-                naverProfileRequest,
+                googleProfileRequest,
                 String.class
         );
 
         //(1-7)
         ObjectMapper objectMapper = new ObjectMapper();
-        NaverProfileDto naverProfile = null;
+        GoogleProfileDto googleProfile = null;
         try {
-            naverProfile = objectMapper.readValue(naverProfileResponse.getBody(), NaverProfileDto.class);
+            googleProfile = objectMapper.readValue(googleProfileResponse.getBody(), GoogleProfileDto.class);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
 
-        return naverProfile;
+        return googleProfile;
     }
 
     // ㅁ [3번] 카카오에서 받은 액세스 토큰으로 정보저장 + Jwt 토큰 얻어서 토큰생성
-    public String saveUserAndGetToken(String naverAccessToken) {
+    public String saveUserAndGetToken(String googleAccessToken) {
 
-        Member naverMember = null;
+        Member googleMember = null;
 
-        NaverProfileDto profile = findProfile(naverAccessToken);
+        GoogleProfileDto profile = findProfile(googleAccessToken);
 
-        naverMember = memberRepository.findByEmail(profile.getResponse().getEmail());
+        googleMember = memberRepository.findByEmail(profile.getResponse().getEmail());
 
-        if (naverMember == null) {
-            naverMember = Member.builder()
+        if (googleMember == null) {
+            googleMember = Member.builder()
                     .memberId(profile.getResponse().getNickname())
                     .nickname(profile.getResponse().getNickname())
                     .email(profile.getResponse().getEmail())
@@ -131,10 +142,10 @@ public class NaverServiceImpl {
                     .oauthType("Naver")
                     .build();
 
-            memberRepository.save(naverMember);
+            memberRepository.save(googleMember);
         }
 
-        return jwtProvider.createOauthJwt(naverMember); //(2)
+        return jwtProvider.createOauthJwt(googleMember); //(2)
     }
 
     // ㅁ [4-1번] DB에서 리프레시토큰 가져오기
