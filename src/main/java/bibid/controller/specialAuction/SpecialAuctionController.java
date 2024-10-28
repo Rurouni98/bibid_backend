@@ -9,6 +9,7 @@ import bibid.repository.livestation.LiveStationChannelRepository;
 import bibid.service.livestation.LiveStationPoolManager;
 import bibid.repository.specialAuction.SpecialAuctionRepository;
 import bibid.service.specialAuction.SpecialAuctionService;
+import bibid.service.specialAuction.impl.SpecialAuctionScheduler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -26,6 +27,7 @@ public class SpecialAuctionController {
 
     private final SpecialAuctionService specialAuctionService;
     private final SpecialAuctionRepository specialAuctionRepository;
+    private final SpecialAuctionScheduler specialAuctionScheduler;
     private final LiveStationChannelRepository channelRepository;
     private final LiveStationPoolManager liveStationPoolManager;
 
@@ -128,36 +130,35 @@ public class SpecialAuctionController {
         }
     }
 
-//    // 알림 등록
-//    @GetMapping("/registerAlarm/{auctionIndex}")
-//    public ResponseEntity<?> registerAlarm(@PathVariable Long auctionIndex) {
-//
-//        ResponseDto<String> responseDto = new ResponseDto<>();
-//
-//        try {
-//            Auction auction = specialAuctionRepository.findById(auctionIndex).orElseThrow(
-//                    () -> new RuntimeException("해당 옥션은 없습니다.")
-//            );
-//
-//            // 알림을 등록하는 메소드 호출
-//            boolean isScheduled = specialAuctionService.registerAlarm(auction);
-//
-//            if (isScheduled) {
-//                responseDto.setStatusCode(HttpStatus.OK.value());
-//                responseDto.setStatusMessage("알림이 성공적으로 등록되었습니다.");
-//            } else {
-//                responseDto.setStatusCode(HttpStatus.CONFLICT.value());
-//                responseDto.setStatusMessage("이미 등록된 알림입니다.");
-//            }
-//
-//            return ResponseEntity.ok(responseDto);
-//
-//        } catch (Exception e) {
-//            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-//            responseDto.setStatusMessage("알림 등록 중 오류 발생: " + e.getMessage());
-//            return ResponseEntity.internalServerError().body(responseDto);
-//        }
-//    }
+    // 알림 등록 엔드포인트
+    @GetMapping("/registerAlarm/{auctionIndex}")
+    public ResponseEntity<?> registerAlarm(@PathVariable Long auctionIndex) {
+        ResponseDto<String> responseDto = new ResponseDto<>();
+
+        try {
+            Auction auction = specialAuctionRepository.findById(auctionIndex)
+                    .orElseThrow(() -> new RuntimeException("해당 옥션은 없습니다."));
+
+            // 알림 등록
+            boolean isScheduled = specialAuctionScheduler.registerAlarm(auction);
+
+            if (isScheduled) {
+                responseDto.setStatusCode(HttpStatus.OK.value());
+                responseDto.setStatusMessage("알림이 성공적으로 등록되었습니다.");
+            } else {
+                responseDto.setStatusCode(HttpStatus.CONFLICT.value());
+                responseDto.setStatusMessage("이미 등록된 알림입니다.");
+            }
+
+            return ResponseEntity.ok(responseDto);
+
+        } catch (Exception e) {
+            log.error("알림 등록 오류: {}", e.getMessage());
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage("알림 등록 중 오류 발생: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
 
 
 

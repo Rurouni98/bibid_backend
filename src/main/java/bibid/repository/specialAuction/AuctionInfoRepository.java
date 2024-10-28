@@ -1,5 +1,6 @@
 package bibid.repository.specialAuction;
 
+import bibid.entity.Auction;
 import bibid.entity.AuctionInfo;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,4 +20,5 @@ public interface AuctionInfoRepository extends JpaRepository<AuctionInfo, Long> 
     @Query("SELECT MAX(a.bidAmount) FROM AuctionInfo a WHERE a.auction.auctionIndex = :auctionIndex")
     Optional<Long> findMaxBidAmountByAuctionIndex(@Param("auctionIndex") Long auctionIndex);
 
+    Optional<AuctionInfo> findTopByAuction_AuctionIndexOrderByBidAmountDescBidTimeDesc(Long auctionIndex);
 }

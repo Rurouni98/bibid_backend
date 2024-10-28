@@ -1,13 +1,17 @@
 package bibid.controller.auctionItemDetail;
 
 import bibid.dto.*;
-import bibid.service.auction.AuctionService;
+import bibid.entity.AuctionInfo;
+import bibid.entity.CustomUserDetails;
+import bibid.entity.Member;
+import bibid.repository.specialAuction.AuctionInfoRepository;
 import bibid.service.auctionItemDetail.AuctionItemDetailService;
+import bibid.service.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,9 +22,15 @@ import java.util.List;
 @Slf4j
 public class AuctionItemDetailController {
 
-    @Autowired
     private final AuctionItemDetailService auctionItemDetailService;
+    private final AuctionInfoRepository auctionInfoRepository;
+    private final NotificationService notificationService;
 
+    public Member getPreviousHighestBidder(Long auctionIndex) {
+        return auctionInfoRepository.findTopByAuction_AuctionIndexOrderByBidAmountDescBidTimeDesc(auctionIndex)
+                .map(AuctionInfo::getBidder)
+                .orElse(null);
+    }
 
     @GetMapping("/category-item-detail/{auctionIndex}")
     public ResponseEntity<?> getItemDetail(@PathVariable("auctionIndex") Long auctionIndex){
@@ -78,30 +88,43 @@ public class AuctionItemDetailController {
 
     @PostMapping("/category-item-detail/{auctionIndex}")
     public ResponseEntity<?> biddingItem(@PathVariable("auctionIndex") Long auctionIndex,
-                                         @RequestBody BidRequestDto bidRequestDto){
+                                         @RequestBody BidRequestDto bidRequestDto,
+                                         @AuthenticationPrincipal CustomUserDetails customUserDetails) {
         ResponseDto<BidRequestDto> bidResponseDto = new ResponseDto<>();
 
-        System.out.println("post api 호출");
-        System.out.println("auctionIndex::"+auctionIndex);
-        System.out.println("reQuestDto : " + bidRequestDto.toString());
-// 맴버 받아오기 추가하기
+        log.info("Received bid request for auctionIndex: {}, request data: {}", auctionIndex, bidRequestDto);
+
         try {
-            auctionItemDetailService.updateAuctionItemDetail(auctionIndex, bidRequestDto);
+            // 직전 최고 입찰자 조회
+            Member previousHighestBidder = getPreviousHighestBidder(auctionIndex);
 
+            // 입찰 업데이트 로직 실행
+            auctionItemDetailService.updateAuctionItemDetail(auctionIndex, bidRequestDto, customUserDetails.getMember());
+
+            // 상위 입찰 시, 직전 최고 입찰자에게 알림 전송 (멤버 인덱스 비교)
+            if (previousHighestBidder != null
+                    && !previousHighestBidder.getMemberIndex().equals(customUserDetails.getMember().getMemberIndex())) {
+                notificationService.notifyHigherBid(previousHighestBidder, auctionIndex);
+                log.info("상위 입찰 알림 전송 완료: auctionIndex={}, previousHighestBidderId={}", auctionIndex, previousHighestBidder.getMemberIndex());
+            } else {
+                log.info("알림 전송 생략: currentHighestBidderId={}는 직전 최고 입찰자와 동일", customUserDetails.getMember().getMemberIndex());
+            }
+
+            // 성공 응답 설정
             bidResponseDto.setItem(bidRequestDto);
-            System.out.println("ResponseDto : " + bidResponseDto);
             bidResponseDto.setStatusCode(HttpStatus.OK.value());
-            bidResponseDto.setStatusMessage("OK");
-            return ResponseEntity.ok("success");
-        } catch (Exception e){
-            log.error("err : post Auction bidding failed : {}", e.getMessage());
+            bidResponseDto.setStatusMessage("입찰 성공");
 
-            bidResponseDto.setStatusMessage(e.getMessage());
+            log.info("Bid placed successfully for auctionIndex: {}", auctionIndex);
+            return ResponseEntity.ok(bidResponseDto);
+        } catch (Exception e) {
+            // 오류 처리
+            log.error("Bid placement failed for auctionIndex: {}. Error: {}", auctionIndex, e.getMessage());
+
+            bidResponseDto.setStatusMessage("입찰 실패: " + e.getMessage());
             bidResponseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
 
-            return ResponseEntity.internalServerError().body(bidRequestDto);
+            return ResponseEntity.internalServerError().body(bidResponseDto);
         }
     }
-
-
 }

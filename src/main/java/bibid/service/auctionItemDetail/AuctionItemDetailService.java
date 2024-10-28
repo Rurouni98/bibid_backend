@@ -20,7 +20,7 @@ public interface AuctionItemDetailService {
 
     SellerInfoDto findSellerInfo(Long auctionIndex);
 
-    AuctionInfoDto updateAuctionItemDetail(Long auctionIndex, BidRequestDto bidRequestDto);
+    AuctionInfoDto updateAuctionItemDetail(Long auctionIndex, BidRequestDto bidRequestDto, Member member);
 
     void updateAuctionBiddingState();
 

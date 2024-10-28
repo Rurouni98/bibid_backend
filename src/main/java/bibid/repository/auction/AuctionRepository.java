@@ -41,7 +41,7 @@ public interface AuctionRepository extends JpaRepository<Auction, Long>, Auction
     long countByMember_MemberIndex(Long memberIndex);
 
     @Modifying
-    @Query("UPDATE Auction a SET a.auctionStatus = '완료' WHERE a.endingLocalDateTime <= :currentTime AND a.auctionStatus = '진행중'")
+    @Query("UPDATE Auction a SET a.auctionStatus = '경매종료' WHERE a.endingLocalDateTime <= :currentTime AND a.auctionStatus = '진행중'")
     void updateCompletedAuctions(@Param("currentTime") LocalDateTime currentTime);
 
     @Modifying

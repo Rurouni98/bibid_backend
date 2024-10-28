@@ -43,4 +43,6 @@ public interface NotificationService {
 
     // 물품 배송/수령 확인 알림
     void notifyDeliveryConfirmation(Member sender, Member receiver, Long auctionIndex);
+
+    List<NotificationDto> getNotificationsForMember(Long memberIndex);
 }

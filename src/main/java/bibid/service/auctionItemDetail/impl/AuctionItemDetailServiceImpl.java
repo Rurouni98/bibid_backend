@@ -96,7 +96,7 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
 
     @Transactional
     @Override
-    public AuctionInfoDto updateAuctionItemDetail(Long auctionIndex, BidRequestDto bidRequestDto) {
+    public AuctionInfoDto updateAuctionItemDetail(Long auctionIndex, BidRequestDto bidRequestDto, Member member) {
         AuctionInfo auctionInfo = new AuctionInfo();
         LocalDateTime currentTime = LocalDateTime.now();
 
@@ -106,18 +106,16 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
         auctionInfo.setAuction(auction);
 
         // 입찰자 정보 조회 및 할당
-        auctionInfo.setBidder(
-                memberRepository.findMemberByAuction_AuctionIndex(auctionIndex)
-                        .orElseThrow(() -> new RuntimeException("Bidder not found for auction with index: " + auctionIndex))
-        );
+        auctionInfo.setBidder(member);
 
         // 입찰 시간 및 입찰 금액 설정
         auctionInfo.setBidTime(currentTime);
         auctionInfo.setBidAmount(bidRequestDto.getUserBiddingPrice());
+        auctionInfo.setBidderNickname(member.getNickname());
 
         // 입찰 유형이 '즉시구매'일 경우 경매 상태를 '완료'로 설정하고 DB에 업데이트
         if (bidRequestDto.getUserBiddingType().equals("buyNow")) {
-            auction.setAuctionStatus("완료");
+            auction.setAuctionStatus("경매종료");
             auctionRepository.save(auction); // 경매 상태를 "완료"로 갱신
         }
 

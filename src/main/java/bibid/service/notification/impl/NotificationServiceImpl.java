@@ -160,4 +160,10 @@ public class NotificationServiceImpl implements NotificationService {
                 "경매 " + auctionIndex + "의 배송이 확인되었습니다.",
                 NotificationType.DELIVERY_CONFIRMATION, auctionIndex);
     }
+
+    public List<NotificationDto> getNotificationsForMember(Long memberIndex) {
+        return notificationRepository.findByMember_MemberIndex(memberIndex).stream()
+                .map(Notification::toDto)
+                .toList();
+    }
 }
