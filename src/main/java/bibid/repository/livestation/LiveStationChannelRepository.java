@@ -12,4 +12,6 @@ public interface LiveStationChannelRepository extends JpaRepository<LiveStationC
     Optional<LiveStationChannel> findFirstByIsAvailableTrue();
 
     List<LiveStationChannel> findAllByIsAvailableFalse();
+
+    Optional<LiveStationChannel> findFirstByIsAvailableTrueAndChannelStatusAndCdnStatusName(String channelStatus, String cdnStatusName);
 }

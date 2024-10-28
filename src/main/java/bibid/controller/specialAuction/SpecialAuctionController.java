@@ -73,7 +73,7 @@ public class SpecialAuctionController {
         if (channel != null) {
             liveStationPoolManager.releaseChannel(channel);
 
-            auction.setAuctionStatus("방송종료");
+            auction.setAuctionStatus("경매종료");
             auction.setLiveStationChannel(null);
             specialAuctionRepository.save(auction);
             log.info("경매 종료로 채널 반납: auctionIndex : {} ", auctionIndex);
@@ -83,7 +83,7 @@ public class SpecialAuctionController {
     }
 
     // 라이브 시작
-    @PostMapping("/startLive/{auctionIndex}/")
+    @PostMapping("/startLive/{auctionIndex}")
     public ResponseEntity<?> startLive(@PathVariable Long auctionIndex) {
 
         Auction auction = specialAuctionRepository.findById(auctionIndex).orElseThrow(
@@ -96,7 +96,6 @@ public class SpecialAuctionController {
         specialAuctionRepository.save(auction);
 
         channel.setChannelStatus("PUBLISH");
-        channel.setAvailable(true);
         channelRepository.save(channel);
 
         return ResponseEntity.ok("라이브가 시작되었습니다.");

@@ -9,6 +9,8 @@ import bibid.entity.AuctionDetail;
 import bibid.entity.ChatRoom;
 import bibid.entity.Member;
 import bibid.repository.auction.AuctionRepository;
+import bibid.service.livestation.LiveStationPoolManager;
+import bibid.service.livestation.LiveStationService;
 import bibid.service.specialAuction.impl.SpecialAuctionScheduler;
 import bibid.service.auction.AuctionService;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,7 @@ public class AuctionServiceImpl implements AuctionService {
     private final SpecialAuctionScheduler specialAuctionScheduler;
     private final AuctionRepository auctionRepository;
     private final FileUtils fileUtils;
+    private final LiveStationPoolManager liveStationPoolManager;
 
     @Override
     public Page<AuctionDto> post(AuctionDto auctionDto,
@@ -81,6 +84,7 @@ public class AuctionServiceImpl implements AuctionService {
         if(auctionDto.getAuctionType().equals("실시간 경매")){
             specialAuctionScheduler.scheduleChannelAllocation(savedAuction.getAuctionIndex(), auctionDto.getStartingLocalDateTime());
             specialAuctionScheduler.scheduleChannelRelease(savedAuction.getAuctionIndex(), auctionDto.getStartingLocalDateTime());
+            specialAuctionScheduler.scheduleAuctionEnd(savedAuction.getAuctionIndex(), auctionDto.getEndingLocalDateTime());
         }
 
         return auctionRepository.findAll(pageable).map(Auction::toDto);

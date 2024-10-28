@@ -2,6 +2,8 @@ package bibid.service.member;
 
 import bibid.dto.MemberDto;
 import bibid.entity.Member;
+import bibid.entity.SellerInfo;
+import bibid.repository.SellerInfoRepository;
 import bibid.repository.member.MemberRepository;
 import bibid.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import java.util.Optional;
 public class MemberServiceImpl implements MemberService {
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
+    private final SellerInfoRepository sellerInfoRepository;
     private final JwtProvider jwtProvider;
     private Optional<Member> optionalMember = Optional.empty();
 
@@ -52,7 +55,15 @@ public class MemberServiceImpl implements MemberService {
         memberDto.setRole("ROLE_USER");
         memberDto.setMemberPw(passwordEncoder.encode(memberDto.getMemberPw()));
 
-        MemberDto joinedMemberDto = memberRepository.save(memberDto.toEntity()).toDto();
+        Member joinedMember = memberRepository.save(memberDto.toEntity());
+
+        SellerInfo sellerInfo = SellerInfo.builder()
+                .member(joinedMember)
+                .build();
+
+        sellerInfoRepository.save(sellerInfo);
+
+        MemberDto joinedMemberDto = joinedMember.toDto();
 
         joinedMemberDto.setMemberPw("");
 
@@ -79,10 +90,9 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public String findByEmail(String email) {
-        optionalMember = memberRepository.findByEmail(email);
+        Member member = memberRepository.findByEmail(email);
 
-        if (optionalMember.isPresent()) {
-            Member member = optionalMember.get();
+        if (member != null) {
             return member.getMemberId();
         } else {
             System.out.println("이메일에 해당하는 사용자가 없습니다.");

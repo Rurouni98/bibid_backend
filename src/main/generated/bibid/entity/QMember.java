@@ -24,6 +24,8 @@ public class QMember extends EntityPathBase<Member> {
 
     public final StringPath addressDetail = createString("addressDetail");
 
+    public final DateTimePath<java.sql.Timestamp> createTime = createDateTime("createTime", java.sql.Timestamp.class);
+
     public final StringPath email = createString("email");
 
     public final StringPath memberAddress = createString("memberAddress");
@@ -40,7 +42,11 @@ public class QMember extends EntityPathBase<Member> {
 
     public final StringPath nickname = createString("nickname");
 
+    public final StringPath oauthType = createString("oauthType");
+
     public final QProfileImage profileImage;
+
+    public final StringPath refreshToken = createString("refreshToken");
 
     public final StringPath role = createString("role");
 

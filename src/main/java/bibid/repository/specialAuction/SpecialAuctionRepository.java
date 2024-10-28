@@ -28,4 +28,6 @@ public interface SpecialAuctionRepository extends JpaRepository<Auction, Long> {
     List<Auction> findAllByAuctionTypeAndStartingLocalDateTimeAfter(String auctionType, LocalDateTime now);
 
     List<Auction> findAllByAuctionTypeAndStartingLocalDateTimeBeforeAndLiveStationChannelIsNotNull(String auctionType, LocalDateTime localDateTime);
+
+    List<Auction> findAllByAuctionTypeAndEndingLocalDateTimeAfter(String auctionType, LocalDateTime now);
 }

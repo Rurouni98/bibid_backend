@@ -81,4 +81,24 @@ public class MypageServiceImpl implements MypageService {
         findMember.setMemberPw("");
         return findMember;
     }
+
+    @Override
+    public MemberDto findByMemberIndex(long memberIndex) {
+        Member member = mypageRepository.findById(memberIndex)
+                .orElseThrow(() -> new RuntimeException("Member not found"));
+
+        MemberDto memberDto = member.toDto();
+        memberDto.setMemberPw(""); // 비밀번호를 숨김
+        return memberDto;
+    }
+
+    @Override
+    public MemberDto findByNickname(String nickname) {
+        Member member = mypageRepository.findByNickname(nickname)
+                .orElseThrow(() -> new RuntimeException("Member not found"));
+
+        MemberDto memberDto = member.toDto();
+        memberDto.setMemberPw(""); // 비밀번호를 숨김
+        return memberDto;
+    }
 }

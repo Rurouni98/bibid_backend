@@ -2,7 +2,14 @@ package bibid.dto;
 
 import bibid.entity.Member;
 import bibid.entity.ProfileImage;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.OneToOne;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.sql.Timestamp;
 
 @Getter
 @Setter
@@ -13,6 +20,7 @@ import lombok.*;
 public class MemberDto {
     private Long memberIndex;
     private String name;
+    private String oauthType;
     private String memberId;
     private String memberPw;
     private String nickname;
@@ -22,12 +30,16 @@ public class MemberDto {
     private String memberAddress;
     private String addressDetail;
     private ProfileImage profileImage;
+    private Timestamp createTime;
     private String token;
+    private String refreshToken;
+
 
     public Member toEntity() {
         return Member.builder()
                 .memberIndex(this.memberIndex)
                 .name(this.name)
+                .oauthType(this.oauthType)
                 .memberId(this.memberId)
                 .memberPw(this.memberPw)
                 .nickname(this.nickname)
@@ -37,6 +49,8 @@ public class MemberDto {
                 .memberAddress(this.memberAddress)
                 .addressDetail(this.addressDetail)
                 .profileImage(this.profileImage)
+                .createTime(this.createTime)
+                .refreshToken(this.refreshToken)
                 .build();
     }
 }

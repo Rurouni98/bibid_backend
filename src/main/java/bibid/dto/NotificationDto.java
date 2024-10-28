@@ -17,18 +17,18 @@ public class NotificationDto {
     private String alertTitle;
     private String alertContent;
     private LocalDateTime alertDate;
-    private boolean viewEd;
-    private String alertCat;
+    private String alertCategory; // "구매/판매", "입금/출금","상위 입찰", "실시간 경매 시작"
+    private boolean isViewed;
 
-    public Notification toEntiy(Member member) {
+    public Notification toEntity(Member member) {
         return Notification.builder()
                 .notificationIndex(this.notificationIndex)
                 .member(member)
                 .alertTitle(this.alertTitle)
                 .alertContent(this.alertContent)
                 .alertDate(this.alertDate)
-                .viewEd(this.viewEd)
-                .alertCat(this.alertCat)
+                .isViewed(this.isViewed)
+                .alertCategory(this.alertCategory)
                 .build();
     }
 

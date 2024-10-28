@@ -147,7 +147,7 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
                 .filter(AuctionImage::isThumbnail)
                 .findFirst()
                 .ifPresent(thumbnail -> {
-                    String fullPath = thumbnail.getFilepath() + "/" + thumbnail.getFilename() + '.' + thumbnail.getFiletype();
+                    String fullPath = thumbnail.getFilepath() + thumbnail.getFilename();
                     imagePathList.add(fullPath);
                 });
 
@@ -155,7 +155,7 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
         auctionImages.stream()
                 .filter(image -> !image.isThumbnail())
                 .forEach(image -> {
-                    String fullPath = image.getFilepath() + "/" + image.getFilename() + '.' + image.getFiletype();
+                    String fullPath = image.getFilepath() + image.getFilename();
                     imagePathList.add(fullPath);
                 });
 

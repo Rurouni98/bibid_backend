@@ -6,16 +6,18 @@ import bibid.entity.LiveStationChannel;
 import bibid.entity.LiveStationServiceUrl;
 import bibid.repository.livestation.LiveStationChannelRepository;
 import jakarta.annotation.PostConstruct;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -77,14 +79,15 @@ public class LiveStationPoolManager {
 
     @Transactional
     public LiveStationChannel allocateChannel() {
-        LiveStationChannel allocatedChannel = channelRepository.findFirstByIsAvailableTrue()
+        LiveStationChannel allocatedChannel =
+                channelRepository.findFirstByIsAvailableTrue()
                 .orElseGet(() -> {
                     log.info("사용 가능한 채널이 없으므로 새 채널을 생성합니다.");
                     return createNewChannel();
                 });
 
-        allocatedChannel.setChannelStatus("PUBLISH");
-        allocatedChannel.setAvailable(false);
+//        allocatedChannel.setChannelStatus("PUBLISH");
+        allocatedChannel.setAllocated(true);
         log.info("채널 할당: Channel ID: {}", allocatedChannel.getChannelId());
 
         if (!allocatedChannel.getCdnStatusName().equals("RUNNING")) {
@@ -96,7 +99,10 @@ public class LiveStationPoolManager {
     }
 
     private LiveStationChannel createNewChannel() {
-        String channelId = liveStationService.createChannel("새로운 채널 이름");
+
+        // 랜덤으로 생성한 채널 이름
+        String channelName = createNewChannelName();
+        String channelId = liveStationService.createChannel(channelName);
         LiveStationInfoDTO liveStationInfoDTO = liveStationService.getChannelInfo(channelId);
 
         LiveStationChannel createdChannel = LiveStationChannel.builder()
@@ -107,10 +113,26 @@ public class LiveStationPoolManager {
                 .publishUrl(liveStationInfoDTO.getPublishUrl())
                 .streamKey(liveStationInfoDTO.getStreamKey())
                 .isAvailable(false)
+                .isAllocated(false)
                 .build();
 
         log.info("새로운 채널 생성 및 저장: Channel ID: {}", channelId);
         return channelRepository.save(createdChannel);
+    }
+
+    public LiveStationChannel testCreateNewChannel() {
+
+        LiveStationChannel allocatedChannel = createNewChannel();
+
+        allocatedChannel.setAllocated(true);
+        log.info("채널 할당: Channel ID: {}", allocatedChannel.getChannelId());
+
+        if (!allocatedChannel.getCdnStatusName().equals("RUNNING")) {
+            log.info("CDN 준비 중, 상태 업데이트 대기: Channel ID: {}", allocatedChannel.getChannelId());
+            checkCdnStatusAndUpdate(allocatedChannel);
+        }
+
+        return channelRepository.save(allocatedChannel);
     }
 
     private void checkCdnStatusAndUpdate(LiveStationChannel channel) {
@@ -133,6 +155,7 @@ public class LiveStationPoolManager {
                             .toList();
                     channel.setServiceUrlList(serviceUrlList);
                     channel.setCdnStatusName("RUNNING");
+
                     channelRepository.save(channel);
 
                     messagingTemplate.convertAndSend("/topic/cdn-updates", channel.getServiceUrlList());
@@ -149,8 +172,19 @@ public class LiveStationPoolManager {
 
     public void releaseChannel(LiveStationChannel channel) {
         channel.setChannelStatus("READY");
-        channel.setAvailable(true);
+        channel.setAllocated(false);
         channelRepository.save(channel);
         log.info("채널 반납 완료: Channel ID: {}", channel.getChannelId());
+    }
+
+    private String createNewChannelName() {
+        // 현재 시간을 'YYYYMMDDHHMMSS' 형식으로 포맷
+        String dateTime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+
+        // UUID를 생성하고 랜덤 문자열 부분을 가져옴
+        String randomString = UUID.randomUUID().toString().substring(0, 5); // 5글자 랜덤 문자열
+
+        // 채널 이름 생성
+        return "ls-" + dateTime + "-" + randomString;
     }
 }

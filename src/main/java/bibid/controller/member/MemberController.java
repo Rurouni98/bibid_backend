@@ -3,7 +3,12 @@ package bibid.controller.member;
 
 import bibid.dto.MemberDto;
 import bibid.dto.ResponseDto;
+import bibid.entity.Member;
+import bibid.oauth2.KakaoServiceImpl;
 import bibid.service.member.MemberService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -11,7 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,6 +28,7 @@ import java.util.Map;
 @Slf4j
 public class MemberController {
     private final MemberService memberService;
+    private final KakaoServiceImpl kakaoService;
 
     private Map<String, String> verificationCodes = new HashMap<>();
 
@@ -109,10 +117,14 @@ public class MemberController {
     }
 
     @GetMapping("/logout")
-    public ResponseEntity<?> logout() {
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response, Principal principal) {
+
+        Member member = new Member();
+
         ResponseDto<Map<String, String>> responseDto = new ResponseDto<>();
 
         try {
+
             Map<String, String> logoutMsgMap = new HashMap<>();
 
             SecurityContext securityContext = SecurityContextHolder.getContext();
@@ -125,6 +137,19 @@ public class MemberController {
             responseDto.setStatusMessage("ok");
             responseDto.setItem(logoutMsgMap);
 
+            Cookie[] cookies = request.getCookies();
+            if (cookies != null) {
+                for(Cookie cookie : cookies){
+                    if("ACCESS_TOKEN".equals(cookie.getName())){
+                        cookie.setMaxAge(0);
+                        cookie.setPath("/");
+                        cookie.setHttpOnly(true);
+                        cookie.setValue(null);
+                        response.addCookie(cookie);
+                    }
+                }
+            }
+
             return ResponseEntity.ok(responseDto);
         } catch (Exception e) {
             log.error("logout error: {}", e.getMessage());
@@ -133,9 +158,6 @@ public class MemberController {
             return ResponseEntity.internalServerError().body(responseDto);
         }
     }
-
-
-
 
 
 }

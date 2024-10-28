@@ -21,18 +21,20 @@ import java.time.LocalDateTime;
 public class Notification {
     @Id
     @GeneratedValue(
-            strategy = GenerationType.IDENTITY,
+            strategy = GenerationType.SEQUENCE,
             generator = "notificationSeqGenerator"
     )
     private Long notificationIndex;
-    @OneToOne
+
+    @ManyToOne
     @JoinColumn(name = "memberIndex")
     private Member member;
+
     private String alertTitle;
     private String alertContent;
     private LocalDateTime alertDate;
-    private boolean viewEd;
-    private String alertCat;
+    private String alertCategory; // "구매/판매", "입금/출금","상위 입찰", "실시간 경매 시작"
+    private boolean isViewed;
 
     public NotificationDto toDto() {
         return NotificationDto.builder()
@@ -41,8 +43,8 @@ public class Notification {
                 .alertTitle(this.alertTitle)
                 .alertContent(this.alertContent)
                 .alertDate(this.alertDate)
-                .viewEd(this.viewEd)
-                .alertCat(this.alertCat)
+                .isViewed(this.isViewed)
+                .alertCategory(this.alertCategory)
                 .build();
     }
 
