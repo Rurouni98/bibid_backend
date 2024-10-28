@@ -64,12 +64,37 @@ public class MypageController {
         }
     }
 
-    @GetMapping("/{memberIndex}")
+    @GetMapping("/userInfo/{memberIndex}")
     public ResponseEntity<?> getMemberByMemberIndex(@PathVariable Long memberIndex) {
         ResponseDto<MemberDto> responseDto = new ResponseDto<>();
 
         try {
             MemberDto findMember = mypageService.findByMemberIndex(memberIndex);
+            log.info("fingMember : {}", findMember);
+
+            responseDto.setItem(findMember);
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("Found member");
+
+            return ResponseEntity.ok(responseDto);
+        } catch (RuntimeException e) {
+            responseDto.setStatusCode(HttpStatus.NOT_FOUND.value());
+            responseDto.setStatusMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseDto);
+        } catch (Exception e) {
+            log.error("getMemberByMemberIndex error: ", e);
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage("An error occurred");
+            return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
+
+    @GetMapping("/{nickname}")
+    public ResponseEntity<?> getMemberByNickname(@PathVariable String nickname) {
+        ResponseDto<MemberDto> responseDto = new ResponseDto<>();
+
+        try {
+            MemberDto findMember = mypageService.findByNickname(nickname);
 
             responseDto.setItem(findMember);
             responseDto.setStatusCode(HttpStatus.OK.value());
