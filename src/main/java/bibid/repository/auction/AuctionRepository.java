@@ -44,5 +44,14 @@ public interface AuctionRepository extends JpaRepository<Auction, Long>, Auction
     @Query("UPDATE Auction a SET a.auctionStatus = '완료' WHERE a.endingLocalDateTime <= :currentTime AND a.auctionStatus = '진행중'")
     void updateCompletedAuctions(@Param("currentTime") LocalDateTime currentTime);
 
+    @Modifying
+    @Query("UPDATE Auction a SET a.auctionStatus = '진행중' WHERE a.startingLocalDateTime <= :currentTime AND a.auctionStatus = '준비중'")
+    void updateOngoingAuctions(@Param("currentTime") LocalDateTime currentTime);
+
+
+    @Modifying
+    @Query("UPDATE Auction a SET a.auctionStatus = :status WHERE a.auctionIndex = :auctionIndex")
+    void updateAuctionStatus(@Param("auctionIndex") Long auctionIndex, @Param("status") String status);
+
 
 }
