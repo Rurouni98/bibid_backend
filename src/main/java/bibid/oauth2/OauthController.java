@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.Cookie;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.http.HttpResponse;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,13 +31,12 @@ import java.util.Map;
 @Slf4j
 public class OauthController {
 
-
     private final KakaoServiceImpl kakaoServiceImpl; //(2)
     private final NaverServiceImpl naverServiceImpl;
     private final GoogleServiceImpl googleServiceImpl;
-    private OauthTokenDto oauthToken;
     private final JwtProvider jwtProvider;
     private final MemberServiceImpl memberServiceImpl;
+    private OauthTokenDto oauthToken;
 
     // ㅁ 카카오
     // 프론트에서 인가코드 받아오는 url
@@ -80,17 +80,9 @@ public class OauthController {
         }
     }
 
-//    @PostMapping("/kakao/reloadToken")
-//    public ResponseEntity<?> kakaoLeloadToken(){
-//
-//
-//
-//
-//    }
-
     // ㅁ 네이버
     @GetMapping("/naver/callback") // (3)
-    public ResponseEntity<?> getNaverJwtToken(@RequestParam("code") String code, HttpServletResponse response, Principal principal) {
+    public ResponseEntity<?> getNaverJwtToken(@RequestParam("code") String code, HttpServletResponse response) {
 
         // 넘어온 인가 코드를 통해 access_token 발급 //(5)
         oauthToken = naverServiceImpl.getAccessToken(code);
@@ -103,8 +95,7 @@ public class OauthController {
         //(3)
         // 프론트에 넘겨 줄 회원정보 조회
         ResponseDto<Map<String, String>> responseDto = new ResponseDto<>();
-        System.out.println("jwtToken:"+jwtToken);
-        Map<String, String> memberInfo = naverServiceImpl.getMember(jwtToken, principal);
+        Map<String, String> memberInfo = naverServiceImpl.getMember(jwtToken);
 
         try {
             log.info("login NaverProfileDto: {}", jwtToken.toString());
@@ -129,38 +120,35 @@ public class OauthController {
     }
 
     // ㅁ 구글
-    @GetMapping("/google/callback") // (3)
-    public ResponseEntity<?> getGoogleJwtToken(@RequestParam("code") String code, HttpServletResponse response) {
+    @PostMapping("/google/callback")
+    public ResponseEntity<?> getGoogleJwtToken(@RequestBody Map<String, String> body, HttpServletResponse response) {
+        String accessToken = body.get("access_token");
+        System.out.println("받은 Access Token: " + accessToken);
 
-        // 넘어온 인가 코드를 통해 access_token 발급 //(5)
-        oauthToken = googleServiceImpl.getAccessToken(code);
+        String jwtToken = googleServiceImpl.saveUserAndGetToken(accessToken);
+        System.out.println("jwtToken:" + jwtToken);
 
-        //(2)
-        // 발급 받은 accessToken 으로 카카오 회원 정보 DB 저장 후 JWT 를 생성
-//        String jwtToken = naverServiceImpl.saveUserAndGetToken(oauthToken.getAccess_token());
-
-        //(3)
-        ResponseDto responseDto = new ResponseDto();
+        // 프론트에 넘겨 줄 회원정보 조회
+        ResponseDto<Map<String, String>> responseDto = new ResponseDto<>();
+        Map<String, String> memberInfo = googleServiceImpl.getMember(jwtToken);
 
         try {
-//            log.info ("login GoogleProfileDto: {}", jwtToken.toString());
-//            Cookie cookie = new Cookie("ACCESS_TOKEN", jwtToken);
-//            cookie.setHttpOnly(true); // 클라이언트 측 JavaScript에서 쿠키 접근 방지
-//            cookie.setPath("/"); // 쿠키의 유효 경로 설정
-//            cookie.setMaxAge(3600); // 쿠키의 만료 시간 설정 (1시간)
-//            response.addCookie(cookie); // 쿠키 추가
+            log.info("login NaverProfileDto: {}", jwtToken.toString());
+            Cookie cookie = new Cookie("ACCESS_TOKEN", jwtToken);
+            cookie.setHttpOnly(true); // 클라이언트 측 JavaScript에서 쿠키 접근 방지
+            cookie.setPath("/"); // 쿠키의 유효 경로 설정
+            cookie.setMaxAge(3600); // 쿠키의 만료 시간 설정 (1시간)
+            response.addCookie(cookie); // 쿠키 추가
 
             responseDto.setStatusCode(HttpStatus.OK.value());
-            responseDto.setStatusMessage("Sent to Client");
+            responseDto.setStatusMessage("Access token received successfully.");
+            responseDto.setItem(memberInfo); // 사용자 정보를 응답 DTO에 추가
 
-            return ResponseEntity.ok(responseDto);
         } catch (Exception e) {
-            log.error("login error: {}", e.getMessage());
-            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            responseDto.setStatusMessage(e.getMessage());
-
-            return ResponseEntity.internalServerError().body(responseDto);
+            throw new RuntimeException(e);
         }
+
+        return ResponseEntity.ok(responseDto);
     }
 
     @GetMapping("/api/token/type")
