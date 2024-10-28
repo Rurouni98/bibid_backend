@@ -2,8 +2,10 @@ package bibid.oauth2;
 
 import bibid.dto.ResponseDto;
 
+import bibid.entity.Member;
 import bibid.jwt.JwtProvider;
 import bibid.service.member.MemberServiceImpl;
+import com.google.api.client.auth.oauth2.TokenResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -19,6 +21,8 @@ import jakarta.servlet.http.Cookie;
 import org.springframework.web.client.RestTemplate;
 
 import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController //(1)
 @RequestMapping("/auth")
@@ -47,10 +51,13 @@ public class OauthController {
         String jwtToken = kakaoServiceImpl.saveUserAndGetToken(oauthToken.getAccess_token());
 
         //(3)
-        ResponseDto responseDto = new ResponseDto();
+        // 프론트에 넘겨 줄 회원정보 조회
+        ResponseDto<Map<String, String>> responseDto = new ResponseDto<>();
+        Map<String, String> memberInfo = kakaoServiceImpl.getMember(jwtToken);
 
+        //(3)
         try {
-            log.info ("login KakaoProfileDto: {}", jwtToken.toString());
+            log.info("login KakaoProfileDto: {}", jwtToken.toString());
             Cookie cookie = new Cookie("ACCESS_TOKEN", jwtToken);
             cookie.setHttpOnly(true); // 클라이언트 측 JavaScript에서 쿠키 접근 방지
             cookie.setPath("/"); // 쿠키의 유효 경로 설정
@@ -59,6 +66,7 @@ public class OauthController {
 
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setStatusMessage("Sent to Client");
+            responseDto.setItem(memberInfo);
 
             return ResponseEntity.ok(responseDto);
         } catch (Exception e) {
@@ -80,20 +88,24 @@ public class OauthController {
 
     // ㅁ 네이버
     @GetMapping("/naver/callback") // (3)
-    public ResponseEntity<?> getNaverJwtToken(@RequestParam("code") String code, HttpServletResponse response) {
+    public ResponseEntity<?> getNaverJwtToken(@RequestParam("code") String code, HttpServletResponse response, Principal principal) {
 
         // 넘어온 인가 코드를 통해 access_token 발급 //(5)
         oauthToken = naverServiceImpl.getAccessToken(code);
+        System.out.println("oauthToken" + oauthToken);
 
         //(2)
         // 발급 받은 accessToken 으로 카카오 회원 정보 DB 저장 후 JWT 를 생성
         String jwtToken = naverServiceImpl.saveUserAndGetToken(oauthToken.getAccess_token());
 
         //(3)
-        ResponseDto responseDto = new ResponseDto();
+        // 프론트에 넘겨 줄 회원정보 조회
+        ResponseDto<Map<String, String>> responseDto = new ResponseDto<>();
+        System.out.println("jwtToken:"+jwtToken);
+        Map<String, String> memberInfo = naverServiceImpl.getMember(jwtToken, principal);
 
         try {
-            log.info ("login NaverProfileDto: {}", jwtToken.toString());
+            log.info("login NaverProfileDto: {}", jwtToken.toString());
             Cookie cookie = new Cookie("ACCESS_TOKEN", jwtToken);
             cookie.setHttpOnly(true); // 클라이언트 측 JavaScript에서 쿠키 접근 방지
             cookie.setPath("/"); // 쿠키의 유효 경로 설정
@@ -102,6 +114,7 @@ public class OauthController {
 
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setStatusMessage("Sent to Client");
+            responseDto.setItem(memberInfo);
 
             return ResponseEntity.ok(responseDto);
         } catch (Exception e) {
@@ -149,17 +162,24 @@ public class OauthController {
     }
 
     @GetMapping("/api/token/type")
-    public ResponseEntity<?> getTokenAndType(HttpServletRequest request, Principal principal) {
+    public ResponseEntity<?> getMember(HttpServletRequest request, Principal principal) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if ("ACCESS_TOKEN".equals(cookie.getName())) {
                     String jwtTokenValue = cookie.getValue();
 
-                    return kakaoServiceImpl.getTokenAndType(jwtTokenValue, principal);
+                    String findType = kakaoServiceImpl.findType(principal);
+
+                    System.out.println("Oauth findType: " + findType);
+
+                    System.out.println("1번실행");
+                    Map<String, String> item = new HashMap<>();
+                    item.put("type", findType);
+                    return ResponseEntity.ok(item);
                 }
             }
         }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("토큰값을 가져올 수 없습니다.");
+        return ResponseEntity.ok("Oauth 로그인이 아닙니다.");
     }
 }

@@ -17,6 +17,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.security.Principal;
@@ -56,12 +57,17 @@ public class NaverServiceImpl {
                 new HttpEntity<>(params, headers);
 
         //(5) 무엇을 주고 받을건지
-        ResponseEntity<String> accessTokenResponse = rt.exchange(
-                "https://nid.naver.com/oauth2.0/token",
-                HttpMethod.POST,
-                naverTokenRequest,
-                String.class
-        );
+        ResponseEntity<String> accessTokenResponse = null;
+        try {
+            accessTokenResponse = rt.exchange(
+                    "https://nid.naver.com/oauth2.0/token",
+                    HttpMethod.POST,
+                    naverTokenRequest,
+                    String.class
+            );
+        } catch (RestClientException e) {
+            throw new RuntimeException(e);
+        }
 
         //(6) Json 방식을 java로 받을 때 어떻게 받을건지
         ObjectMapper objectMapper = new ObjectMapper();
@@ -75,7 +81,7 @@ public class NaverServiceImpl {
         return oauthToken; //(8)
     }
 
-//     ㅁ [2번] 카카오에서 받은 액세스 토큰으로 카카오에서 사용자 정보 받아오기
+    //     ㅁ [2번] 카카오에서 받은 액세스 토큰으로 카카오에서 사용자 정보 받아오기
     public NaverProfileDto findProfile(String naverAccessToken) {
 
         //(1-2)
@@ -137,8 +143,37 @@ public class NaverServiceImpl {
         return jwtProvider.createOauthJwt(naverMember); //(2)
     }
 
+    // ㅁ [4-1번] DB
+    public Map<String, String> getMember(String jwtTokenValue, Principal principal) {
+
+        Map<String, String> item = new HashMap<>();
+        Member member = null;
+
+        try {
+            String memberId = jwtProvider.validateAndGetSubject(jwtTokenValue);
+
+            member = memberRepository.findByNickname(memberId);
+
+            item.put("memberIndex", String.valueOf(member.getMemberIndex()));
+            item.put("type", member.getOauthType());
+            item.put("addressDetail", "***");
+            item.put("email", member.getEmail());
+            item.put("memberAddress", "***");
+            item.put("memberId", member.getMemberId());
+            item.put("nickname", member.getName());
+            item.put("name", member.getName());
+            item.put("memberPnum", member.getMemberPnum());
+
+            return item;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+
+    }
+
     // ㅁ [4-1번] DB에서 리프레시토큰 가져오기
-    public ResponseEntity<?> getTokenAndType (String jwtTokenValue, Principal principal) {
+    public ResponseEntity<?> getTokenAndType(String jwtTokenValue, Principal principal) {
 
         ResponseDto<Map<String, String>> responseDto = new ResponseDto<>();
         Map<String, String> item = new HashMap<>();

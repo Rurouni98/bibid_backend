@@ -148,73 +148,65 @@ public class KakaoServiceImpl {
         return jwtProvider.createOauthJwt(kakaoMember); //(2)
     }
 
-    // ㅁ [4번] 카카오에서 받은 refresh_token으로 access_token leload 하기
-    public OauthTokenDto leLoadToken (Long memberIndex){
+    //    // ㅁ [4번] 카카오에서 받은 refresh_token으로 access_token leload 하기
+//    public OauthTokenDto leLoadToken (Long memberIndex){
+//
+////        String refreshToken = findToken(memberIndex);
+//
+//        RestTemplate rt = new RestTemplate();
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.add("Content-Type", "application/x-www-form-urlencoded;charset=utf-8");
+//
+//        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+//        params.add("grant_type", "refresh_token");
+//        params.add("client_id", "29e81fa9fda262c573f312af9934fa5c");
+////        params.add("refresh_token", refreshToken);
+//
+//        HttpEntity<MultiValueMap<String, String>> kakaoLeloadRequest =
+//                new HttpEntity<>(params, headers);
+//
+//        ResponseEntity<String> kakaoLeloadResponse = rt.exchange(
+//                "https://kauth.kakao.com/oauth/token",
+//                HttpMethod.POST,
+//                kakaoLeloadRequest,
+//                String.class
+//        );
+//
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        OauthTokenDto oauthToken = null;
+//        try {
+//            oauthToken = objectMapper.readValue(kakaoLeloadResponse.getBody(), OauthTokenDto.class);
+//        } catch (JsonProcessingException e) {
+//            throw new RuntimeException(e);
+//        }
+//
+//        return oauthToken;
+//
+//    }
+//
+    // ㅁ [4-1번] DB
+    public Map<String, String> getMember(String jwtTokenValue) {
 
-//        String refreshToken = findToken(memberIndex);
-
-        RestTemplate rt = new RestTemplate();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/x-www-form-urlencoded;charset=utf-8");
-
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("grant_type", "refresh_token");
-        params.add("client_id", "29e81fa9fda262c573f312af9934fa5c");
-//        params.add("refresh_token", refreshToken);
-
-        HttpEntity<MultiValueMap<String, String>> kakaoLeloadRequest =
-                new HttpEntity<>(params, headers);
-
-        ResponseEntity<String> kakaoLeloadResponse = rt.exchange(
-                "https://kauth.kakao.com/oauth/token",
-                HttpMethod.POST,
-                kakaoLeloadRequest,
-                String.class
-        );
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        OauthTokenDto oauthToken = null;
-        try {
-            oauthToken = objectMapper.readValue(kakaoLeloadResponse.getBody(), OauthTokenDto.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-
-        return oauthToken;
-
-    }
-
-    // ㅁ [4-1번] DB에서 리프레시토큰 가져오기
-    public ResponseEntity<?> getTokenAndType (String jwtTokenValue, Principal principal) {
-
-        ResponseDto<Map<String, String>> responseDto = new ResponseDto<>();
         Map<String, String> item = new HashMap<>();
         Member member = null;
         try {
-            if (principal == null) {
-                throw new IllegalStateException("현재 인증된 사용자를 찾을 수 없습니다.");
-            }
 
-            String username = principal.getName();
+            String MemberId = jwtProvider.validateAndGetSubject(jwtTokenValue);
 
-            CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(username);
+            member = memberRepository.findByNickname(MemberId);
 
-            Member memberId = userDetails.getMember();
+            item.put("memberIndex", String.valueOf(member.getMemberIndex()));
+            item.put("type", member.getOauthType());
+            item.put("addressDetail", "***");
+            item.put("email", member.getEmail());
+            item.put("memberAddress", "***");
+            item.put("memberId", member.getMemberId());
+            item.put("nickname", member.getName());
+            item.put("name", "***");
+            item.put("memberPnum", "010********");
 
-            String findMemberNickname = memberId.getNickname();
-
-            member = memberRepository.findByNickname(findMemberNickname);
-
-            String token = member.getRefreshToken();
-            String type = member.getOauthType();
-
-            item.put("token", token);
-            item.put("type", type);
-
-            responseDto.setItem(item);
-
-            return ResponseEntity.ok(responseDto);
+            return item;
 
         } catch (RuntimeException e) {
             throw new RuntimeException(e);
@@ -222,36 +214,34 @@ public class KakaoServiceImpl {
 
     }
 
-//    public String findType(String token, Principal principal){
-//        if (principal == null) {
-//            throw new IllegalStateException("현재 인증된 사용자를 찾을 수 없습니다.");
-//        }
-//
-//        String username = principal.getName();
-//        System.out.println("현재 사용자명:" + username);
-//
-//        CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(username);
-//        if (userDetails == null) {
-//            throw new RuntimeException("사용자를 찾을 수 없습니다.");
-//        }
-//
-//        Member memberId = userDetails.getMember();
-//        if (memberId == null) {
-//            throw new RuntimeException("Member 정보를 찾을 수 없습니다.");
-//        }
-//
-//        String findMemberNickname = memberId.getNickname();
-//
-//        Member member = memberRepository.findByNickname(findMemberNickname);
-//        if(member == null){
-//            throw new RuntimeException("Member not found");
-//        }
-//
-//        return member.getOauthType();
-//
-//    }
+    public String findType(Principal principal) {
+        if (principal == null) {
+            throw new IllegalStateException("현재 인증된 사용자를 찾을 수 없습니다.");
+        }
 
+        String username = principal.getName();
+        System.out.println("현재 사용자명:" + username);
 
+        CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(username);
+        if (userDetails == null) {
+            throw new RuntimeException("사용자를 찾을 수 없습니다.");
+        }
+
+        Member memberId = userDetails.getMember();
+        if (memberId == null) {
+            throw new RuntimeException("Member 정보를 찾을 수 없습니다.");
+        }
+
+        String findMemberNickname = memberId.getNickname();
+
+        Member member = memberRepository.findByNickname(findMemberNickname);
+        if (member == null) {
+            throw new RuntimeException("Member not found");
+        }
+
+        return member.getOauthType();
+
+    }
 
 
 //    public String convertImageToBase64(String imageUrl) throws Exception {

@@ -86,7 +86,7 @@ public class GoogleServiceImpl {
         return oauthToken; //(8)
     }
 
-//     ㅁ [2번] 카카오에서 받은 액세스 토큰으로 카카오에서 사용자 정보 받아오기
+    //     ㅁ [2번] 카카오에서 받은 액세스 토큰으로 카카오에서 사용자 정보 받아오기
     public GoogleProfileDto findProfile(String googleAccessToken) {
 
         //(1-2)
@@ -148,7 +148,7 @@ public class GoogleServiceImpl {
         return jwtProvider.createOauthJwt(googleMember); //(2)
     }
 
-    // ㅁ [4-1번] DB에서 리프레시토큰 가져오기
+    // ㅁ [4-1번] DB에서 타입가져오기
     public ResponseEntity<?> getTokenAndType (String jwtTokenValue, Principal principal) {
 
         ResponseDto<Map<String, String>> responseDto = new ResponseDto<>();
@@ -172,7 +172,7 @@ public class GoogleServiceImpl {
             String token = member.getRefreshToken();
             String type = member.getOauthType();
 
-            item.put("token", token);
+            item.put("token", "true");
             item.put("type", type);
 
             responseDto.setItem(item);

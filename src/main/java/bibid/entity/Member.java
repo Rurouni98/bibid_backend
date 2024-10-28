@@ -28,7 +28,7 @@ public class Member {
     )
     private Long memberIndex;
     private String name;
-    private String oauthType;
+    private String oauthType = "Normal";
     @Column(unique = true)
     private String memberId;
     private String memberPw;
