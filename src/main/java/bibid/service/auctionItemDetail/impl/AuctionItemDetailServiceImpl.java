@@ -1,6 +1,7 @@
 package bibid.service.auctionItemDetail.impl;
 
 import bibid.dto.*;
+import bibid.entity.Auction;
 import bibid.entity.AuctionImage;
 import bibid.entity.AuctionInfo;
 import bibid.entity.Member;
@@ -93,31 +94,36 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
         return sellerInfoRepository.findByMember_MemberIndex(findSeller(auctionIndex).getMemberIndex()).toDto();
     }
 
+    @Transactional
     @Override
     public AuctionInfoDto updateAuctionItemDetail(Long auctionIndex, BidRequestDto bidRequestDto) {
         AuctionInfo auctionInfo = new AuctionInfo();
+        LocalDateTime currentTime = LocalDateTime.now();
 
-        System.out.println("updateAuctionItemDetail 실행 - setAuction");
-        auctionInfo.setAuction(
-                auctionRepository.findById(auctionIndex).orElseThrow(
-                        () -> new RuntimeException("cant find auction to save auctionInfo")
-                )
-        );
-        System.out.println("updateAuctionItemDetail 실행 - setBidder");
+        // 경매 객체 조회 및 할당
+        Auction auction = auctionRepository.findById(auctionIndex)
+                .orElseThrow(() -> new RuntimeException("Auction not found with index: " + auctionIndex));
+        auctionInfo.setAuction(auction);
+
+        // 입찰자 정보 조회 및 할당
         auctionInfo.setBidder(
-                memberRepository.findMemberByAuction_AuctionIndex(auctionIndex).orElseThrow(
-                        () -> new RuntimeException("cant find bidder to save auctionInfo")
-                )
+                memberRepository.findMemberByAuction_AuctionIndex(auctionIndex)
+                        .orElseThrow(() -> new RuntimeException("Bidder not found for auction with index: " + auctionIndex))
         );
-        auctionInfo.setBidTime(LocalDateTime.now());
+
+        // 입찰 시간 및 입찰 금액 설정
+        auctionInfo.setBidTime(currentTime);
         auctionInfo.setBidAmount(bidRequestDto.getUserBiddingPrice());
 
-        if(bidRequestDto.getUserBiddingType().equals("즉시구매")){
-            System.out.println("완료처리 로직 필요.");
+        // 입찰 유형이 '즉시구매'일 경우 경매 상태를 '완료'로 설정하고 DB에 업데이트
+        if (bidRequestDto.getUserBiddingType().equals("buyNow")) {
+            auction.setAuctionStatus("완료");
+            auctionRepository.save(auction); // 경매 상태를 "완료"로 갱신
         }
 
-        System.out.println("nowwwwwwwww:" + auctionInfo.toDto());
+        // AuctionInfo 저장 및 DTO 반환
         auctionInfoRepository.save(auctionInfo);
+        System.out.println(auction);
         return auctionInfo.toDto();
     }
 
@@ -127,6 +133,7 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
     @Transactional
     public void updateAuctionBiddingState() {
         auctionRepository.updateCompletedAuctions(LocalDateTime.now());
+        auctionRepository.updateOngoingAuctions(LocalDateTime.now());
     }
 
     @Override

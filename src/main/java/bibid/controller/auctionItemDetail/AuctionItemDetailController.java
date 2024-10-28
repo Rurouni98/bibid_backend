@@ -76,7 +76,7 @@ public class AuctionItemDetailController {
     }
 
 
-    @PostMapping("/api/category-item-detail/{auctionIndex}")
+    @PostMapping("/category-item-detail/{auctionIndex}")
     public ResponseEntity<?> biddingItem(@PathVariable("auctionIndex") Long auctionIndex,
                                          @RequestBody BidRequestDto bidRequestDto){
         ResponseDto<BidRequestDto> bidResponseDto = new ResponseDto<>();
