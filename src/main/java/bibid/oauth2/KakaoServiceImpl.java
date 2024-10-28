@@ -214,7 +214,7 @@ public class KakaoServiceImpl {
 
     }
 
-    public String findType(Principal principal) {
+    public String checkLogin(Principal principal) {
         if (principal == null) {
             throw new IllegalStateException("현재 인증된 사용자를 찾을 수 없습니다.");
         }
@@ -232,14 +232,16 @@ public class KakaoServiceImpl {
             throw new RuntimeException("Member 정보를 찾을 수 없습니다.");
         }
 
-        String findMemberNickname = memberId.getNickname();
+        String findMemberId = memberId.getMemberId();
 
-        Member member = memberRepository.findByNickname(findMemberNickname);
-        if (member == null) {
+        Optional <Member> member = memberRepository.findByMemberId(findMemberId);
+        if (!member.isPresent()) {
             throw new RuntimeException("Member not found");
         }
 
-        return member.getOauthType();
+        Member loginMember = member.get();
+
+        return loginMember.getRole();
 
     }
 

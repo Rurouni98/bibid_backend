@@ -84,7 +84,7 @@ public class OauthController {
     @GetMapping("/naver/callback") // (3)
     public ResponseEntity<?> getNaverJwtToken(@RequestParam("code") String code, HttpServletResponse response) {
 
-        // 넘어온 인가 코드를 통해 access_token 발급 //(5)
+        // 넘어온 인가 코드를 통해 access_token 발급 /r/(5)
         oauthToken = naverServiceImpl.getAccessToken(code);
         System.out.println("oauthToken" + oauthToken);
 
@@ -151,25 +151,56 @@ public class OauthController {
         return ResponseEntity.ok(responseDto);
     }
 
-    @GetMapping("/api/token/type")
-    public ResponseEntity<?> getMember(HttpServletRequest request, Principal principal) {
+    @GetMapping("/checkLogin")
+    public ResponseEntity<?> checkLogin(HttpServletRequest request, Principal principal) {
+
+        ResponseDto<String> responseDto = new ResponseDto<>();
+
         Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("ACCESS_TOKEN".equals(cookie.getName())) {
-                    String jwtTokenValue = cookie.getValue();
+        System.out.println("쿠키밸류:" + cookies);
+        try {
+            boolean hasAccessToken = false;
 
-                    String findType = kakaoServiceImpl.findType(principal);
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if ("ACCESS_TOKEN".equals(cookie.getName())) {
+                        hasAccessToken = true;
+                        String jwtTokenValue = cookie.getValue();
+                        System.out.println("토큰밸류:" + jwtTokenValue);
 
-                    System.out.println("Oauth findType: " + findType);
-
-                    System.out.println("1번실행");
-                    Map<String, String> item = new HashMap<>();
-                    item.put("type", findType);
-                    return ResponseEntity.ok(item);
+                        if (principal != null) {
+                            String checkLogin = kakaoServiceImpl.checkLogin(principal);
+                            System.out.println("checkLogin:" + checkLogin);
+                            responseDto.setStatusMessage("ok");
+                            responseDto.setStatusCode(200);
+                            responseDto.setItem(checkLogin);
+                        } else {
+                            responseDto.setStatusMessage("not logged in");
+                            responseDto.setStatusCode(401);
+                            responseDto.setItem("notLogin");
+                        }
+                        return ResponseEntity.ok(responseDto);
+                    }
                 }
             }
+
+            if (!hasAccessToken) {
+                responseDto.setStatusMessage("no cookie");
+                responseDto.setStatusCode(401);
+                responseDto.setItem("notLogin");
+                return ResponseEntity.ok(responseDto);
+            }
+
+        } catch (Exception e) {
+            responseDto.setStatusMessage("error");
+            responseDto.setStatusCode(500);
+            return ResponseEntity.internalServerError().body(responseDto);
         }
-        return ResponseEntity.ok("Oauth 로그인이 아닙니다.");
+
+        responseDto.setStatusMessage("unExpected Error");
+        responseDto.setStatusCode(500);
+        return ResponseEntity.internalServerError().body(responseDto);
     }
 }
+
+
