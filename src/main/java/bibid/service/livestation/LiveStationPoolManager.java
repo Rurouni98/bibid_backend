@@ -80,7 +80,7 @@ public class LiveStationPoolManager {
     @Transactional
     public LiveStationChannel allocateChannel() {
         LiveStationChannel allocatedChannel =
-                channelRepository.findFirstByIsAvailableTrue()
+                channelRepository.findFirstByIsAllocatedFalse()
                 .orElseGet(() -> {
                     log.info("사용 가능한 채널이 없으므로 새 채널을 생성합니다.");
                     return createNewChannel();
