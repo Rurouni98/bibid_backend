@@ -22,7 +22,7 @@ public class QNotification extends EntityPathBase<Notification> {
 
     public static final QNotification notification = new QNotification("notification");
 
-    public final StringPath alertCategory = createString("alertCategory");
+    public final EnumPath<NotificationType> alertCategory = createEnum("alertCategory", NotificationType.class);
 
     public final StringPath alertContent = createString("alertContent");
 
@@ -35,6 +35,8 @@ public class QNotification extends EntityPathBase<Notification> {
     public final QMember member;
 
     public final NumberPath<Long> notificationIndex = createNumber("notificationIndex", Long.class);
+
+    public final NumberPath<Long> referenceIndex = createNumber("referenceIndex", Long.class);
 
     public QNotification(String variable) {
         this(Notification.class, forVariable(variable), INITS);

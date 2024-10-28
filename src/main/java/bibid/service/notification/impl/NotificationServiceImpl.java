@@ -1,8 +1,10 @@
 package bibid.service.notification.impl;
 
 import bibid.dto.NotificationDto;
+import bibid.entity.Auction;
 import bibid.entity.Member;
 import bibid.entity.Notification;
+import bibid.entity.NotificationType;
 import bibid.repository.notification.NotificationRepository;
 import bibid.service.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
@@ -23,69 +25,139 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
-    // 알림 생성 메서드
-    @Transactional
     @Override
-    public NotificationDto createNotification(Member member, String title, String content, String category) {
+    public NotificationDto createNotification(Member member, String title, String content, NotificationType category, Long referenceIndex) {
+        log.info("Creating notification for member ID: {}", member.getMemberIndex());
         Notification notification = Notification.builder()
                 .member(member)
                 .alertTitle(title)
                 .alertContent(content)
                 .alertDate(LocalDateTime.now())
                 .alertCategory(category)
+                .referenceIndex(referenceIndex)
                 .isViewed(false)
                 .build();
 
         Notification savedNotification = notificationRepository.save(notification);
+        log.info("Notification created with ID: {}", savedNotification.getNotificationIndex());
         return savedNotification.toDto();
     }
 
-    // 특정 이벤트 발생 시 알림 생성 및 전송 메서드
-    public void createAndSendNotification(Member member, String title, String content, String category) {
+    public void createAndSendNotification(Member member, String title, String content, NotificationType category, Long referenceIndex) {
+        log.info("Creating and sending notification to member ID: {}", member.getMemberIndex());
+
         Notification notification = Notification.builder()
-                .member(member) // Member 엔티티로 매핑
+                .member(member)
                 .alertTitle(title)
                 .alertContent(content)
                 .alertDate(LocalDateTime.now())
                 .alertCategory(category)
+                .referenceIndex(referenceIndex)
                 .isViewed(false)
                 .build();
 
-        // 알림을 저장
-        notificationRepository.save(notification);
+        Notification savedNotification = notificationRepository.save(notification);
+        log.info("Notification saved with ID: {} for member ID: {}", savedNotification.getNotificationIndex(), member.getMemberIndex());
 
-        // WebSocket으로 클라이언트에 알림 전송
-        messagingTemplate.convertAndSend("/topic/notifications/" + member.getMemberIndex(), notification.toDto());
+        // WebSocket을 통해 전송 시도
+        try {
+            messagingTemplate.convertAndSend("/topic/notifications/" + member.getMemberIndex(), savedNotification.toDto());
+            log.info("Notification sent to WebSocket for member ID: {}", member.getMemberIndex());
+        } catch (Exception e) {
+            log.warn("WebSocket 전송 실패 - 유저가 오프라인 상태일 수 있습니다. 알림은 DB에 저장되어 있습니다. member ID: {}", member.getMemberIndex(), e);
+        }
     }
 
-    // 특정 회원의 읽지 않은 알림 조회 메서드
     @Transactional(readOnly = true)
     @Override
     public List<NotificationDto> getUnreadNotifications(Long memberIndex) {
-        return notificationRepository.findByMember_MemberIndexAndIsViewedFalse(memberIndex)
+        log.info("Fetching unread notifications for member ID: {}", memberIndex);
+        List<NotificationDto> unreadNotifications = notificationRepository.findByMember_MemberIndexAndIsViewedFalse(memberIndex)
                 .stream()
                 .map(Notification::toDto)
                 .collect(Collectors.toList());
+
+        log.info("Fetched {} unread notifications for member ID: {}", unreadNotifications.size(), memberIndex);
+        return unreadNotifications;
     }
 
-    // 특정 회원의 모든 알림 조회 메서드 (최신순)
     @Transactional(readOnly = true)
     @Override
     public List<NotificationDto> getAllNotifications(Long memberIndex) {
-        return notificationRepository.findByMember_MemberIndexOrderByAlertDateDesc(memberIndex)
+        log.info("Fetching all notifications for member ID: {}", memberIndex);
+        List<NotificationDto> allNotifications = notificationRepository.findByMember_MemberIndexOrderByAlertDateDesc(memberIndex)
                 .stream()
                 .map(Notification::toDto)
                 .collect(Collectors.toList());
+
+        log.info("Fetched {} total notifications for member ID: {}", allNotifications.size(), memberIndex);
+        return allNotifications;
     }
 
-    // 특정 알림을 읽음 상태로 업데이트
     @Transactional
     @Override
     public void markAsViewed(Long notificationIndex) {
+        log.info("Marking notification as viewed: ID {}", notificationIndex);
         Notification notification = notificationRepository.findById(notificationIndex)
-                .orElseThrow(() -> new IllegalArgumentException("해당 알림을 찾을 수 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("해당 알림을 찾을 수 없습니다. ID: " + notificationIndex));
         notification.setViewed(true);
         notificationRepository.save(notification);
+        log.info("Notification marked as viewed: ID {}", notificationIndex);
     }
 
+    @Override
+    public void sendAuctionStartNotification(Auction auction) {
+        log.info("Sending auction start notification for auction ID: {}", auction.getAuctionIndex());
+        createAndSendNotification(auction.getMember(), "경매 시작 알림",
+                "경매 " + auction.getAuctionIndex() + "가 곧 시작됩니다.",
+                NotificationType.AUCTION_START, auction.getAuctionIndex());
+    }
+
+    @Override
+    public void notifyServerMaintenance(String title, String content) {
+        log.info("Sending server maintenance notification");
+        Notification notification = Notification.builder()
+                .alertTitle(title)
+                .alertContent(content)
+                .alertDate(LocalDateTime.now())
+                .alertCategory(NotificationType.SERVER_MAINTENANCE)
+                .isViewed(false)
+                .build();
+
+        notificationRepository.save(notification);
+        messagingTemplate.convertAndSend("/topic/notifications/global", notification.toDto());
+        log.info("Server maintenance notification sent: {}", content);
+    }
+
+    @Override
+    public void notifyAuctionSold(Member seller, Long auctionIndex) {
+        log.info("Sending auction sold notification for auction ID: {}", auctionIndex);
+        createAndSendNotification(seller, "경매 낙찰 알림",
+                "경매 " + auctionIndex + "가 낙찰되었습니다.",
+                NotificationType.AUCTION_SOLD, auctionIndex);
+    }
+
+    @Override
+    public void notifyHigherBid(Member bidder, Long auctionIndex) {
+        log.info("Sending higher bid notification for auction ID: {}", auctionIndex);
+        createAndSendNotification(bidder, "상위 입찰자 등장",
+                "경매 " + auctionIndex + "에서 새로운 입찰자가 등장했습니다.",
+                NotificationType.HIGHER_BID, auctionIndex);
+    }
+
+    @Override
+    public void notifyAuctionWin(Member winner, Long auctionIndex) {
+        log.info("Sending auction win notification for auction ID: {}", auctionIndex);
+        createAndSendNotification(winner, "낙찰 알림",
+                "축하합니다! 경매 " + auctionIndex + "에서 낙찰되었습니다.",
+                NotificationType.AUCTION_WIN, auctionIndex);
+    }
+
+    @Override
+    public void notifyDeliveryConfirmation(Member sender, Member receiver, Long auctionIndex) {
+        log.info("Sending delivery confirmation notification for auction ID: {}", auctionIndex);
+        createAndSendNotification(receiver, "배송 확인 요청",
+                "경매 " + auctionIndex + "의 배송이 확인되었습니다.",
+                NotificationType.DELIVERY_CONFIRMATION, auctionIndex);
+    }
 }

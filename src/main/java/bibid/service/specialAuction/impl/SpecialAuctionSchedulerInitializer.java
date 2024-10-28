@@ -2,7 +2,10 @@ package bibid.service.specialAuction.impl;
 
 import bibid.entity.Auction;
 import bibid.entity.LiveStationChannel;
+import bibid.entity.Notification;
+import bibid.entity.NotificationType;
 import bibid.repository.livestation.LiveStationChannelRepository;
+import bibid.repository.notification.NotificationRepository;
 import bibid.service.livestation.LiveStationPoolManager;
 import bibid.repository.specialAuction.SpecialAuctionRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +25,8 @@ public class SpecialAuctionSchedulerInitializer {
     private final SpecialAuctionRepository specialAuctionRepository;
     private final SpecialAuctionScheduler specialAuctionScheduler;
     private final LiveStationPoolManager liveStationPoolManager;
-    private final LiveStationChannelRepository liveStationChannelRepository;
+    private final NotificationRepository notificationRepository; // NotificationRepository 추가
 
-    @EventListener(ApplicationReadyEvent.class)
     public void rescheduleAuctionsAfterRestart() {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime thirtyMinutesLater = now.plusMinutes(30);
@@ -82,4 +84,26 @@ public class SpecialAuctionSchedulerInitializer {
         }
 
     }
+
+    // 알림 스케줄링 메서드 추가
+    private void rescheduleNotificationsOnStartup() {
+        List<Notification> notifications = notificationRepository.findAll();
+
+        notifications.forEach(notification -> {
+            if (notification.getAlertCategory() == NotificationType.AUCTION_START) {
+                Auction auction = specialAuctionRepository.findById(notification.getReferenceIndex()).orElse(null);
+                if (auction != null) {
+                    specialAuctionScheduler.registerAlarm(auction); // 알림 스케줄링 등록
+                    log.info("기존 알림 스케줄 재등록: 경매 ID {}", auction.getAuctionIndex());
+                }
+            }
+        });
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void rescheduleOnStartup() {
+        rescheduleAuctionsAfterRestart(); // 기존 경매 스케줄링 메서드 호출
+        rescheduleNotificationsOnStartup(); // 알림 스케줄링 메서드 호출
+    }
+
 }

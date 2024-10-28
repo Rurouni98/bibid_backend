@@ -1,6 +1,8 @@
 package bibid.dto;
 
 import bibid.entity.*;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -17,8 +19,10 @@ public class NotificationDto {
     private String alertTitle;
     private String alertContent;
     private LocalDateTime alertDate;
-    private String alertCategory; // "구매/판매", "입금/출금","상위 입찰", "실시간 경매 시작"
+    @Enumerated(EnumType.STRING)
+    private NotificationType alertCategory;
     private boolean isViewed;
+    private Long referenceIndex;
 
     public Notification toEntity(Member member) {
         return Notification.builder()
@@ -29,6 +33,7 @@ public class NotificationDto {
                 .alertDate(this.alertDate)
                 .isViewed(this.isViewed)
                 .alertCategory(this.alertCategory)
+                .referenceIndex(this.referenceIndex)
                 .build();
     }
 
