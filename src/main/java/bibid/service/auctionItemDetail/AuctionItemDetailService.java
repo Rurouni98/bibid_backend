@@ -2,6 +2,8 @@ package bibid.service.auctionItemDetail;
 
 import bibid.dto.*;
 import bibid.entity.Member;
+import jakarta.transaction.Transactional;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.List;
 
@@ -22,7 +24,13 @@ public interface AuctionItemDetailService {
 
     AuctionInfoDto updateAuctionItemDetail(Long auctionIndex, BidRequestDto bidRequestDto, Member member);
 
-    void updateAuctionBiddingState();
+    @Scheduled(fixedRate = 60000)
+    @Transactional
+    void updateOngoingAuctions();
+
+    @Scheduled(fixedRate = 60000)
+    @Transactional
+    void updateCompletedAuctionStatus();
 
     List<String> findAuctionImagesByAuctionIndex(Long auctionIndex);
 }
