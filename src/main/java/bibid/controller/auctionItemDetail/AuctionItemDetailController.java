@@ -98,16 +98,22 @@ public class AuctionItemDetailController {
             // 직전 최고 입찰자 조회
             Member previousHighestBidder = getPreviousHighestBidder(auctionIndex);
 
+            // 본인이 직전 최고 입찰자인 경우 에러 처리
+            if (previousHighestBidder != null
+                    && previousHighestBidder.getMemberIndex().equals(customUserDetails.getMember().getMemberIndex())) {
+                log.warn("본인이 이미 최고가 입찰자입니다: memberId={}, auctionIndex={}", customUserDetails.getMember().getMemberIndex(), auctionIndex);
+                bidResponseDto.setStatusMessage("입찰 실패: 이미 최고가 입찰자입니다.");
+                bidResponseDto.setStatusCode(HttpStatus.BAD_REQUEST.value());
+                return ResponseEntity.badRequest().body(bidResponseDto);
+            }
+
             // 입찰 업데이트 로직 실행
             auctionItemDetailService.updateAuctionItemDetail(auctionIndex, bidRequestDto, customUserDetails.getMember());
 
-            // 상위 입찰 시, 직전 최고 입찰자에게 알림 전송 (멤버 인덱스 비교)
-            if (previousHighestBidder != null
-                    && !previousHighestBidder.getMemberIndex().equals(customUserDetails.getMember().getMemberIndex())) {
+            // 상위 입찰 시, 직전 최고 입찰자에게 알림 전송
+            if (previousHighestBidder != null) {
                 notificationService.notifyHigherBid(previousHighestBidder, auctionIndex);
                 log.info("상위 입찰 알림 전송 완료: auctionIndex={}, previousHighestBidderId={}", auctionIndex, previousHighestBidder.getMemberIndex());
-            } else {
-                log.info("알림 전송 생략: currentHighestBidderId={}는 직전 최고 입찰자와 동일", customUserDetails.getMember().getMemberIndex());
             }
 
             // 성공 응답 설정

@@ -45,4 +45,10 @@ public interface NotificationService {
     void notifyDeliveryConfirmation(Member sender, Member receiver, Long auctionIndex);
 
     List<NotificationDto> getNotificationsForMember(Long memberIndex);
+
+    void notifyExchange(Member member, String title, String content);
+
+    void notifyDeposit(Member member, String title, String content);
+
+    void notifyDirectMessage(Member sender, Member receiver, String content, Long auctionIndex);
 }

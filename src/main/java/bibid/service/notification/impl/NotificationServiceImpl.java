@@ -166,4 +166,23 @@ public class NotificationServiceImpl implements NotificationService {
                 .map(Notification::toDto)
                 .toList();
     }
+
+    @Override
+    public void notifyExchange(Member member, String title, String content) {
+        log.info("Sending exchange notification for member ID: {}", member.getMemberIndex());
+        createAndSendNotification(member, title, content, NotificationType.EXCHANGE_NOTIFICATION, null);
+    }
+
+    @Override
+    public void notifyDeposit(Member member, String title, String content) {
+        log.info("Sending deposit notification for member ID: {}", member.getMemberIndex());
+        createAndSendNotification(member, title, content, NotificationType.DEPOSIT_NOTIFICATION, null);
+    }
+
+    @Override
+    public void notifyDirectMessage(Member sender, Member receiver, String content, Long auctionIndex) {
+        log.info("Sending direct message notification from member ID: {} to member ID: {}", sender.getMemberIndex(), receiver.getMemberIndex());
+        createAndSendNotification(receiver, "새로운 메시지 도착", content, NotificationType.DIRECT_MESSAGE, auctionIndex);
+    }
+
 }
