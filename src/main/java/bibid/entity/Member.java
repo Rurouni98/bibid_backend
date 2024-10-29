@@ -23,22 +23,31 @@ import java.sql.Timestamp;
 public class Member {
     @Id
     @GeneratedValue(
-            strategy = GenerationType.IDENTITY,
+            strategy = GenerationType.SEQUENCE,
             generator = "memberSeqGenerator"
     )
     private Long memberIndex;
+
     private String name;
     private String oauthType = "Normal";
+
     @Column(unique = true)
     private String memberId;
+
     private String memberPw;
+
     @Column(unique = true)
     private String nickname;
+
     private String email;
     private String memberPnum;
     private String role;
     private String memberAddress;
     private String addressDetail;
+
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private Account account;
 
     @OneToOne(mappedBy = "member", cascade = CascadeType.ALL)
     @JsonManagedReference
@@ -63,7 +72,8 @@ public class Member {
                 .role(this.role)
                 .memberAddress(this.memberAddress)
                 .addressDetail(this.addressDetail)
-                .profileImageDto(this.profileImage.toDto())
+                .profileImageDto(this.profileImage != null ? this.profileImage.toDto() : null)
+                .accountDto(this.account.toDto())
                 .createTime(this.createTime)
                 .refreshToken(this.refreshToken)
                 .rememberMe(this.rememberMe)

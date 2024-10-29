@@ -1,9 +1,11 @@
 package bibid.service.member;
 
 import bibid.dto.MemberDto;
+import bibid.entity.Account;
 import bibid.entity.Member;
 import bibid.entity.SellerInfo;
 import bibid.repository.SellerInfoRepository;
+import bibid.repository.account.AccountRepository;
 import bibid.repository.member.MemberRepository;
 import bibid.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ public class MemberServiceImpl implements MemberService {
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
     private final SellerInfoRepository sellerInfoRepository;
+    private final AccountRepository accountRepository;
     private final JwtProvider jwtProvider;
     private Optional<Member> optionalMember = Optional.empty();
 
@@ -61,7 +64,13 @@ public class MemberServiceImpl implements MemberService {
                 .member(joinedMember)
                 .build();
 
+        Account account = Account.builder()
+                .member(joinedMember)
+                .userMoney("0")
+                .build();
+
         sellerInfoRepository.save(sellerInfo);
+        accountRepository.save(account);
 
         MemberDto joinedMemberDto = joinedMember.toDto();
 

@@ -30,11 +30,11 @@ public class MemberDto {
     private String memberAddress;
     private String addressDetail;
     private ProfileImageDto profileImageDto;
+    private AccountDto accountDto;
     private Timestamp createTime;
     private String token;
     private String refreshToken;
     private Boolean rememberMe;
-
 
     public Member toEntity() {
         return Member.builder()
@@ -50,9 +50,11 @@ public class MemberDto {
                 .memberAddress(this.memberAddress)
                 .addressDetail(this.addressDetail)
                 .profileImage(null)
+                .account(null)
                 .createTime(this.createTime)
                 .refreshToken(this.refreshToken)
                 .rememberMe(this.rememberMe)
                 .build();
     }
+
 }

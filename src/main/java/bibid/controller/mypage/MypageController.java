@@ -1,9 +1,11 @@
 package bibid.controller.mypage;
 
 import bibid.dto.*;
+import bibid.entity.Account;
 import bibid.entity.AuctionInfo;
 import bibid.entity.CustomUserDetails;
 import bibid.entity.Member;
+import bibid.service.account.AccountService;
 import bibid.service.mypage.MypageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +23,7 @@ import java.util.List;
 @Slf4j
 public class MypageController {
     private final MypageService mypageService;
+    private final AccountService accountService;
 
     @GetMapping
     public ResponseEntity<?> getMember(){
@@ -169,4 +172,28 @@ public class MypageController {
             return ResponseEntity.internalServerError().body(responseDto);
         }
     }
+
+
+    // 계좌 내역 요청
+    @GetMapping("/account")
+    public ResponseEntity<?> getAccountHistory(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        ResponseDto<Account> responseDto = new ResponseDto<>();
+
+        Long memberIndex = customUserDetails.getMember().getMemberIndex();
+
+        try {
+            Member member = customUserDetails.getMember();
+            Account account = accountService.findMemberIndex(member.getMemberIndex());
+
+            responseDto.setItem(account);
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("내가 입찰한 경매 리스트 조회 성공");
+
+            return ResponseEntity.ok(responseDto);
+        } catch (Exception e) {
+            log.error("계좌 사용 내역 조회 실패: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
 }

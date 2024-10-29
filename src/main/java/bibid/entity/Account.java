@@ -26,13 +26,15 @@ import java.util.Optional;
 public class Account {
     @Id
     @GeneratedValue(
-            strategy = GenerationType.IDENTITY,
+            strategy = GenerationType.SEQUENCE,
             generator = "accountSeqGenerator"
     )
     private Long accountIndex;
+
     @OneToOne
     @JoinColumn(name = "memberIndex")
     private Member member;
+
     private String userMoney;
 
     // 경매 정보

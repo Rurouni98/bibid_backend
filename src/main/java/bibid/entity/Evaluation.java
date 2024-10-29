@@ -19,7 +19,7 @@ import lombok.*;
 public class Evaluation {
     @Id
     @GeneratedValue(
-            strategy = GenerationType.IDENTITY,
+            strategy = GenerationType.SEQUENCE,
             generator = "evaluationSeqGenerator"
     )
     private Long evaluationIndex;
