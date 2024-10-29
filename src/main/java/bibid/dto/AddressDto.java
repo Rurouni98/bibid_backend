@@ -22,7 +22,7 @@ public class AddressDto {
     private Long receiverPnum;
     private boolean isDefault;
 
-    public Address toEntiy(Member member) {
+    public Address toEntity(Member member) {
         return Address.builder()
                 .member(member)
                 .addressIndex(this.addressIndex)

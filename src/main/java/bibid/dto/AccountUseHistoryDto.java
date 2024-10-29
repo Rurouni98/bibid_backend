@@ -17,14 +17,16 @@ public class AccountUseHistoryDto {
     private Long auctionIndex;
     private String useType;
     private String changeAccount;
+    private Long accountIndex;
 
-    public AccountUseHistory toEntiy(Member member, Auction auction) {
+    public AccountUseHistory toEntity(Member member, Auction auction, Account account) {
         return AccountUseHistory.builder()
                 .accountUseHistoryIndex(this.accountUseHistoryIndex)
                 .member(member)
                 .auction(auction)
                 .useType(this.useType)
                 .changeAccount(this.changeAccount)
+                .account(account)
                 .build();
     }
 }

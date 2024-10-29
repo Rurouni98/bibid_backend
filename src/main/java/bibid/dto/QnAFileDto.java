@@ -16,7 +16,7 @@ public class QnAFileDto {
     private String fileName;
     private String fileOriginName;
 
-    public QnAFile toEntiy(QnA qna, Member member) {
+    public QnAFile toEntity(QnA qna, Member member) {
         return QnAFile.builder()
                 .qnaFileIndex(this.qnaFileIndex)
                 .qna(qna)

@@ -17,7 +17,7 @@ public class QnADto {
     private Long memberIndex;
     private String qnaContent;
 
-    public QnA toEntiy(Member member) {
+    public QnA toEntity(Member member) {
         return QnA.builder()
                 .qnaIndex(this.qnaIndex)
                 .member(member)

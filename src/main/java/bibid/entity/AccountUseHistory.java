@@ -26,14 +26,21 @@ public class AccountUseHistory {
             generator = "accountUseHistorySeqGenerator"
     )
     private Long accountUseHistoryIndex;
+
     @OneToOne
     @JoinColumn(name = "memberIndex")
     private Member member;
+
     @OneToOne
     @JoinColumn(name = "auctionIndex")
     private Auction auction;
+
     private String useType;
     private String changeAccount;
+
+    @ManyToOne
+    @JoinColumn(name = "accountIndex")
+    private Account account;
 
     public AccountUseHistoryDto toDto() {
         return AccountUseHistoryDto.builder()
@@ -42,6 +49,7 @@ public class AccountUseHistory {
                 .auctionIndex(this.auction.getAuctionIndex())
                 .useType(this.useType)
                 .changeAccount(this.changeAccount)
+                .accountIndex(this.account.getAccountIndex())
                 .build();
     }
 
