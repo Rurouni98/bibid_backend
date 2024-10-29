@@ -10,6 +10,7 @@ import bibid.entity.ProfileImage;
 
 import bibid.repository.mypage.MypageProfileRepository;
 import bibid.repository.mypage.MypageRepository;
+import bibid.repository.mypage.ProfileImageRepository;
 import bibid.repository.specialAuction.AuctionInfoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,7 @@ public class MypageServiceImpl implements MypageService {
     private final MypageRepository mypageRepository;
     private final MypageProfileRepository mypageProfileRepository;
     private final AuctionInfoRepository auctionInfoRepository;
+    private final ProfileImageRepository profileImageRepository;
 
     @Override
     public MemberDto modify(MemberDto memberDto, MultipartFile[] uploadProfiles) {
@@ -122,4 +124,37 @@ public class MypageServiceImpl implements MypageService {
                 .map(auctionInfo -> auctionInfo.getAuction().toDto())
                 .toList();
     }
+
+    @Override
+    public ProfileImageDto uploadOrUpdateProfileImage(MultipartFile profileImage, Member member) {
+
+        // 기존 프로필 이미지 조회 또는 새로 생성
+        ProfileImage prevProfileImage = profileImageRepository.findByMember(member)
+                .orElse(new ProfileImage());
+
+        if (profileImage != null && !profileImage.isEmpty()) {
+            // parserFileInfo 메서드를 사용하여 파일 정보를 ProfileImageDto로 생성
+            ProfileImageDto profileImageDto = fileUtils.parserFileInfo(profileImage, "mypage/profileImage");
+
+            // ProfileImage 엔티티에 파일 정보 업데이트
+            prevProfileImage.setFilepath(profileImageDto.getFilepath());
+            prevProfileImage.setFiletype(profileImageDto.getFiletype());
+            prevProfileImage.setFilesize(profileImageDto.getFilesize());
+            prevProfileImage.setOriginalname(profileImageDto.getOriginalname());
+            prevProfileImage.setNewfilename(profileImageDto.getNewfilename());
+            prevProfileImage.setFilestatus("UPDATED");
+        } else {
+            throw new IllegalArgumentException("프로필 이미지 파일이 비어 있습니다.");
+        }
+
+        // Member와 연관 관계 설정
+        prevProfileImage.setMember(member);
+
+        // 데이터베이스에 프로필 이미지 저장
+        ProfileImage savedProfileImage = profileImageRepository.save(prevProfileImage);
+
+        // 저장된 프로필 이미지를 ProfileImageDto로 변환하여 반환
+        return savedProfileImage.toDto();
+    }
+
 }

@@ -2,6 +2,7 @@ package bibid.service.mypage;
 
 import bibid.dto.AuctionDto;
 import bibid.dto.MemberDto;
+import bibid.dto.ProfileImageDto;
 import bibid.entity.Member;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,4 +18,6 @@ public interface MypageService {
     MemberDto findByNickname(String nickname);
 
     List<AuctionDto> findBiddedAuctions(Long memberIndex);
+
+    ProfileImageDto uploadOrUpdateProfileImage(MultipartFile file, Member member);
 }

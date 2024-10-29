@@ -1,9 +1,6 @@
 package bibid.controller.mypage;
 
-import bibid.dto.AuctionDto;
-import bibid.dto.AuctionInfoDto;
-import bibid.dto.MemberDto;
-import bibid.dto.ResponseDto;
+import bibid.dto.*;
 import bibid.entity.AuctionInfo;
 import bibid.entity.CustomUserDetails;
 import bibid.entity.Member;
@@ -146,4 +143,30 @@ public class MypageController {
         }
     }
 
+    @PostMapping("/profile-image")
+    public ResponseEntity<?> uploadProfileImage(
+            @RequestPart("profileImage") MultipartFile profileImage,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
+        ResponseDto<ProfileImageDto> responseDto = new ResponseDto<>();
+
+        try {
+            // 현재 로그인된 사용자의 Member 객체 가져오기
+            Member member = customUserDetails.getMember();
+
+            // 프로필 이미지 업로드 서비스 호출
+            ProfileImageDto updatedProfileImage = mypageService.uploadOrUpdateProfileImage(profileImage, member);
+
+            responseDto.setItem(updatedProfileImage);
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("Profile image uploaded successfully");
+
+            return ResponseEntity.ok(responseDto);
+        } catch (Exception e) {
+            log.error("Profile image upload error: {}", e.getMessage());
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage("Failed to upload profile image");
+            return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
 }
