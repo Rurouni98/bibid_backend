@@ -39,11 +39,14 @@ public class Member {
     private String role;
     private String memberAddress;
     private String addressDetail;
-    @OneToOne(cascade = CascadeType.ALL)
+
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL)
     @JsonManagedReference
     private ProfileImage profileImage;
+
     @CreationTimestamp
     private Timestamp createTime;
+
     private String refreshToken;
     private Boolean rememberMe;
 
@@ -60,7 +63,7 @@ public class Member {
                 .role(this.role)
                 .memberAddress(this.memberAddress)
                 .addressDetail(this.addressDetail)
-                .profileImage(this.profileImage)
+                .profileImageDto(this.profileImage.toDto())
                 .createTime(this.createTime)
                 .refreshToken(this.refreshToken)
                 .rememberMe(this.rememberMe)

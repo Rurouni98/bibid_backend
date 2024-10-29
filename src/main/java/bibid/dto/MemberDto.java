@@ -29,7 +29,7 @@ public class MemberDto {
     private String role;
     private String memberAddress;
     private String addressDetail;
-    private ProfileImage profileImage;
+    private ProfileImageDto profileImageDto;
     private Timestamp createTime;
     private String token;
     private String refreshToken;
@@ -49,7 +49,7 @@ public class MemberDto {
                 .role(this.role)
                 .memberAddress(this.memberAddress)
                 .addressDetail(this.addressDetail)
-                .profileImage(this.profileImage)
+                .profileImage(null)
                 .createTime(this.createTime)
                 .refreshToken(this.refreshToken)
                 .rememberMe(this.rememberMe)
