@@ -27,7 +27,8 @@ public class PaymentController {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private static final String WIDGET_SECRET_KEY = "test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6";
-    private static final String API_SECRET_KEY = "test_sk_zXLkKEypNArWmo50nX3lmeaxYG5R";
+//    private static final String API_SECRET_KEY = "test_sk_zXLkKEypNArWmo50nX3lmeaxYG5R";
+    private static final String API_SECRET_KEY = "test_sk_5OWRapdA8dzqQO0ARxPPVo1zEqZK";
     private final Map<String, String> billingKeyMap = new HashMap<>();
 
     @RequestMapping(value = {"/confirm/widget", "/confirm/payment"})

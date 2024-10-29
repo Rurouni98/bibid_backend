@@ -24,6 +24,8 @@ public class QAccount extends EntityPathBase<Account> {
 
     public final NumberPath<Long> accountIndex = createNumber("accountIndex", Long.class);
 
+    public final ListPath<AccountUseHistory, QAccountUseHistory> accountUseHistoryList = this.<AccountUseHistory, QAccountUseHistory>createList("accountUseHistoryList", AccountUseHistory.class, QAccountUseHistory.class, PathInits.DIRECT2);
+
     public final QMember member;
 
     public final StringPath userMoney = createString("userMoney");
