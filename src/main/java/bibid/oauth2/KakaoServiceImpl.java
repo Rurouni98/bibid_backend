@@ -1,34 +1,26 @@
 package bibid.oauth2;
 
-import bibid.dto.MemberDto;
-import bibid.dto.ResponseDto;
 import bibid.entity.CustomUserDetails;
 import bibid.entity.Member;
 import bibid.jwt.JwtProvider;
 import bibid.repository.member.MemberRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import jakarta.servlet.http.Cookie;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.http.HttpResponse;
 import java.security.Principal;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 
 @Service
@@ -214,7 +206,7 @@ public class KakaoServiceImpl {
 
     }
 
-    public String findType(Principal principal) {
+    public String checkLogin(Principal principal) {
         if (principal == null) {
             throw new IllegalStateException("현재 인증된 사용자를 찾을 수 없습니다.");
         }
@@ -232,14 +224,16 @@ public class KakaoServiceImpl {
             throw new RuntimeException("Member 정보를 찾을 수 없습니다.");
         }
 
-        String findMemberNickname = memberId.getNickname();
+        String findMemberId = memberId.getMemberId();
 
-        Member member = memberRepository.findByNickname(findMemberNickname);
-        if (member == null) {
+        Optional <Member> member = memberRepository.findByMemberId(findMemberId);
+        if (!member.isPresent()) {
             throw new RuntimeException("Member not found");
         }
 
-        return member.getOauthType();
+        Member loginMember = member.get();
+
+        return loginMember.getRole();
 
     }
 

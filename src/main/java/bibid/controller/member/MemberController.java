@@ -16,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
 import java.security.Principal;
 import java.util.HashMap;
@@ -96,18 +95,34 @@ public class MemberController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody MemberDto memberDto) {
+    public ResponseEntity<?> login(@RequestBody MemberDto memberDto, HttpServletResponse response) {
         ResponseDto<MemberDto> responseDto = new ResponseDto<>();
 
         try {
             log.info("login memberDto: {}", memberDto.toString());
             MemberDto loginMemberDto = memberService.login(memberDto);
+            String jwtToken = loginMemberDto.getToken();
+            Boolean rememberMe = loginMemberDto.getRememberMe();
+            log.info("rememberMe: {}", rememberMe);
+            if (rememberMe) {
+                Cookie cookie = new Cookie("ACCESS_TOKEN", jwtToken);
+                cookie.setHttpOnly(true);
+                cookie.setPath("/");
+                cookie.setMaxAge(7 * 24 * 60 * 60);
+                response.addCookie(cookie);
+            } else {
+                Cookie cookie = new Cookie("ACCESS_TOKEN", jwtToken);
+                cookie.setHttpOnly(true);
+                cookie.setPath("/");
+                response.addCookie(cookie);
+            }
 
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setStatusMessage("ok");
             responseDto.setItem(loginMemberDto);
 
             return ResponseEntity.ok(responseDto);
+
         } catch (Exception e) {
             log.error("login error: {}", e.getMessage());
             responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -139,8 +154,8 @@ public class MemberController {
 
             Cookie[] cookies = request.getCookies();
             if (cookies != null) {
-                for(Cookie cookie : cookies){
-                    if("ACCESS_TOKEN".equals(cookie.getName())){
+                for (Cookie cookie : cookies) {
+                    if ("ACCESS_TOKEN".equals(cookie.getName())) {
                         cookie.setMaxAge(0);
                         cookie.setPath("/");
                         cookie.setHttpOnly(true);

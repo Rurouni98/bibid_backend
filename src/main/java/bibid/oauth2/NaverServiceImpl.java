@@ -144,7 +144,7 @@ public class NaverServiceImpl {
     }
 
     // ㅁ [4-1번] DB
-    public Map<String, String> getMember(String jwtTokenValue, Principal principal) {
+    public Map<String, String> getMember(String jwtTokenValue) {
 
         Map<String, String> item = new HashMap<>();
         Member member = null;
@@ -168,8 +168,6 @@ public class NaverServiceImpl {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-
     }
 
     // ㅁ [4-1번] DB에서 리프레시토큰 가져오기
