@@ -34,7 +34,7 @@ public class SpecialAuctionController {
     @GetMapping("/list")
     public ResponseEntity<?> getAuctionsByType(
             @RequestParam("auctionType") String auctionType,
-            @PageableDefault(page = 0, size = 10) Pageable pageable) {
+            @PageableDefault(page = 0, size = 100) Pageable pageable) {
 
         // 응답 데이터를 담을 Map 선언
         ResponseDto<AuctionDto> responseDto = new ResponseDto<>();
