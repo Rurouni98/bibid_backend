@@ -117,7 +117,7 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
 
         // 입찰 유형이 '즉시구매'일 경우 경매 상태를 '완료'로 설정하고 DB에 업데이트
         if (bidRequestDto.getUserBiddingType().equals("buyNow")) {
-            auction.setAuctionStatus("경매종료");
+            auction.setAuctionStatus("경매 완료");
             auctionRepository.save(auction); // 경매 상태를 "완료"로 갱신
         }
 
@@ -144,7 +144,7 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
 
 
         List<Auction> completedAuctions = auctionRepository.findByEndingLocalDateTimeBeforeAndAuctionStatusAndAuctionType(
-                currentTime, "진행중", "일반 경매");
+                currentTime, "경매 시작", "일반 경매");
 
         if (completedAuctions.isEmpty()) {
             log.info("No completed auctions to finalize. Skipping this cycle.");

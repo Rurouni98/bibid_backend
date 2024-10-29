@@ -71,7 +71,7 @@ public class SpecialAuctionScheduler {
                 }
                 liveStationPoolManager.releaseChannel(channel);
                 auction.setLiveStationChannel(null);
-                auction.setAuctionStatus("경매종료");
+                auction.setAuctionStatus("경매 완료");
                 auctionRepository.save(auction);
                 log.info("1시간 경과로 강제 채널 반납 완료: 경매 ID {}", auctionIndex);
             } catch (Exception e) {

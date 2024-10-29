@@ -1,17 +1,22 @@
 package bibid.service.mypage;
 
 import bibid.common.FileUtils;
+import bibid.dto.AuctionDto;
 import bibid.dto.MemberDto;
 import bibid.dto.ProfileImageDto;
+import bibid.entity.AuctionInfo;
 import bibid.entity.Member;
 import bibid.entity.ProfileImage;
 
 import bibid.repository.mypage.MypageProfileRepository;
 import bibid.repository.mypage.MypageRepository;
+import bibid.repository.specialAuction.AuctionInfoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +25,7 @@ public class MypageServiceImpl implements MypageService {
     private final FileUtils fileUtils;
     private final MypageRepository mypageRepository;
     private final MypageProfileRepository mypageProfileRepository;
+    private final AuctionInfoRepository auctionInfoRepository;
 
     @Override
     public MemberDto modify(MemberDto memberDto, MultipartFile[] uploadProfiles) {
@@ -40,11 +46,11 @@ public class MypageServiceImpl implements MypageService {
 
         ProfileImage myPageProfile = existingMember.getProfileImage();
 
-        if(uploadProfiles != null && uploadProfiles.length > 0) {
+        if (uploadProfiles != null && uploadProfiles.length > 0) {
 
             MultipartFile file = uploadProfiles[uploadProfiles.length - 1];
-            if(!file.getOriginalFilename().equalsIgnoreCase("")
-                    && file.getOriginalFilename() != null){
+            if (!file.getOriginalFilename().equalsIgnoreCase("")
+                    && file.getOriginalFilename() != null) {
                 ProfileImageDto addProfileFileDto = fileUtils.parserFileInfo(file, "bitcamp119/");
 
                 addProfileFileDto.setMemberIndex(memberDto.getMemberIndex());
@@ -52,7 +58,7 @@ public class MypageServiceImpl implements MypageService {
 
                 log.info("addProfileFileDto : {}", addProfileFileDto.toString());
                 ProfileImage updateProfile = addProfileFileDto.toEntity(memberDto.toEntity());
-                if(myPageProfile != null){
+                if (myPageProfile != null) {
                     myPageProfile.setFilepath(addProfileFileDto.getFilepath());
                     myPageProfile.setFilesize(addProfileFileDto.getFilesize());
                     myPageProfile.setFiletype(addProfileFileDto.getFiletype());
@@ -100,5 +106,20 @@ public class MypageServiceImpl implements MypageService {
         MemberDto memberDto = member.toDto();
         memberDto.setMemberPw(""); // 비밀번호를 숨김
         return memberDto;
+    }
+
+    @Override
+    public List<AuctionDto> findBiddedAuctions(Long memberIndex) {
+        log.info("Finding bidded auctions for memberIndex: {}", memberIndex);
+
+        // AuctionInfo 엔티티를 통해 입찰 기록을 가져온 후, AuctionDto 리스트로 변환
+        List<AuctionInfo> biddedInfos = auctionInfoRepository.findByBidder_MemberIndex(memberIndex);
+
+        log.info("Number of bidded auctions found: {}", biddedInfos.size());
+        biddedInfos.forEach(info -> log.info("Auction Info: {}", info));
+
+        return biddedInfos.stream()
+                .map(auctionInfo -> auctionInfo.getAuction().toDto())
+                .toList();
     }
 }
