@@ -48,6 +48,8 @@ public class QMember extends EntityPathBase<Member> {
 
     public final StringPath refreshToken = createString("refreshToken");
 
+    public final BooleanPath rememberMe = createBoolean("rememberMe");
+
     public final StringPath role = createString("role");
 
     public QMember(String variable) {

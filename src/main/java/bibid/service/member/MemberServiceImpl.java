@@ -83,6 +83,7 @@ public class MemberServiceImpl implements MemberService {
         MemberDto loginMemberDto = member.toDto();
 
         loginMemberDto.setMemberPw("");
+        loginMemberDto.setRememberMe(memberDto.getRememberMe());
         loginMemberDto.setToken(jwtProvider.createJwt(member));
 
         return loginMemberDto;
@@ -99,6 +100,8 @@ public class MemberServiceImpl implements MemberService {
             return null;
         }
     }
+
+
 
     @Override
     public String modifyPasswd(String newPasswd) {

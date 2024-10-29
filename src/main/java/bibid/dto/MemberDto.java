@@ -33,6 +33,7 @@ public class MemberDto {
     private Timestamp createTime;
     private String token;
     private String refreshToken;
+    private Boolean rememberMe;
 
 
     public Member toEntity() {
@@ -51,6 +52,7 @@ public class MemberDto {
                 .profileImage(this.profileImage)
                 .createTime(this.createTime)
                 .refreshToken(this.refreshToken)
+                .rememberMe(this.rememberMe)
                 .build();
     }
 }

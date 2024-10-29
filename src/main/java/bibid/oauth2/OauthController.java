@@ -1,28 +1,18 @@
 package bibid.oauth2;
 
 import bibid.dto.ResponseDto;
-
-import bibid.entity.Member;
 import bibid.jwt.JwtProvider;
 import bibid.service.member.MemberServiceImpl;
-import com.google.api.client.auth.oauth2.TokenResponse;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.Cookie;
-import org.springframework.web.client.RestTemplate;
-
-import java.net.http.HttpResponse;
 import java.security.Principal;
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController //(1)
@@ -59,13 +49,11 @@ public class OauthController {
         try {
             log.info("login KakaoProfileDto: {}", jwtToken.toString());
             Cookie cookie = new Cookie("ACCESS_TOKEN", jwtToken);
-            cookie.setHttpOnly(true); // 클라이언트 측 JavaScript에서 쿠키 접근 방지
-            cookie.setPath("/"); // 쿠키의 유효 경로 설정
-            cookie.setMaxAge(3600); // 쿠키의 만료 시간 설정 (1시간)
-            response.addCookie(cookie); // 쿠키 추가
+            cookie.setHttpOnly(true);
+            cookie.setPath("/");
+            cookie.setMaxAge(7 * 24 * 60 * 60);
+            response.addCookie(cookie);
 
-
-//            responseDto.setItem(memberDto);
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setStatusMessage("Sent to Client");
             responseDto.setItem(memberInfo);
@@ -84,7 +72,7 @@ public class OauthController {
     @GetMapping("/naver/callback") // (3)
     public ResponseEntity<?> getNaverJwtToken(@RequestParam("code") String code, HttpServletResponse response) {
 
-        // 넘어온 인가 코드를 통해 access_token 발급 /r/(5)
+        // 넘어온 인가 코드를 통해 access_token 발급
         oauthToken = naverServiceImpl.getAccessToken(code);
         System.out.println("oauthToken" + oauthToken);
 
@@ -102,7 +90,7 @@ public class OauthController {
             Cookie cookie = new Cookie("ACCESS_TOKEN", jwtToken);
             cookie.setHttpOnly(true); // 클라이언트 측 JavaScript에서 쿠키 접근 방지
             cookie.setPath("/"); // 쿠키의 유효 경로 설정
-            cookie.setMaxAge(3600); // 쿠키의 만료 시간 설정 (1시간)
+            cookie.setMaxAge(7 * 24 * 60 * 60);
             response.addCookie(cookie); // 쿠키 추가
 
             responseDto.setStatusCode(HttpStatus.OK.value());
@@ -123,10 +111,8 @@ public class OauthController {
     @PostMapping("/google/callback")
     public ResponseEntity<?> getGoogleJwtToken(@RequestBody Map<String, String> body, HttpServletResponse response) {
         String accessToken = body.get("access_token");
-        System.out.println("받은 Access Token: " + accessToken);
 
         String jwtToken = googleServiceImpl.saveUserAndGetToken(accessToken);
-        System.out.println("jwtToken:" + jwtToken);
 
         // 프론트에 넘겨 줄 회원정보 조회
         ResponseDto<Map<String, String>> responseDto = new ResponseDto<>();
@@ -137,7 +123,7 @@ public class OauthController {
             Cookie cookie = new Cookie("ACCESS_TOKEN", jwtToken);
             cookie.setHttpOnly(true); // 클라이언트 측 JavaScript에서 쿠키 접근 방지
             cookie.setPath("/"); // 쿠키의 유효 경로 설정
-            cookie.setMaxAge(3600); // 쿠키의 만료 시간 설정 (1시간)
+            cookie.setMaxAge(7 * 24 * 60 * 60);
             response.addCookie(cookie); // 쿠키 추가
 
             responseDto.setStatusCode(HttpStatus.OK.value());
@@ -157,7 +143,6 @@ public class OauthController {
         ResponseDto<String> responseDto = new ResponseDto<>();
 
         Cookie[] cookies = request.getCookies();
-        System.out.println("쿠키밸류:" + cookies);
         try {
             boolean hasAccessToken = false;
 

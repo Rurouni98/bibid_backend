@@ -45,6 +45,7 @@ public class Member {
     @CreationTimestamp
     private Timestamp createTime;
     private String refreshToken;
+    private Boolean rememberMe;
 
     public MemberDto toDto() {
         return MemberDto.builder()
@@ -62,6 +63,7 @@ public class Member {
                 .profileImage(this.profileImage)
                 .createTime(this.createTime)
                 .refreshToken(this.refreshToken)
+                .rememberMe(this.rememberMe)
                 .build();
     }
 }
