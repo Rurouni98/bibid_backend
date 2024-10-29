@@ -1,28 +1,29 @@
 package bibid.service.auctionItemDetail.impl;
 
 import bibid.dto.*;
-import bibid.entity.Auction;
-import bibid.entity.AuctionImage;
-import bibid.entity.AuctionInfo;
-import bibid.entity.Member;
+import bibid.entity.*;
 import bibid.repository.AuctionImageRepository;
 import bibid.repository.SellerInfoRepository;
 import bibid.repository.auction.AuctionRepository;
 import bibid.repository.member.MemberRepository;
 import bibid.repository.specialAuction.AuctionInfoRepository;
 import bibid.service.auctionItemDetail.AuctionItemDetailService;
+import bibid.service.notification.NotificationService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
 
     private final AuctionRepository auctionRepository;
@@ -30,6 +31,7 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
     private final MemberRepository memberRepository;
     private final SellerInfoRepository sellerInfoRepository;
     private final AuctionImageRepository auctionImageRepository;
+    private final NotificationService notificationService;
 
     @Override
     public AuctionDto findAuctionItem(Long auctionIndex) {
@@ -125,14 +127,71 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
         return auctionInfo.toDto();
     }
 
-
-    @Override
     @Scheduled(fixedRate = 60000)
     @Transactional
-    public void updateAuctionBiddingState() {
-        auctionRepository.updateCompletedAuctions(LocalDateTime.now());
-        auctionRepository.updateOngoingAuctions(LocalDateTime.now());
+    @Override
+    public void updateOngoingAuctions() {
+        auctionRepository.updateOngoingAuctions(LocalDateTime.now(), "일반 경매");
+        log.info("Updated ongoing auctions based on the current time");
     }
+
+    @Scheduled(fixedRate = 60000)
+    @Transactional
+    @Override
+    public void updateCompletedAuctionStatus() {
+
+        LocalDateTime currentTime = LocalDateTime.now();
+
+
+        List<Auction> completedAuctions = auctionRepository.findByEndingLocalDateTimeBeforeAndAuctionStatusAndAuctionType(
+                currentTime, "진행중", "일반 경매");
+
+        if (completedAuctions.isEmpty()) {
+            log.info("No completed auctions to finalize. Skipping this cycle.");
+            return;
+        }
+
+        for (Auction auction : completedAuctions) {
+            finalizeAuction(auction.getAuctionIndex());
+        }
+    }
+
+    @Transactional
+    public void finalizeAuction(Long auctionIndex) {
+        Auction auction = auctionRepository.findById(auctionIndex)
+                .orElseThrow(() -> new IllegalArgumentException("해당 경매를 찾을 수 없습니다. ID: " + auctionIndex));
+
+        if (auction.getEndingLocalDateTime().isBefore(LocalDateTime.now())) {
+            // 최고 입찰 정보 조회
+            AuctionInfo lastBidInfo = auction.getAuctionInfoList()
+                    .stream()
+                    .max(Comparator.comparing(AuctionInfo::getBidTime))
+                    .orElse(null);
+
+            if (lastBidInfo != null) {
+                // 낙찰자 정보 및 상세 정보 설정
+                AuctionDetail auctionDetail = auction.getAuctionDetail();
+                auctionDetail.setWinnerIndex(lastBidInfo.getBidder().getMemberIndex());
+                auctionDetail.setWinningBid(lastBidInfo.getBidAmount());
+
+                auction.setAuctionStatus("경매 종료"); // 상태를 '경매 종료'로 변경
+
+                // 낙찰자와 판매자에게 알림 전송
+                notificationService.notifyAuctionWin(lastBidInfo.getBidder(), auctionIndex);
+                notificationService.notifyAuctionSold(auction.getMember(), auctionIndex);
+
+                log.info("Auction finalized with winner for auction ID: {}, winner ID: {}, winning bid: {}",
+                        auctionIndex, lastBidInfo.getBidder().getMemberIndex(), lastBidInfo.getBidAmount());
+            } else {
+                // 입찰 정보가 없을 경우 유찰 처리
+                auction.setAuctionStatus("유찰"); // 경매 상태를 '유찰'로 설정
+                log.info("Auction finalized without winner for auction ID: {}, status set to '유찰'", auctionIndex);
+            }
+
+            auctionRepository.save(auction); // 업데이트된 정보 저장
+        }
+    }
+
 
     @Override
     public List<String> findAuctionImagesByAuctionIndex(Long auctionIndex) {

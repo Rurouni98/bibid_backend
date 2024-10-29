@@ -96,13 +96,21 @@ public class SpecialAuctionScheduler {
                         .orElse(null);
 
                 if (lastBidInfo != null) {
-                    AuctionDetail auctionDetail = new AuctionDetail();
-                    auctionDetail.setAuction(auction);
+
+                    // 낙찰자 정보 및 상세 정보 설정
+                    AuctionDetail auctionDetail = auction.getAuctionDetail();
                     auctionDetail.setWinnerIndex(lastBidInfo.getBidder().getMemberIndex());
                     auctionDetail.setWinningBid(lastBidInfo.getBidAmount());
 
-                    auction.setAuctionStatus("낙찰");
-                    auction.setAuctionDetail(auctionDetail);
+                    auction.setAuctionStatus("낙찰"); // 경매 상태를 '낙찰'로 설정
+
+                    // 낙찰자와 판매자에게 알림 전송
+                    notificationService.notifyAuctionWin(lastBidInfo.getBidder(), auctionIndex);
+                    notificationService.notifyAuctionSold(auction.getMember(), auctionIndex);
+
+                    log.info("Auction finalized with winner for auction ID: {}, winner ID: {}, winning bid: {}",
+                            auctionIndex, lastBidInfo.getBidder().getMemberIndex(), lastBidInfo.getBidAmount());
+
                 } else {
                     auction.setAuctionStatus("유찰");
                 }
