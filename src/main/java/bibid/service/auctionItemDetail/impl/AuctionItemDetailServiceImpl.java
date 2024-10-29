@@ -174,7 +174,7 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
                 auctionDetail.setWinnerIndex(lastBidInfo.getBidder().getMemberIndex());
                 auctionDetail.setWinningBid(lastBidInfo.getBidAmount());
 
-                auction.setAuctionStatus("경매 종료"); // 상태를 '경매 종료'로 변경
+                auction.setAuctionStatus("낙찰"); // 상태를 '낙찰'로 변경
 
                 // 낙찰자와 판매자에게 알림 전송
                 notificationService.notifyAuctionWin(lastBidInfo.getBidder(), auctionIndex);

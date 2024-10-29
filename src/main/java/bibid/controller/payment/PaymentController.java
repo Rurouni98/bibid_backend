@@ -31,11 +31,23 @@ public class PaymentController {
     private static final String API_SECRET_KEY = "test_sk_5OWRapdA8dzqQO0ARxPPVo1zEqZK";
     private final Map<String, String> billingKeyMap = new HashMap<>();
 
-    @RequestMapping(value = {"/confirm/widget", "/confirm/payment"})
-    public ResponseEntity<JSONObject> confirmPayment(HttpServletRequest request, @RequestBody String jsonBody) throws Exception {
-        String secretKey = request.getRequestURI().contains("/confirm/payment") ? API_SECRET_KEY : WIDGET_SECRET_KEY;
-        JSONObject response = sendRequest(parseRequestData(jsonBody), secretKey, "https://api.tosspayments.com/v1/payments/confirm");
+    @RequestMapping(value = "/api/payments/confirm", method = RequestMethod.POST)
+    public ResponseEntity<JSONObject> confirmPayment(@RequestBody String jsonBody) throws Exception {
+        JSONObject requestData = parseRequestData(jsonBody);
+        String secretKey = WIDGET_SECRET_KEY;
+
+        JSONObject response = sendRequest(requestData, secretKey, "https://api.tosspayments.com/v1/payments/confirm");
         int statusCode = response.containsKey("error") ? 400 : 200;
+
+        // 성공 또는 실패 URL 반환
+        String successUrl = (String) requestData.get("successUrl");
+        String failUrl = (String) requestData.get("failUrl");
+        if (response.containsKey("error")) {
+            response.put("failUrl", failUrl);
+        } else {
+            response.put("successUrl", successUrl);
+        }
+
         return ResponseEntity.status(statusCode).body(response);
     }
 
