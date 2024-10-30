@@ -8,6 +8,7 @@ import bibid.repository.member.MemberRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -34,8 +35,19 @@ public class NaverServiceImpl {
     private final JwtProvider jwtProvider;
     private final UserDetailsService userDetailsService;
 
+    @Value("${front.url}")
+    private String frontUrl;
+
+    @Value("${naver.client.id}")
+    private String naverClientId;
+
+    @Value("${naver.client.secret}")
+    private String naverClientSecret;
+
     // ㅁ [1번] 코드로 카카오에서 토큰 받기
     public OauthTokenDto getAccessToken(String code) {
+
+
 
         //(1) RestfulAPI 준비
         RestTemplate rt = new RestTemplate();
@@ -47,9 +59,9 @@ public class NaverServiceImpl {
         //(3) 어떤 내용을 보내줄 건지
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
-        params.add("client_id", "wa3QkzrBALL4WACeB12Z");
-        params.add("client_secret", "aW5bQUet2D");
-        params.add("redirect_uri", "http://223.130.141.179:3000/auth/naver/callback");
+        params.add("client_id", naverClientId);
+        params.add("client_secret", naverClientSecret);
+        params.add("redirect_uri", frontUrl + ":3000/auth/naver/callback");
         params.add("code", code);
 
         //(4) 어디에 담아줄 건지
