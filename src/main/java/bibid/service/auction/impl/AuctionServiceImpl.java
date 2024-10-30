@@ -126,4 +126,13 @@ public class AuctionServiceImpl implements AuctionService {
         Pageable sortedByRegdate = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("regdate").descending());
         return auctionRepository.searchAll(searchCondition, searchKeyword, sortedByRegdate).map(Auction::toDto);
     }
+
+    @Override
+    public void remove(Long auctionIndex) {
+        try {
+            auctionRepository.deleteByAuctionIndex(auctionIndex);
+        } catch (Exception e) {
+            throw new RuntimeException("오류가 발생했습니다.");
+        }
+    }
 }

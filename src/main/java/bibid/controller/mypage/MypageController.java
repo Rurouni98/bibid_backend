@@ -6,6 +6,7 @@ import bibid.entity.AuctionInfo;
 import bibid.entity.CustomUserDetails;
 import bibid.entity.Member;
 import bibid.service.account.AccountService;
+import bibid.service.auction.AuctionService;
 import bibid.service.mypage.MypageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class MypageController {
+    private final AuctionService auctionService;
     private final MypageService mypageService;
     private final AccountService accountService;
 
@@ -217,6 +219,27 @@ public class MypageController {
             log.error("getMyAuctions error: ", e);
             responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
             responseDto.setStatusMessage("오류가 발생했습니다.");
+            return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
+
+    @DeleteMapping("/my-auctions/{auctionIndex}")
+    public ResponseEntity<?> deleteMyAuction(@PathVariable Long auctionIndex,
+                                             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        ResponseDto<AuctionDto> responseDto = new ResponseDto<>();
+
+        try {
+            log.info("deleteMyAuction auctionIndex: {}", auctionIndex);
+            auctionService.remove(auctionIndex);
+
+            responseDto.setStatusCode(HttpStatus.NO_CONTENT.value());
+            responseDto.setStatusMessage("no content");
+
+            return ResponseEntity.ok(responseDto);
+        } catch (Exception e) {
+            log.error("deleteMyAuction error: {}", e.getMessage());
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage(e.getMessage());
             return ResponseEntity.internalServerError().body(responseDto);
         }
     }

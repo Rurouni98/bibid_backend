@@ -1,6 +1,7 @@
 package bibid.repository.auction;
 
 import bibid.entity.Auction;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -47,4 +48,9 @@ public interface AuctionRepository extends JpaRepository<Auction, Long>, Auction
     List<Auction> findByEndingLocalDateTimeBeforeAndAuctionStatusAndAuctionType(LocalDateTime currentTime, String auctionStatus, String auctionType);
 
     List<Auction> findByMember_MemberIndex(Long memberIndex);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Auction a WHERE a.auctionIndex = :auctionIndex")
+    void deleteByAuctionIndex(@Param("auctionIndex") Long auctionIndex);
 }
