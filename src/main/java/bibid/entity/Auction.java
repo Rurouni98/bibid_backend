@@ -76,7 +76,7 @@ public class Auction {
     private List<AuctionInfo> auctionInfoList;
 
     // 경매세부
-    @OneToOne(mappedBy = "auction", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "auction", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private AuctionDetail auctionDetail;
 
