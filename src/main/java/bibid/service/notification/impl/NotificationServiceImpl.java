@@ -35,7 +35,7 @@ public class NotificationServiceImpl implements NotificationService {
     public List<NotificationDto> getNotificationsForMember(Long memberIndex) {
         List<Notification> notifications = notificationRepository.findByMember_MemberIndex(memberIndex);
         return notifications.stream()
-                .map(Notification::toDto)
+                .map(NotificationDto::new)
                 .collect(Collectors.toList());
     }
 
