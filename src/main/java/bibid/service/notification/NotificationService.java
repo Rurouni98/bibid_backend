@@ -6,6 +6,7 @@ import bibid.entity.Member;
 import bibid.entity.NotificationType;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface NotificationService {
@@ -41,10 +42,9 @@ public interface NotificationService {
     // 내가 경매에서 낙찰된 경우 알림
     void notifyAuctionWin(Member winner, Long auctionIndex);
 
-    // 물품 배송/수령 확인 알림
-    void notifyDeliveryConfirmation(Member sender, Member receiver, Long auctionIndex);
-
     List<NotificationDto> getNotificationsForMember(Long memberIndex);
+
+    void notifyDeliveryConfirmation(Member sender, Member receiver, Long auctionIndex);
 
     void notifyExchange(Member member, String title, String content);
 

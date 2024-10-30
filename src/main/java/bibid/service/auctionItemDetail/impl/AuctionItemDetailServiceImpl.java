@@ -173,6 +173,7 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
                 AuctionDetail auctionDetail = auction.getAuctionDetail();
                 auctionDetail.setWinnerIndex(lastBidInfo.getBidder().getMemberIndex());
                 auctionDetail.setWinningBid(lastBidInfo.getBidAmount());
+                auctionDetail.setWinnerNickname(lastBidInfo.getBidder().getNickname());
 
                 auction.setAuctionStatus("낙찰"); // 상태를 '낙찰'로 변경
 

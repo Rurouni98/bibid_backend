@@ -103,6 +103,7 @@ public class SpecialAuctionScheduler {
                     AuctionDetail auctionDetail = auction.getAuctionDetail();
                     auctionDetail.setWinnerIndex(lastBidInfo.getBidder().getMemberIndex());
                     auctionDetail.setWinningBid(lastBidInfo.getBidAmount());
+                    auctionDetail.setWinnerNickname(lastBidInfo.getBidder().getNickname());
 
                     auction.setAuctionStatus("낙찰"); // 경매 상태를 '낙찰'로 설정
 

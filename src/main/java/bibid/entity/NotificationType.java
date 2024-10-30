@@ -5,7 +5,8 @@ public enum NotificationType {
     AUCTION_SOLD,          // 내가 올린 경매 낙찰
     HIGHER_BID,            // 상위 입찰자 등장
     AUCTION_WIN,           // 내가 낙찰자
-    DELIVERY_CONFIRMATION, // 판매자/낙찰자 간 물품 배송/수령
+    PURCHASE_CONFIRMATION, // 구매한 물품 정산 공지
+    SALE_CONFIRMATION, // 판매된 물품 정산 공지
     SERVER_MAINTENANCE,    // 서버 점검
     EXCHANGE_NOTIFICATION,  // 환전 알림
     DEPOSIT_NOTIFICATION,   // 충전 알림
