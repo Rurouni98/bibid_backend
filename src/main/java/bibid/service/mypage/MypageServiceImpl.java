@@ -4,10 +4,12 @@ import bibid.common.FileUtils;
 import bibid.dto.AuctionDto;
 import bibid.dto.MemberDto;
 import bibid.dto.ProfileImageDto;
+import bibid.entity.Auction;
 import bibid.entity.AuctionInfo;
 import bibid.entity.Member;
 import bibid.entity.ProfileImage;
 
+import bibid.repository.auction.AuctionRepository;
 import bibid.repository.mypage.MypageProfileRepository;
 import bibid.repository.mypage.MypageRepository;
 import bibid.repository.mypage.ProfileImageRepository;
@@ -28,6 +30,7 @@ public class MypageServiceImpl implements MypageService {
     private final MypageProfileRepository mypageProfileRepository;
     private final AuctionInfoRepository auctionInfoRepository;
     private final ProfileImageRepository profileImageRepository;
+    private final AuctionRepository auctionRepository;
 
     @Override
     public MemberDto modify(MemberDto memberDto, MultipartFile[] uploadProfiles) {
@@ -157,4 +160,15 @@ public class MypageServiceImpl implements MypageService {
         return savedProfileImage.toDto();
     }
 
+    @Override
+    public List<AuctionDto> findMyAuctions(Long memberIndex) {
+        log.info("Finding my auctions for memberIndex: {}", memberIndex);
+
+        List<Auction> myAuctions = auctionRepository.findByMember_MemberIndex(memberIndex);
+        log.info("Number of my auctions found: {}", myAuctions.size());
+
+        return myAuctions.stream()
+                .map(Auction::toDto)
+                .toList();
+    }
 }

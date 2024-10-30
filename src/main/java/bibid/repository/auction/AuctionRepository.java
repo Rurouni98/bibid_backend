@@ -45,4 +45,6 @@ public interface AuctionRepository extends JpaRepository<Auction, Long>, Auction
     void updateOngoingAuctions(@Param("currentTime") LocalDateTime currentTime, @Param("auctionType") String auctionType);
 
     List<Auction> findByEndingLocalDateTimeBeforeAndAuctionStatusAndAuctionType(LocalDateTime currentTime, String auctionStatus, String auctionType);
+
+    List<Auction> findByMember_MemberIndex(Long memberIndex);
 }

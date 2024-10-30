@@ -20,4 +20,6 @@ public interface MypageService {
     List<AuctionDto> findBiddedAuctions(Long memberIndex);
 
     ProfileImageDto uploadOrUpdateProfileImage(MultipartFile file, Member member);
+
+    List<AuctionDto> findMyAuctions(Long memberIndex);
 }

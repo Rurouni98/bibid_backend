@@ -196,4 +196,29 @@ public class MypageController {
         }
     }
 
+    @GetMapping("/my-auctions")
+    public ResponseEntity<?> getMyAuctions(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        ResponseDto<AuctionDto> responseDto = new ResponseDto<>();
+
+        try {
+            Member member = customUserDetails.getMember();
+            List<AuctionDto> myAuctions = mypageService.findMyAuctions(member.getMemberIndex());
+
+            responseDto.setItems(myAuctions);
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("내가 등록한 경매 리스트 조회 성공");
+
+            return ResponseEntity.ok(responseDto);
+        } catch (RuntimeException e) {
+            responseDto.setStatusCode(HttpStatus.NOT_FOUND.value());
+            responseDto.setStatusMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseDto);
+        } catch (Exception e) {
+            log.error("getMyAuctions error: ", e);
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage("오류가 발생했습니다.");
+            return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
+
 }
