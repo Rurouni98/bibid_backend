@@ -208,6 +208,7 @@ public class NotificationServiceImpl implements NotificationService {
         Map<String, Object> notificationData = new HashMap<>();
         notificationData.put("title", "상위 입찰자 공지");
         notificationData.put("auctionType", auction.getAuctionType());
+        notificationData.put("productName", auction.getProductName());
         notificationData.put("myBid", lowerBid);
         notificationData.put("higherBid", higherBid);
         notificationData.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd a hh:mm")));

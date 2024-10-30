@@ -29,6 +29,7 @@ public class NotificationController {
     public ResponseEntity<?> getNotifications(@PathVariable("memberIndex") Long memberIndex) {
         log.info("Fetching notifications for member ID: {}", memberIndex);
         List<NotificationDto> notifications = notificationService.getNotificationsForMember(memberIndex);
+
         return ResponseEntity.ok(notifications);
     }
 
