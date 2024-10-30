@@ -71,7 +71,7 @@ public class AuctionRepositoryCustomImpl implements AuctionRepositoryCustom {
         List<Auction> results = queryFactory
                 .selectFrom(auction)
                 .where(auction.auctionType.eq("일반 경매"))
-                .orderBy(auction.regdate.desc())
+                .orderBy(auction.viewCnt.desc(), auction.regdate.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
