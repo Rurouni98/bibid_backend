@@ -143,8 +143,8 @@ public class NotificationServiceImpl implements NotificationService {
 
         Map<String, Object> notificationData = new HashMap<>();
         notificationData.put("title", "실시간 경매 공지");
-        notificationData.put("content", "경매 " + auction.getAuctionIndex() + "가 곧 시작됩니다.");
-        notificationData.put("auctionIndex", auction.getAuctionIndex());
+        notificationData.put("auctionType", auction.getAuctionType());
+        notificationData.put("productName", auction.getProductName());
         notificationData.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd a hh:mm")));
         notificationData.put("notificationType", NotificationType.AUCTION_START);
 
@@ -156,13 +156,16 @@ public class NotificationServiceImpl implements NotificationService {
         Auction auction = auctionRepository.findById(auctionIndex)
                 .orElseThrow(() -> new RuntimeException("경매가 없습니다."));
 
+
+
         Map<String, Object> notificationData = new HashMap<>();
-        notificationData.put("title", "참여중인 경매 낙찰 공지");
-        notificationData.put("content", "일반 경매 " + auction.getProductName() + "이/(가) 낙찰되었습니다.");
-        notificationData.put("winnerNickname", winner.getNickname());
-        notificationData.put("winningBid", auction.getAuctionDetail().getWinningBid());
+
+        notificationData.put("title", "입찰한 경매 낙찰 공지");
+        notificationData.put("auctionType", auction.getAuctionType());
+        notificationData.put("productName", auction.getProductName());
         notificationData.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd a hh:mm")));
         notificationData.put("notificationType", NotificationType.AUCTION_WIN);
+        notificationData.put("referenceIndex", auctionIndex);
 
         createAndSendNotification(winner, notificationData);
     }
@@ -185,24 +188,31 @@ public class NotificationServiceImpl implements NotificationService {
                 .orElseThrow(() -> new RuntimeException("경매가 없습니다."));
 
         Map<String, Object> notificationData = new HashMap<>();
-        notificationData.put("title", "낙찰");
-        notificationData.put("content", "경매 " + auction.getProductName() + "가 낙찰되었습니다.");
-        notificationData.put("notificationType", NotificationType.AUCTION_SOLD);
+        notificationData.put("title", "등록한 경매 낙찰 공지");
+        notificationData.put("auctionType", auction.getAuctionType());
+        notificationData.put("productName", auction.getProductName());
+        notificationData.put("winningBid", auction.getAuctionDetail().getWinningBid());
+        notificationData.put("winnerNickname", auction.getAuctionDetail().getWinnerNickname());
         notificationData.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd a hh:mm")));
+        notificationData.put("notificationType", NotificationType.AUCTION_SOLD);
+        notificationData.put("referenceIndex", auctionIndex);
 
         createAndSendNotification(seller, notificationData);
     }
 
     @Override
-    public void notifyHigherBid(Member bidder, Long auctionIndex) {
+    public void notifyHigherBid(Member bidder, Long auctionIndex, Long higherBid, Long lowerBid) {
         Auction auction = auctionRepository.findById(auctionIndex)
                 .orElseThrow(() -> new RuntimeException("경매가 없습니다."));
 
         Map<String, Object> notificationData = new HashMap<>();
         notificationData.put("title", "상위 입찰자 공지");
-        notificationData.put("content", "경매 " + auction.getProductName() + "에서 새로운 입찰자가 등장했습니다.");
-        notificationData.put("notificationType", NotificationType.HIGHER_BID);
+        notificationData.put("auctionType", auction.getAuctionType());
+        notificationData.put("myBid", lowerBid);
+        notificationData.put("higherBid", higherBid);
         notificationData.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd a hh:mm")));
+        notificationData.put("notificationType", NotificationType.HIGHER_BID);
+        notificationData.put("referenceIndex", auctionIndex);
 
         createAndSendNotification(bidder, notificationData);
     }
@@ -214,19 +224,21 @@ public class NotificationServiceImpl implements NotificationService {
 
         Map<String, Object> buyerNotificationData = new HashMap<>();
         buyerNotificationData.put("title", "구매한 물품 정산 공지");
-        buyerNotificationData.put("content", "구매한 \"" + auction.getProductName() + "\"에 대한 물품 수령 확인이 되어 물품 금액이 정산처리 되었습니다.");
+        buyerNotificationData.put("productName", auction.getProductName());
         buyerNotificationData.put("price", auction.getAuctionDetail().getWinningBid());
         buyerNotificationData.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd a hh:mm")));
         buyerNotificationData.put("notificationType", NotificationType.PURCHASE_CONFIRMATION);
+        buyerNotificationData.put("referenceIndex", receiver.getMemberIndex());
 
         createAndSendNotification(receiver, buyerNotificationData);
 
         Map<String, Object> sellerNotificationData = new HashMap<>();
         sellerNotificationData.put("title", "판매된 물품 정산 공지");
-        sellerNotificationData.put("content", "판매된 \"" + auction.getProductName() + "\"을(를) 구매자가 수령하여 물품에 대한 금액이 정산처리 되었습니다.");
-        sellerNotificationData.put("price", auction.getAuctionDetail().getWinningBid()*0.9);
+        sellerNotificationData.put("productName", auction.getProductName());
+        sellerNotificationData.put("price", auction.getAuctionDetail().getWinningBid() * 0.9);
         sellerNotificationData.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd a hh:mm")));
         sellerNotificationData.put("notificationType", NotificationType.SALE_CONFIRMATION);
+        sellerNotificationData.put("referenceIndex", sender.getMemberIndex());
 
         createAndSendNotification(sender, sellerNotificationData);
     }
@@ -238,6 +250,7 @@ public class NotificationServiceImpl implements NotificationService {
         notificationData.put("content", content);
         notificationData.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd a hh:mm")));
         notificationData.put("notificationType", NotificationType.EXCHANGE_NOTIFICATION);
+        notificationData.put("referenceIndex", member.getMemberIndex());
 
         createAndSendNotification(member, notificationData);
     }
@@ -249,6 +262,7 @@ public class NotificationServiceImpl implements NotificationService {
         notificationData.put("content", content);
         notificationData.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd a hh:mm")));
         notificationData.put("notificationType", NotificationType.DEPOSIT_NOTIFICATION);
+        notificationData.put("referenceIndex", member.getMemberIndex());
 
         createAndSendNotification(member, notificationData);
     }

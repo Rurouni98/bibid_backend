@@ -36,13 +36,13 @@ public interface NotificationService {
     // 내가 올린 경매가 낙찰된 경우 알림
     void notifyAuctionSold(Member seller, Long auctionIndex);
 
-    // 상위 입찰자 등장 시 알림
-    void notifyHigherBid(Member bidder, Long auctionIndex);
 
     // 내가 경매에서 낙찰된 경우 알림
     void notifyAuctionWin(Member winner, Long auctionIndex);
 
     List<NotificationDto> getNotificationsForMember(Long memberIndex);
+
+    void notifyHigherBid(Member bidder, Long auctionIndex, Long higherBid, Long lowerBid);
 
     void notifyDeliveryConfirmation(Member sender, Member receiver, Long auctionIndex);
 

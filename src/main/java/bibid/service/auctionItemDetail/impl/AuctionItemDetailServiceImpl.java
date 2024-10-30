@@ -73,7 +73,6 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
                 .collect(Collectors.toList());
     }
 
-
     @Override
     public List<String> findAuctionInfoEtc(Long auctionIndex) {
         List<String> extension = new ArrayList<>();
@@ -114,6 +113,24 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
         auctionInfo.setBidTime(currentTime);
         auctionInfo.setBidAmount(bidRequestDto.getUserBiddingPrice());
         auctionInfo.setBidderNickname(member.getNickname());
+
+        // 이전 입찰자와 비교하여 higherBid, lowerBid 계산
+        List<AuctionInfo> previousBids = auctionInfoRepository.findByAuctionOrderByBidTimeDesc(auction);
+
+        Long higherBid = auctionInfo.getBidAmount();
+        AuctionInfo previousBidInfo = previousBids.stream()
+                .filter(info -> !info.getBidder().equals(member)) // 현재 입찰자를 제외한 입찰 정보
+                .findFirst()
+                .orElse(null); // 직전 입찰자가 없을 경우 null
+
+        // 이전 입찰자가 있을 경우, 해당 입찰자의 입찰 금액 및 정보를 사용
+        if (previousBidInfo != null) {
+            Long lowerBid = previousBidInfo.getBidAmount();
+            Member previousHighestBidder = previousBidInfo.getBidder(); // 직전 입찰자 정보
+
+            // lowerBid와 이전 입찰자가 존재할 경우 알림 전송
+            notificationService.notifyHigherBid(previousHighestBidder, auctionIndex, higherBid, lowerBid);
+        }
 
         // 입찰 유형이 '즉시구매'일 경우 경매 상태를 '완료'로 설정하고 DB에 업데이트
         if (bidRequestDto.getUserBiddingType().equals("buyNow")) {

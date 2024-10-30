@@ -68,21 +68,21 @@ public class NotificationController {
         return ResponseEntity.ok("경매 낙찰 알림 전송 성공");
     }
 
-    // 상위 입찰자 알림 전송
-    @PostMapping("/api/notifications/higherBid")
-    public ResponseEntity<?> sendHigherBidNotification(@RequestBody Map<String, Long> payload) {
-        Long memberIndex = payload.get("memberIndex");
-        Long auctionIndex = payload.get("auctionIndex");
-
-        log.info("Received higherBid notification request for memberIndex: {}, auctionIndex: {}", memberIndex, auctionIndex);
-
-        Member member = memberRepository.findById(memberIndex)
-                .orElseThrow(() -> new IllegalArgumentException("멤버를 찾을 수 없습니다."));
-
-        notificationService.notifyHigherBid(member, auctionIndex);
-
-        return ResponseEntity.ok("상위 입찰자 알림 전송 성공");
-    }
+//    // 상위 입찰자 알림 전송
+//    @PostMapping("/api/notifications/higherBid")
+//    public ResponseEntity<?> sendHigherBidNotification(@RequestBody Map<String, Long> payload) {
+//        Long memberIndex = payload.get("memberIndex");
+//        Long auctionIndex = payload.get("auctionIndex");
+//
+//        log.info("Received higherBid notification request for memberIndex: {}, auctionIndex: {}", memberIndex, auctionIndex);
+//
+//        Member member = memberRepository.findById(memberIndex)
+//                .orElseThrow(() -> new IllegalArgumentException("멤버를 찾을 수 없습니다."));
+//
+//        notificationService.notifyHigherBid(member, auctionIndex);
+//
+//        return ResponseEntity.ok("상위 입찰자 알림 전송 성공");
+//    }
 
     // 서버 점검 알림 전송
     @PostMapping("/api/notifications/serverMaintenance")
