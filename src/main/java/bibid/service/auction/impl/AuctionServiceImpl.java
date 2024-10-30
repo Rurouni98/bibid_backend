@@ -8,6 +8,7 @@ import bibid.entity.Auction;
 import bibid.entity.AuctionDetail;
 import bibid.entity.ChatRoom;
 import bibid.entity.Member;
+import bibid.repository.auction.AuctionDetailRepository;
 import bibid.repository.auction.AuctionRepository;
 import bibid.service.livestation.LiveStationPoolManager;
 import bibid.service.livestation.LiveStationService;
@@ -20,6 +21,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
@@ -32,7 +34,7 @@ public class AuctionServiceImpl implements AuctionService {
     private final SpecialAuctionScheduler specialAuctionScheduler;
     private final AuctionRepository auctionRepository;
     private final FileUtils fileUtils;
-    private final LiveStationPoolManager liveStationPoolManager;
+    private final AuctionDetailRepository auctionDetailRepository;
 
     @Override
     public Page<AuctionDto> post(AuctionDto auctionDto,
@@ -127,12 +129,18 @@ public class AuctionServiceImpl implements AuctionService {
         return auctionRepository.searchAll(searchCondition, searchKeyword, sortedByRegdate).map(Auction::toDto);
     }
 
+    @Transactional
     @Override
     public void remove(Long auctionIndex) {
-        try {
-            auctionRepository.deleteByAuctionIndex(auctionIndex);
-        } catch (Exception e) {
-            throw new RuntimeException("오류가 발생했습니다.");
+        Auction auction = auctionRepository.findById(auctionIndex)
+                .orElseThrow(() -> new RuntimeException("Auction not found with index: " + auctionIndex));
+
+        // AuctionDetail을 수동으로 삭제
+        if (auction.getAuctionDetail() != null) {
+            auctionDetailRepository.delete(auction);
         }
+
+        // Auction 삭제
+        auctionRepository.delete(auction);
     }
 }
