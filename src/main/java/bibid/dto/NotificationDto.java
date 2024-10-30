@@ -27,6 +27,7 @@ public class NotificationDto {
     private NotificationType alertCategory;
     private boolean isViewed;
     private Long referenceIndex;
+    private Boolean isSent;
 
     // Notification 엔티티로부터 DTO를 생성하는 생성자
     public NotificationDto(Notification notification) {
@@ -37,6 +38,7 @@ public class NotificationDto {
         this.alertCategory = notification.getAlertCategory();
         this.isViewed = notification.isViewed();
         this.referenceIndex = notification.getReferenceIndex();
+        this.isSent = notification.getIsSent();
 
         // alertContent 필드를 JSON 문자열에서 Map으로 파싱
         try {
@@ -67,6 +69,7 @@ public class NotificationDto {
                 .isViewed(this.isViewed)
                 .alertCategory(this.alertCategory)
                 .referenceIndex(this.referenceIndex)
+                .isSent(this.isSent)
                 .build();
     }
 }

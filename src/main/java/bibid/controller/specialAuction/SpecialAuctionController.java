@@ -10,7 +10,6 @@ import bibid.entity.Member;
 import bibid.repository.livestation.LiveStationChannelRepository;
 import bibid.service.livestation.LiveStationPoolManager;
 import bibid.repository.specialAuction.SpecialAuctionRepository;
-import bibid.service.notification.NotificationService;
 import bibid.service.specialAuction.SpecialAuctionService;
 import bibid.service.specialAuction.impl.SpecialAuctionScheduler;
 import lombok.RequiredArgsConstructor;

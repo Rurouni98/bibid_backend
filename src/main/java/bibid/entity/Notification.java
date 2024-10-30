@@ -42,6 +42,7 @@ public class Notification {
 
     private boolean isViewed;
     private Long referenceIndex;
+    private Boolean isSent;
 
     public NotificationDto toDto() {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -65,6 +66,7 @@ public class Notification {
                 .isViewed(this.isViewed)
                 .alertCategory(this.alertCategory)
                 .referenceIndex(this.referenceIndex)
+                .isSent(this.isSent)
                 .build();
     }
 }

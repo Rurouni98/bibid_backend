@@ -33,7 +33,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public List<NotificationDto> getNotificationsForMember(Long memberIndex) {
-        List<Notification> notifications = notificationRepository.findByMember_MemberIndex(memberIndex);
+        List<Notification> notifications = notificationRepository.findByMember_MemberIndexAndIsSentTrue(memberIndex);
         return notifications.stream()
                 .map(NotificationDto::new)
                 .collect(Collectors.toList());
@@ -42,36 +42,6 @@ public class NotificationServiceImpl implements NotificationService {
     private void sendNotificationData(Member member, Map<String, Object> notificationData) {
         messagingTemplate.convertAndSend("/topic/notifications/" + member.getMemberIndex(), notificationData);
         log.info("Notification sent to WebSocket for member ID: {}", member.getMemberIndex());
-    }
-
-    @Override
-    public NotificationDto createNotification(Member member, String title, String content, NotificationType category, Long referenceIndex) {
-        Map<String, Object> contentMap = new HashMap<>();
-        contentMap.put("title", title);
-        contentMap.put("referenceIndex", referenceIndex);
-        contentMap.put("content", content);
-
-        String contentJson;
-        try {
-            contentJson = objectMapper.writeValueAsString(contentMap);
-        } catch (Exception e) {
-            log.error("Failed to serialize notification content", e);
-            contentJson = content;
-        }
-
-        Notification notification = Notification.builder()
-                .member(member)
-                .alertTitle(title)
-                .alertContent(contentJson)
-                .alertDate(LocalDateTime.now())
-                .alertCategory(category)
-                .referenceIndex(referenceIndex)
-                .isViewed(false)
-                .build();
-
-        Notification savedNotification = notificationRepository.save(notification);
-        log.info("Notification created with ID: {}", savedNotification.getNotificationIndex());
-        return savedNotification.toDto();
     }
 
     public void createAndSendNotification(Member member, Map<String, Object> notificationData) {
@@ -91,6 +61,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .alertCategory((NotificationType) notificationData.get("notificationType"))
                 .referenceIndex((Long) notificationData.get("referenceIndex"))
                 .isViewed(false)
+                .isSent(false)
                 .build();
 
         Notification savedNotification = notificationRepository.save(notification);
@@ -98,6 +69,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         try {
             messagingTemplate.convertAndSend("/topic/notifications/" + member.getMemberIndex(), notificationData);
+            savedNotification.setIsSent(true);
             log.info("Notification sent to WebSocket for member ID: {}", member.getMemberIndex());
         } catch (Exception e) {
             log.warn("WebSocket 전송 실패 - 유저가 오프라인 상태일 수 있습니다. 알림은 DB에 저장되어 있습니다. member ID: {}", member.getMemberIndex(), e);
@@ -137,7 +109,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void sendAuctionStartNotificationToUser(Auction auction, Long memberIndex) {
+    public void sendAuctionStartNotificationToUser(Auction auction, Long memberIndex, Long notificationIndex) {
         Member member = memberRepository.findById(memberIndex)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다: ID " + memberIndex));
 
@@ -148,8 +120,57 @@ public class NotificationServiceImpl implements NotificationService {
         notificationData.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd a hh:mm")));
         notificationData.put("notificationType", NotificationType.AUCTION_START);
 
-        createAndSendNotification(member, notificationData);
+        // WebSocket 전송
+        messagingTemplate.convertAndSend("/topic/notifications/" + memberIndex, notificationData);
+        log.info("Notification sent to WebSocket for member ID: {}", memberIndex);
+
+        // DB에서 상태를 전송 완료로 업데이트
+        Notification notification = notificationRepository.findById(notificationIndex).orElseThrow(
+                () -> new RuntimeException("notification not exist")
+        );
+        if (notification != null) {
+            notification.setIsSent(true);
+            notificationRepository.save(notification);
+        }
     }
+
+
+
+    @Override
+    public Notification createScheduledNotification(Auction auction, Long memberIndex) {
+        Member member = memberRepository.findById(memberIndex)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다: ID " + memberIndex));
+
+        Map<String, Object> notificationData = new HashMap<>();
+        notificationData.put("title", "실시간 경매 공지");
+        notificationData.put("auctionType", auction.getAuctionType());
+        notificationData.put("productName", auction.getProductName());
+        notificationData.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd a hh:mm")));
+        notificationData.put("notificationType", NotificationType.AUCTION_START);
+
+        String contentJson;
+        try {
+            contentJson = objectMapper.writeValueAsString(notificationData);
+        } catch (Exception e) {
+            log.error("Failed to serialize notification content", e);
+            contentJson = (String) notificationData.getOrDefault("content", "");
+        }
+
+        Notification notification = Notification.builder()
+                .member(member)
+                .alertTitle((String) notificationData.get("title"))
+                .alertContent(contentJson)
+                .alertDate(auction.getStartingLocalDateTime().minusMinutes(10))
+                .alertCategory(NotificationType.AUCTION_START)
+                .referenceIndex(auction.getAuctionIndex())
+                .isSent(false) // 전송 예정 상태
+                .build();
+
+        Notification savedNotification = notificationRepository.save(notification);
+        log.info("Notification saved to DB for member ID: {}", memberIndex);
+        return savedNotification;
+    }
+
 
     @Override
     public void notifyAuctionWin(Member winner, Long auctionIndex) {

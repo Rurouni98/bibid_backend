@@ -28,6 +28,8 @@ public class QChat extends EntityPathBase<Chat> {
 
     public final QChatRoom chatRoom;
 
+    public final EnumPath<ChatMessageType> messageType = createEnum("messageType", ChatMessageType.class);
+
     public final QMember sender;
 
     public final DateTimePath<java.time.LocalDateTime> sendTime = createDateTime("sendTime", java.time.LocalDateTime.class);

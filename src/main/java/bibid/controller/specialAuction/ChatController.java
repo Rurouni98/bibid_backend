@@ -1,19 +1,17 @@
 package bibid.controller.specialAuction;
 
-import bibid.dto.AuctionDto;
-import bibid.dto.AuctionInfoDto;
 import bibid.dto.ChatDto;
 import bibid.entity.*;
 import bibid.entity.CustomUserDetails;
 import bibid.repository.auction.AuctionRepository;
 import bibid.repository.specialAuction.ChatRepository;
+import bibid.service.specialAuction.RedisChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Controller;
 
@@ -32,6 +30,7 @@ public class ChatController {
     private final AuctionRepository auctionRepository;
     private final UserDetailsService userDetailsService;
     private final ChatRepository chatRepository;
+    private final RedisChatService redisChatService;
 
     // 참여자 수를 관리하는 Map
     private final Map<Long, Set<String>> participants = new HashMap<>();
@@ -56,15 +55,18 @@ public class ChatController {
         Auction auction = auctionRepository.findById(auctionIndex)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid auction ID"));
 
-        chatDto.setSendTime(LocalDateTime.now()); // 현재 시간을 메시지 전송 시간으로 설정
-
+        chatDto.setSendTime(LocalDateTime.now());
         Chat chat = chatDto.toEntity(auction.getChatRoom(), sender);
-
         Chat savedChat = chatRepository.save(chat);
 
         log.info("savedChat : {}", savedChat);
 
-        return savedChat.toDto();  // 클라이언트로 메시지를 그대로 전송
+        // Redis에 메시지 저장
+        redisChatService.saveChatMessage(auctionIndex, savedChat.toDto());
+        log.info("saveChatMessage 호출됨: auctionIndex={}, message={}", auctionIndex, chatDto.getChatMessage());
+
+
+        return savedChat.toDto();
 
     }
 

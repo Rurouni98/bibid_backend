@@ -7,6 +7,7 @@ import bibid.entity.CustomUserDetails;
 import bibid.entity.Member;
 import bibid.repository.auction.AuctionRepository;
 import bibid.repository.specialAuction.AuctionInfoRepository;
+import bibid.service.specialAuction.RedisBidService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -15,9 +16,9 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Controller;
-
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Controller
 @RequiredArgsConstructor
@@ -26,6 +27,7 @@ public class BidController {
     private final AuctionRepository auctionRepository;
     private final AuctionInfoRepository auctionInfoRepository;
     private final UserDetailsService userDetailsService;
+    private final RedisBidService redisBidService;
 
     @MessageMapping("/auction.bid/{auctionIndex}")
     @SendTo("/topic/auction/{auctionIndex}")
@@ -52,13 +54,22 @@ public class BidController {
             throw new IllegalStateException("이 경매는 현재 입찰할 수 없습니다.");
         }
 
-        // 입찰 정보를 DB에 저장
-        AuctionInfo auctionInfo = auctionInfoDto.toEntity(auction, bidder);
-        auctionInfo.setBidderNickname(bidder.getNickname());
-        auctionInfo.setBidTime(LocalDateTime.now());
-        AuctionInfo savedAuctionInfo = auctionInfoRepository.save(auctionInfo);
-        log.info("Saved auction info: {}", savedAuctionInfo);
+        // 새로운 입찰을 Redis에 기록
+        redisBidService.placeBid(auctionIndex, auctionInfoDto.getBidAmount(), bidder.getNickname());
+        log.info("Bid placed in Redis: auctionId={}, amount={}, user={}", auctionIndex, auctionInfoDto.getBidAmount(), bidder.getNickname());
 
-        return savedAuctionInfo.toDto(); // 저장된 입찰 정보 반환
+        // 최고 입찰가 업데이트 후 프론트로 전달
+        Double highestBid = redisBidService.getHighestBid(auctionIndex);
+        auctionInfoDto.setBidAmount(highestBid.longValue());
+        auctionInfoDto.setBidderNickname(bidder.getNickname());
+
+        // DB에 저장 (필요한 경우 주기적으로 배치 처리)
+        AuctionInfo auctionInfo = auctionInfoDto.toEntity(auction, bidder);
+        auctionInfo.setBidTime(LocalDateTime.now());
+        auctionInfoRepository.save(auctionInfo);
+        log.info("Bid saved to DB: {}", auctionInfo);
+
+        // 저장된 입찰 정보를 브로드캐스트
+        return auctionInfoDto;
     }
 }
