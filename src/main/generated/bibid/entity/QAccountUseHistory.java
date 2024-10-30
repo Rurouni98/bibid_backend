@@ -22,6 +22,8 @@ public class QAccountUseHistory extends EntityPathBase<AccountUseHistory> {
 
     public static final QAccountUseHistory accountUseHistory = new QAccountUseHistory("accountUseHistory");
 
+    public final QAccount account;
+
     public final NumberPath<Long> accountUseHistoryIndex = createNumber("accountUseHistoryIndex", Long.class);
 
     public final QAuction auction;
@@ -50,6 +52,7 @@ public class QAccountUseHistory extends EntityPathBase<AccountUseHistory> {
 
     public QAccountUseHistory(Class<? extends AccountUseHistory> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.account = inits.isInitialized("account") ? new QAccount(forProperty("account"), inits.get("account")) : null;
         this.auction = inits.isInitialized("auction") ? new QAuction(forProperty("auction"), inits.get("auction")) : null;
         this.member = inits.isInitialized("member") ? new QMember(forProperty("member"), inits.get("member")) : null;
     }

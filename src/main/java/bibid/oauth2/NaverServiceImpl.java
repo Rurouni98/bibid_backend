@@ -49,7 +49,7 @@ public class NaverServiceImpl {
         params.add("grant_type", "authorization_code");
         params.add("client_id", "wa3QkzrBALL4WACeB12Z");
         params.add("client_secret", "aW5bQUet2D");
-        params.add("redirect_uri", "http://localhost:3000/auth/naver/callback");
+        params.add("redirect_uri", "http://223.130.141.179:3000/auth/naver/callback");
         params.add("code", code);
 
         //(4) 어디에 담아줄 건지
