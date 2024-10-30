@@ -6,6 +6,7 @@ import bibid.dto.ResponseDto;
 import bibid.entity.CustomUserDetails;
 import bibid.entity.Member;
 import bibid.oauth2.KakaoServiceImpl;
+import bibid.repository.member.MemberRepository;
 import bibid.service.member.MemberService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,6 +31,7 @@ import java.util.Map;
 public class MemberController {
     private final MemberService memberService;
     private final KakaoServiceImpl kakaoService;
+    private final MemberRepository memberRepository;
 
     private Map<String, String> verificationCodes = new HashMap<>();
 
@@ -176,7 +178,7 @@ public class MemberController {
         }
     }
 
-    @GetMapping("/fetch")
+    @GetMapping("/fetchMember")
     public ResponseEntity<?> fetchMember(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
         ResponseDto<MemberDto> responseDto = new ResponseDto<>();
 
@@ -187,7 +189,8 @@ public class MemberController {
         }
 
         try {
-            Member member = memberService.getMemberByMemberIndex(customUserDetails.getMember().getMemberIndex());
+            Member member = memberRepository.findById(customUserDetails.getMember().getMemberIndex())
+                            .orElseThrow(() -> new RuntimeException( "member not exist"));
 
             responseDto.setItem(member.toDto());
             responseDto.setStatusCode(HttpStatus.OK.value());
@@ -200,5 +203,7 @@ public class MemberController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDto);
         }
     }
+
+
 
 }
