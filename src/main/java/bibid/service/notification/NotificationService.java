@@ -26,8 +26,8 @@ public interface NotificationService {
     @Transactional
     void markAsViewed(Long notificationIndex);
 
-    // 경매 시작 알림 생성 및 전송
-    void sendAuctionStartNotification(Auction auction);
+    // 알림 전송 로직 (SimpMessagingTemplate 등을 사용하여 구현 가능)
+    void sendAuctionStartNotificationToUser(Auction auction, Long memberIndex);
 
     // 서버 점검 알림 등록
     void notifyServerMaintenance(String title, String content);
@@ -51,4 +51,5 @@ public interface NotificationService {
     void notifyDeposit(Member member, String title, String content);
 
     void notifyDirectMessage(Member sender, Member receiver, String content, Long auctionIndex);
+
 }

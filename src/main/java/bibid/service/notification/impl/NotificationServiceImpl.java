@@ -5,6 +5,7 @@ import bibid.entity.Auction;
 import bibid.entity.Member;
 import bibid.entity.Notification;
 import bibid.entity.NotificationType;
+import bibid.repository.member.MemberRepository;
 import bibid.repository.notification.NotificationRepository;
 import bibid.service.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final MemberRepository memberRepository;
 
     @Override
     public NotificationDto createNotification(Member member, String title, String content, NotificationType category, Long referenceIndex) {
@@ -105,12 +107,19 @@ public class NotificationServiceImpl implements NotificationService {
         log.info("Notification marked as viewed: ID {}", notificationIndex);
     }
 
+    // 알림 전송 로직 (SimpMessagingTemplate 등을 사용하여 구현 가능)
     @Override
-    public void sendAuctionStartNotification(Auction auction) {
-        log.info("Sending auction start notification for auction ID: {}", auction.getAuctionIndex());
-        createAndSendNotification(auction.getMember(), "경매 시작 알림",
+    public void sendAuctionStartNotificationToUser(Auction auction, Long memberIndex) {
+        // Member 엔티티를 memberIndex로 조회
+        Member member = memberRepository.findById(memberIndex)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다: ID " + memberIndex));
+
+        // 알림 생성 및 전송
+        createAndSendNotification(member, "경매 시작 알림",
                 "경매 " + auction.getAuctionIndex() + "가 곧 시작됩니다.",
                 NotificationType.AUCTION_START, auction.getAuctionIndex());
+
+        log.info("Auction start notification sent to user ID: {} for auction ID: {}", memberIndex, auction.getAuctionIndex());
     }
 
     @Override

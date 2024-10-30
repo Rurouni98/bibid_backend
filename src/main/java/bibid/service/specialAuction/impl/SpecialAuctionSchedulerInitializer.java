@@ -93,8 +93,9 @@ public class SpecialAuctionSchedulerInitializer {
             if (notification.getAlertCategory() == NotificationType.AUCTION_START) {
                 Auction auction = specialAuctionRepository.findById(notification.getReferenceIndex()).orElse(null);
                 if (auction != null) {
-                    specialAuctionScheduler.registerAlarm(auction); // 알림 스케줄링 등록
-                    log.info("기존 알림 스케줄 재등록: 경매 ID {}", auction.getAuctionIndex());
+                    Long memberIndex = notification.getMember().getMemberIndex(); // 알림 신청한 사용자 정보 가져오기
+                    specialAuctionScheduler.registerAlarmForUser(auction, memberIndex); // 사용자별 알림 스케줄링 등록
+                    log.info("기존 알림 스케줄 재등록: 경매 ID {}, 사용자 ID {}", auction.getAuctionIndex(), memberIndex);
                 }
             }
         });

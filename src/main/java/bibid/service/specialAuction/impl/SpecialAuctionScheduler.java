@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
@@ -29,7 +30,8 @@ public class SpecialAuctionScheduler {
     private final TaskScheduler taskScheduler;
     private final LiveStationPoolManager liveStationPoolManager;
     private final NotificationService notificationService;
-    private final Map<Long, ScheduledFuture<?>> scheduledNotifications = new ConcurrentHashMap<>();
+    private final Map<Long, Map<Long, ScheduledFuture<?>>> scheduledNotifications = new ConcurrentHashMap<>();
+
 
     // 경매 채널 할당 스케줄링
     public void scheduleChannelAllocation(Long auctionIndex, LocalDateTime startingLocalDateTime) {
@@ -126,23 +128,24 @@ public class SpecialAuctionScheduler {
         log.info("경매 종료 스케줄링 완료: auctionIndex={}, endDate={}", auctionIndex, endDate);
     }
 
-    // 알림 등록 및 스케줄링
-    public boolean registerAlarm(Auction auction) {
+    public boolean registerAlarmForUser(Auction auction, Long memberIndex) {
         Long auctionIndex = auction.getAuctionIndex();
         LocalDateTime auctionStartTime = auction.getStartingLocalDateTime().minusMinutes(30);
 
-        if (scheduledNotifications.containsKey(auctionIndex)) {
-            log.info("알림 스케줄이 이미 존재합니다. 경매 ID: {}", auctionIndex);
+        // 경매 ID와 사용자 ID를 기준으로 중복 스케줄링 확인
+        if (scheduledNotifications.containsKey(auctionIndex) && scheduledNotifications.get(auctionIndex).containsKey(memberIndex)) {
+            log.info("사용자가 이미 알림 신청을 완료했습니다. 경매 ID: {}, 사용자 ID: {}", auctionIndex, memberIndex);
             return false;
         }
 
+        // 스케줄링 설정
         ScheduledFuture<?> scheduledTask = taskScheduler.schedule(
-                () -> notificationService.sendAuctionStartNotification(auction),
+                () -> notificationService.sendAuctionStartNotificationToUser(auction, memberIndex),
                 Date.from(auctionStartTime.atZone(ZoneId.systemDefault()).toInstant())
         );
 
-        scheduledNotifications.put(auctionIndex, scheduledTask);
-        log.info("알림 스케줄링 등록 완료: 경매 ID {}", auctionIndex);
+        scheduledNotifications.computeIfAbsent(auctionIndex, k -> new HashMap<>()).put(memberIndex, scheduledTask);
+        log.info("알림 스케줄링 등록 완료: 경매 ID {}, 사용자 ID {}", auctionIndex, memberIndex);
         return true;
     }
 
