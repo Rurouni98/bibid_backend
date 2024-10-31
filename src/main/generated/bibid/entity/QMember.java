@@ -54,6 +54,8 @@ public class QMember extends EntityPathBase<Member> {
 
     public final StringPath role = createString("role");
 
+    public final QSellerInfo sellerInfo;
+
     public QMember(String variable) {
         this(Member.class, forVariable(variable), INITS);
     }
@@ -74,6 +76,7 @@ public class QMember extends EntityPathBase<Member> {
         super(type, metadata, inits);
         this.account = inits.isInitialized("account") ? new QAccount(forProperty("account"), inits.get("account")) : null;
         this.profileImage = inits.isInitialized("profileImage") ? new QProfileImage(forProperty("profileImage"), inits.get("profileImage")) : null;
+        this.sellerInfo = inits.isInitialized("sellerInfo") ? new QSellerInfo(forProperty("sellerInfo"), inits.get("sellerInfo")) : null;
     }
 
 }

@@ -4,7 +4,7 @@ import bibid.dto.MemberDto;
 import bibid.entity.Account;
 import bibid.entity.Member;
 import bibid.entity.SellerInfo;
-import bibid.repository.SellerInfoRepository;
+import bibid.repository.member.SellerInfoRepository;
 import bibid.repository.account.AccountRepository;
 import bibid.repository.member.MemberRepository;
 import bibid.jwt.JwtProvider;
@@ -58,23 +58,27 @@ public class MemberServiceImpl implements MemberService {
         memberDto.setRole("ROLE_USER");
         memberDto.setMemberPw(passwordEncoder.encode(memberDto.getMemberPw()));
 
-        Member joinedMember = memberRepository.save(memberDto.toEntity());
+        // Member 엔티티 생성
+        Member member = memberDto.toEntity();
 
+        // SellerInfo와 Account를 생성하여 Member에 설정
         SellerInfo sellerInfo = SellerInfo.builder()
-                .member(joinedMember)
+                .member(member)
                 .build();
+        member.setSellerInfo(sellerInfo);
 
         Account account = Account.builder()
-                .member(joinedMember)
-                .userMoney("0")
+                .member(member)
+                .userMoney("1000000")
                 .build();
+        member.setAccount(account);
 
-        sellerInfoRepository.save(sellerInfo);
-        accountRepository.save(account);
+        // Member 저장 (Cascade로 인해 SellerInfo와 Account도 저장됨)
+        Member joinedMember = memberRepository.save(member);
 
+        // 반환할 Dto 설정
         MemberDto joinedMemberDto = joinedMember.toDto();
-
-        joinedMemberDto.setMemberPw("");
+        joinedMemberDto.setMemberPw("");  // 비밀번호를 빈 문자열로 설정
 
         return joinedMemberDto;
     }

@@ -91,11 +91,11 @@ public class AccountServiceImpl implements AccountService {
         return account.toDto();
     }
 
-    // 구매 로직
+    // 입찰 로직
     @Override
     @Transactional
     public AccountDto buyAuction(AccountUseHistoryDto accountUseHistoryDto, Long memberIndex) {
-        log.info("구매 요청 시작 - Member Index: {}", memberIndex);
+        log.info("입찰 요청 시작 - Member Index: {}", memberIndex);
 
         Member member = memberRepository.findById(memberIndex)
                 .orElseThrow(() -> new RuntimeException("회원 정보가 존재하지 않습니다."));
@@ -108,23 +108,23 @@ public class AccountServiceImpl implements AccountService {
         log.info("옥션 정보 조회 완료 - Auction Index: {}, Auction Status: {}", auction.getAuctionIndex(), auction.getAuctionStatus());
 
 
-        // 구매 전 잔액 기록
+        // 입찰 전 잔액 기록
         int currentBalance = Integer.parseInt(account.getUserMoney());
         int changeAmount = Integer.parseInt(accountUseHistoryDto.getChangeAccount());
         int newBalance = currentBalance - changeAmount;
 
-        // 구매 처리 후 잔액 설정
+        // 입찰 처리 후 잔액 설정
         account.setUserMoney(String.valueOf(newBalance));
-        log.info("구매 후 잔액 - New Balance: {}", account.getUserMoney());
+        log.info("입찰 후 잔액 - New Balance: {}", account.getUserMoney());
 
         // 기록 추가 및 저장
         AccountUseHistory history = accountUseHistoryDto.toEntity(member, auction, account);
-        history.setBeforeBalance(String.valueOf(currentBalance)); // 구매 전 잔액
-        history.setAfterBalance(account.getUserMoney()); // 구매 후 잔액
+        history.setBeforeBalance(String.valueOf(currentBalance)); // 입찰 전 잔액
+        history.setAfterBalance(account.getUserMoney()); // 입찰 후 잔액
         accountUseHistoryRepository.save(history); // AccountUseHistory 개별 저장
         accountRepository.save(account); // Account 개별 저장
 
-        log.info("구매 요청 완료 - Updated Account Balance: {}", account.getUserMoney());
+        log.info("입찰 요청 완료 - Updated Account Balance: {}", account.getUserMoney());
         return account.toDto();
     }
 
@@ -132,7 +132,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional
     public AccountDto sellAuction(AccountUseHistoryDto accountUseHistoryDto, Long memberIndex) {
-        log.info("판매 요청 시작 - Member Index: {}", memberIndex);
+        log.info("대금 수령 요청 시작 - Member Index: {}", memberIndex);
 
         Member member = memberRepository.findById(memberIndex)
                 .orElseThrow(() -> new RuntimeException("회원 정보가 존재하지 않습니다."));

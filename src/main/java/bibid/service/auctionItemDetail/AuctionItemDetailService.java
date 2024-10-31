@@ -33,4 +33,13 @@ public interface AuctionItemDetailService {
     void updateCompletedAuctionStatus();
 
     List<String> findAuctionImagesByAuctionIndex(Long auctionIndex);
+
+    String auctionChecking(Long auctionIndex);
+
+    void plusAuctionView(Long auctionIndex);
+
+    String biddingItem(Long auctionIndex, BidRequestDto bidRequestDto, Long memberIndex);
+
+    // 맴버 인덱스도 추가해주어야됨
+    String biddingItem(Long auctionIndex, BidRequestDto bidRequestDto, MemberDto memberDto);
 }

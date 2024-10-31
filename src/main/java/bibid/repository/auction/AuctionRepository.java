@@ -53,4 +53,10 @@ public interface AuctionRepository extends JpaRepository<Auction, Long>, Auction
     @Transactional
     @Query("DELETE FROM Auction a WHERE a.auctionIndex = :auctionIndex")
     void deleteByAuctionIndex(@Param("auctionIndex") Long auctionIndex);
+
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Auction a SET a.viewCnt = a.viewCnt + 1 WHERE a.auctionIndex = :auctionIndex")
+    void updateAuctionViewCnt(Long auctionIndex);
 }

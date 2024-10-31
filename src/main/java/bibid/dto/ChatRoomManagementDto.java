@@ -17,16 +17,18 @@ public class ChatRoomManagementDto {
     private Long chatRoomIndex;
 
     private Long participantIndex;
-    private LocalDateTime joinTime;
-    private LocalDateTime leaveTime;
+    private String participantNickname;
+    private LocalDateTime eventTime;
+    private String type;  // LEAVE, ENTER
 
     public ChatRoomManagement toEntity(ChatRoom chatRoom) {
         return ChatRoomManagement.builder()
                 .chatRoomManagementIndex(this.chatRoomManagementIndex)
                 .chatRoom(chatRoom)
                 .participantIndex(this.participantIndex)
-                .joinTime(this.joinTime)
-                .leaveTime(this.leaveTime)
+                .participantNickname(this.participantNickname)
+                .eventTime(this.eventTime)
+                .type(this.type)
                 .build();
     }
 }

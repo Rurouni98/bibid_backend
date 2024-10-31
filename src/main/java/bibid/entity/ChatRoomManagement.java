@@ -33,16 +33,18 @@ public class ChatRoomManagement {
     private ChatRoom chatRoom;
 
     private Long participantIndex;
-    private LocalDateTime joinTime;
-    private LocalDateTime leaveTime;
+    private String participantNickname;
+    private LocalDateTime eventTime;
+    private String type;  // LEAVE, ENTER
 
     public ChatRoomManagementDto toDto() {
         return ChatRoomManagementDto.builder()
                 .chatRoomManagementIndex(this.chatRoomManagementIndex)
                 .chatRoomIndex(Optional.ofNullable(this.chatRoom).map(ChatRoom::getChatRoomIndex).orElse(null))
                 .participantIndex(this.participantIndex)
-                .joinTime(this.joinTime)
-                .leaveTime(this.leaveTime)
+                .participantNickname(this.participantNickname)
+                .eventTime(this.eventTime)
+                .type(this.type)
                 .build();
     }
 

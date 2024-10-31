@@ -35,6 +35,7 @@ public class MemberDto {
     private String token;
     private String refreshToken;
     private Boolean rememberMe;
+    private SellerInfoDto sellerInfoDto;
 
     public Member toEntity() {
         return Member.builder()
@@ -54,6 +55,7 @@ public class MemberDto {
                 .createTime(this.createTime)
                 .refreshToken(this.refreshToken)
                 .rememberMe(this.rememberMe)
+                .sellerInfo(null)
                 .build();
     }
 
