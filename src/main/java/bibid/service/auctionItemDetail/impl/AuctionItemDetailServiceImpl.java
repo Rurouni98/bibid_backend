@@ -130,11 +130,65 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
         // 이전 입찰자가 있을 경우, 해당 입찰자의 입찰 금액 및 정보를 사용
         if (previousBidInfo != null) {
             Long lowerBid = previousBidInfo.getBidAmount();
+            Account previousBidderAccount = accountRepository.findByMember_MemberIndex(previousBidInfo.getBidder().getMemberIndex())
+                    .orElseThrow(() -> new RuntimeException("이전 입찰자의 계좌 정보를 찾을 수 없습니다."));
             Member previousHighestBidder = previousBidInfo.getBidder(); // 직전 입찰자 정보
+
+            // 이전 입찰자의 금액 환불
+            int previousBalance = Integer.parseInt(previousBidderAccount.getUserMoney());
+            previousBidderAccount.setUserMoney(String.valueOf(previousBalance + lowerBid.intValue()));
+            accountRepository.save(previousBidderAccount);
+            log.info("이전 입찰자 {}에게 {} 원 환불 완료", previousHighestBidder.getNickname(), lowerBid);
+
+            // AccountUseHistoryDto 생성 및 저장 (환불)
+            AccountUseHistoryDto refundHistoryDto = AccountUseHistoryDto.builder()
+                    .auctionType("일반 경매")
+                    .accountIndex(previousBidderAccount.getAccountIndex())
+                    .afterBalance(String.valueOf(previousBalance + lowerBid.intValue()))
+                    .beforeBalance(String.valueOf(previousBalance))
+                    .createdTime(currentTime)
+                    .productName(auction.getProductName())
+                    .changeAccount(String.valueOf(lowerBid))
+                    .useType("반환")
+                    .memberIndex(previousHighestBidder.getMemberIndex())
+                    .auctionIndex(auctionIndex)
+                    .build();
+            accountUseHistoryRepository.save(refundHistoryDto.toEntity(previousHighestBidder, auction, previousBidderAccount));
+
+            log.info("이전 입찰자 {}에게 {} 원 환불 완료 및 히스토리 기록", previousBidInfo.getBidder().getNickname(), lowerBid);
 
             // lowerBid와 이전 입찰자가 존재할 경우 알림 전송
             notificationService.notifyHigherBid(previousHighestBidder, auctionIndex, higherBid, lowerBid);
         }
+
+        // 현재 입찰자의 금액 차감
+        Account currentBidderAccount = accountRepository.findByMember_MemberIndex(member.getMemberIndex())
+                .orElseThrow(() -> new RuntimeException("현재 입찰자의 계좌 정보를 찾을 수 없습니다."));
+        int currentBalance = Integer.parseInt(currentBidderAccount.getUserMoney());
+        int bidAmount = bidRequestDto.getUserBiddingPrice().intValue();
+        if (currentBalance < bidAmount) {
+            throw new RuntimeException("잔액이 부족합니다.");
+        }
+        currentBidderAccount.setUserMoney(String.valueOf(currentBalance - bidAmount));
+        accountRepository.save(currentBidderAccount);
+        log.info("현재 입찰자 {}의 계좌에서 {} 원 차감 완료", member.getNickname(), bidAmount);
+
+        // AccountUseHistoryDto 생성 및 저장 (입찰)
+        AccountUseHistoryDto bidHistoryDto = AccountUseHistoryDto.builder()
+                .auctionType("일반 경매")
+                .accountIndex(currentBidderAccount.getAccountIndex())
+                .afterBalance(String.valueOf(currentBalance - bidAmount))
+                .beforeBalance(String.valueOf(currentBalance))
+                .createdTime(currentTime)
+                .productName(auction.getProductName())
+                .changeAccount(String.valueOf(bidAmount))
+                .useType("입찰")
+                .memberIndex(member.getMemberIndex())
+                .auctionIndex(auctionIndex)
+                .build();
+        accountUseHistoryRepository.save(bidHistoryDto.toEntity(member, auction, currentBidderAccount));
+
+        log.info("현재 입찰자 {}의 계좌에서 {} 원 차감 완료 및 히스토리 기록", member.getNickname(), bidAmount);
 
         // 입찰 유형이 '즉시구매'일 경우 경매 상태를 '완료'로 설정하고 DB에 업데이트
         if (bidRequestDto.getUserBiddingType().equals("buyNow")) {
@@ -144,7 +198,8 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
 
         // AuctionInfo 저장 및 DTO 반환
         auctionInfoRepository.save(auctionInfo);
-        System.out.println(auction);
+        log.info("AuctionInfo 저장 완료 - Auction Index: {}, Bidder: {}, Bid Amount: {}", auctionIndex, member.getNickname(), bidAmount);
+
         return auctionInfo.toDto();
     }
 

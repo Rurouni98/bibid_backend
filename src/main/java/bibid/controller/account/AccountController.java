@@ -65,7 +65,7 @@ public class AccountController {
         }
     }
 
-    // 구매 요청
+    // 입찰 요청
     @PostMapping("/buy")
     public ResponseEntity<?> buyAuction(@RequestBody AccountUseHistoryDto accountUseHistoryDto,
                                         @AuthenticationPrincipal CustomUserDetails customUserDetails) {

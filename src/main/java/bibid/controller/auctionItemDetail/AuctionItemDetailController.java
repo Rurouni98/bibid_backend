@@ -1,8 +1,12 @@
 package bibid.controller.auctionItemDetail;
 
 import bibid.dto.*;
+import bibid.entity.Account;
+import bibid.entity.Auction;
 import bibid.entity.Member;
 import bibid.entity.CustomUserDetails;
+import bibid.repository.auction.AuctionRepository;
+import bibid.service.account.AccountService;
 import bibid.service.auctionItemDetail.AuctionItemDetailService;
 import bibid.service.qna.QnaServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -21,7 +26,9 @@ import java.util.List;
 public class AuctionItemDetailController {
 
     private final AuctionItemDetailService auctionItemDetailService;
+    private final AccountService accountService;
     private final QnaServiceImpl qnaService;
+    private final AuctionRepository auctionRepository;
 
     @GetMapping("/category-item-detail/{auctionIndex}")
     public ResponseEntity<?> getItemDetail(@PathVariable("auctionIndex") Long auctionIndex){
@@ -95,6 +102,9 @@ public class AuctionItemDetailController {
                                          @AuthenticationPrincipal CustomUserDetails customUserDetails) {
         ResponseDto<BidRequestDto> bidResponseDto = new ResponseDto<>();
         Member member = customUserDetails.getMember();
+
+        Auction auction = auctionRepository.findById(auctionIndex)
+                .orElseThrow(() -> new RuntimeException("auction not exist"));
 
         log.info("Bid request received - auctionIndex: {}, bidder: {}, bid amount: {}",
                 auctionIndex, member.getNickname(), bidRequestDto.getUserBiddingPrice());
