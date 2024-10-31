@@ -205,7 +205,7 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
         Long memberIndex = memberDto.getMemberIndex();
         // 유저 계좌조회
         if (
-        Integer.parseInt(accountRepository.findByMemberIndex(memberIndex).getUserMoney()) > 0
+        Integer.parseInt(accountRepository.findByMember_MemberIndex(memberIndex).getUserMoney()) > 0
         ){
             // accountUseHistory 처리
             // 조회한 accountUseHistory 객체에 auction_auctionIndex 와
