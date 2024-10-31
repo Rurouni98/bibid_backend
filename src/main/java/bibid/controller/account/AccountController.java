@@ -96,7 +96,7 @@ public class AccountController {
             // 판매자의 계좌를 업데이트합니다.
             Account sellerAccount = seller.getAccount();
             int currentBalance = Integer.parseInt(sellerAccount.getUserMoney());
-            int newBalance = currentBalance + winningBidAmount;
+            int newBalance = currentBalance + (int) (winningBidAmount * 0.9);
             sellerAccount.setUserMoney(String.valueOf(newBalance));
             accountRepository.save(sellerAccount);
 
