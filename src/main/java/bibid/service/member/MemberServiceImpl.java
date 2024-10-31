@@ -69,7 +69,7 @@ public class MemberServiceImpl implements MemberService {
 
         Account account = Account.builder()
                 .member(member)
-                .userMoney("0")
+                .userMoney("1000000")
                 .build();
         member.setAccount(account);
 
