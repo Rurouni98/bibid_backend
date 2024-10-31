@@ -12,7 +12,7 @@ import java.util.Set;
 @Slf4j
 public class RedisBidService {
 
-    private RedisTemplate<String, String> redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
 
     // 입찰 추가 (입찰가와 사용자 ID)
     public void placeBid(Long auctionIndex, double bidAmount, String userId) {

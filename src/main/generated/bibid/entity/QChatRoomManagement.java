@@ -26,11 +26,13 @@ public class QChatRoomManagement extends EntityPathBase<ChatRoomManagement> {
 
     public final NumberPath<Long> chatRoomManagementIndex = createNumber("chatRoomManagementIndex", Long.class);
 
-    public final DateTimePath<java.time.LocalDateTime> joinTime = createDateTime("joinTime", java.time.LocalDateTime.class);
-
-    public final DateTimePath<java.time.LocalDateTime> leaveTime = createDateTime("leaveTime", java.time.LocalDateTime.class);
+    public final DateTimePath<java.time.LocalDateTime> eventTime = createDateTime("eventTime", java.time.LocalDateTime.class);
 
     public final NumberPath<Long> participantIndex = createNumber("participantIndex", Long.class);
+
+    public final StringPath participantNickname = createString("participantNickname");
+
+    public final StringPath type = createString("type");
 
     public QChatRoomManagement(String variable) {
         this(ChatRoomManagement.class, forVariable(variable), INITS);
