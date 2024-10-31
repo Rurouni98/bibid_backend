@@ -1,6 +1,7 @@
 package bibid.repository.auction;
 
 import bibid.entity.Auction;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -53,5 +54,8 @@ public interface AuctionRepository extends JpaRepository<Auction, Long>, Auction
     @Query("UPDATE Auction a SET a.auctionStatus = :status WHERE a.auctionIndex = :auctionIndex")
     void updateAuctionStatus(@Param("auctionIndex") Long auctionIndex, @Param("status") String status);
 
-
+    @Modifying
+    @Transactional
+    @Query("UPDATE Auction a SET a.viewCnt = a.viewCnt + 1 WHERE a.auctionIndex = :auctionIndex")
+    void updateAuctionViewCnt(Long auctionIndex);
 }

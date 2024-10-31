@@ -25,4 +25,10 @@ public interface AuctionItemDetailService {
     void updateAuctionBiddingState();
 
     List<String> findAuctionImagesByAuctionIndex(Long auctionIndex);
+
+    String auctionChecking(Long auctionIndex);
+
+    void plusAuctionView(Long auctionIndex);
+
+    String biddingItem(Long auctionIndex, BidRequestDto bidRequestDto, MemberDto memberDto);
 }
