@@ -11,13 +11,12 @@ public enum AuctionStatus {
     BROADCASTING("방송중"),           // 실시간 경매 방송 중
     STARTED("경매 시작"),             // 경매 시작
     BID_COMPLETE("낙찰"),             // 입찰 성공, 낙찰 완료
-    AUCTION_COMPLETED("경매 완료"),   // 경매가 완료되었을 때
     AUCTION_FAILED("유찰"),           // 유찰
     BROADCAST_ENDED("방송 종료"),     // 실시간 경매 방송 종료
-    PAYMENT_COMPLETED("결제 완료"),   // 결제 완료 상태
     SHIPPING("배송중"),               // 배송 중 상태
     DELIVERY_COMPLETED("배송 완료"),  // 배송 완료 상태
-    PURCHASE_CONFIRMED("구매 확정");  // 구매 확정 상태
+    AUCTION_COMPLETED("경매 완료");   // 경매가 완료되었을 때
+
 
     private final String status;
 }
