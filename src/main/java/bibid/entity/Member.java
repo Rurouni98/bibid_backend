@@ -51,6 +51,10 @@ public class Member {
 
     @OneToOne(mappedBy = "member", cascade = CascadeType.ALL)
     @JsonManagedReference
+    private SellerInfo sellerInfo;
+
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private ProfileImage profileImage;
 
     @CreationTimestamp
@@ -77,6 +81,7 @@ public class Member {
                 .createTime(this.createTime)
                 .refreshToken(this.refreshToken)
                 .rememberMe(this.rememberMe)
+                .sellerInfoDto(this.sellerInfo.toDto())
                 .build();
     }
 }
