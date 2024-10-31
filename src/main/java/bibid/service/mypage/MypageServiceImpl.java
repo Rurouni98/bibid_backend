@@ -19,7 +19,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -117,13 +120,25 @@ public class MypageServiceImpl implements MypageService {
     public List<AuctionDto> findBiddedAuctions(Long memberIndex) {
         log.info("Finding bidded auctions for memberIndex: {}", memberIndex);
 
-        // AuctionInfo 엔티티를 통해 입찰 기록을 가져온 후, AuctionDto 리스트로 변환
+        // AuctionInfo 엔티티를 통해 입찰 기록을 가져온 후, 동일 경매에 대한 중복을 제거하고 최신 입찰 기록만 유지
         List<AuctionInfo> biddedInfos = auctionInfoRepository.findByBidder_MemberIndex(memberIndex);
+
+        // 중복 제거: 같은 경매에 대해 가장 최근의 입찰 기록만 남김
+        Map<Long, AuctionInfo> latestBidsMap = new HashMap<>();
+        for (AuctionInfo info : biddedInfos) {
+            Long auctionIndex = info.getAuction().getAuctionIndex();
+            if (!latestBidsMap.containsKey(auctionIndex) || info.getBidTime().isAfter(latestBidsMap.get(auctionIndex).getBidTime())) {
+                latestBidsMap.put(auctionIndex, info);
+            }
+        }
+
+        // 중복 제거 후, 최신 입찰 기록 리스트 생성
+        List<AuctionInfo> latestBids = new ArrayList<>(latestBidsMap.values());
 
         log.info("Number of bidded auctions found: {}", biddedInfos.size());
         biddedInfos.forEach(info -> log.info("Auction Info: {}", info));
 
-        return biddedInfos.stream()
+        return latestBids.stream()
                 .map(auctionInfo -> auctionInfo.getAuction().toDto())
                 .toList();
     }

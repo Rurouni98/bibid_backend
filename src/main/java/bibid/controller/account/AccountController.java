@@ -65,32 +65,10 @@ public class AccountController {
         }
     }
 
-    // 입찰 요청
-    @PostMapping("/buy")
-    public ResponseEntity<?> buyAuction(@RequestBody AccountUseHistoryDto accountUseHistoryDto,
-                                        @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        ResponseDto<AccountDto> responseDto = new ResponseDto<>();
-        Long memberIndex = customUserDetails.getMember().getMemberIndex();
-
-        try {
-            AccountDto updatedAccount = accountService.buyAuction(accountUseHistoryDto, memberIndex);
-            responseDto.setItem(updatedAccount);
-            responseDto.setStatusCode(HttpStatus.OK.value());
-            responseDto.setStatusMessage("구매 요청 성공");
-
-            return ResponseEntity.ok(responseDto);
-        } catch (Exception e) {
-            log.error("구매 요청 실패: {}", e.getMessage());
-            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            responseDto.setStatusMessage("구매 요청 처리 중 오류가 발생했습니다.");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDto);
-        }
-    }
-
-    // 판매 요청
-    @PostMapping("/sell")
-    public ResponseEntity<?> sellAuction(@RequestBody AccountUseHistoryDto accountUseHistoryDto,
-                                         @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+    // 대금 수령 요청
+    @PostMapping("/receive-payment")
+    public ResponseEntity<?> receiveAuctionPayment(@RequestBody AccountUseHistoryDto accountUseHistoryDto,
+                                                   @AuthenticationPrincipal CustomUserDetails customUserDetails) {
         ResponseDto<AccountDto> responseDto = new ResponseDto<>();
         Long memberIndex = customUserDetails.getMember().getMemberIndex();
 
@@ -98,16 +76,17 @@ public class AccountController {
             AccountDto updatedAccount = accountService.sellAuction(accountUseHistoryDto, memberIndex);
             responseDto.setItem(updatedAccount);
             responseDto.setStatusCode(HttpStatus.OK.value());
-            responseDto.setStatusMessage("판매 요청 성공");
+            responseDto.setStatusMessage("대금 수령 요청 성공");
 
             return ResponseEntity.ok(responseDto);
         } catch (Exception e) {
-            log.error("판매 요청 실패: {}", e.getMessage());
+            log.error("대금 수령 요청 실패: {}", e.getMessage());
             responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            responseDto.setStatusMessage("판매 요청 처리 중 오류가 발생했습니다.");
+            responseDto.setStatusMessage("대금 수령 요청 처리 중 오류가 발생했습니다.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDto);
         }
     }
+
 
 }
 

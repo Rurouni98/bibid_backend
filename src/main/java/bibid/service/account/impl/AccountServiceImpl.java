@@ -132,7 +132,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional
     public AccountDto sellAuction(AccountUseHistoryDto accountUseHistoryDto, Long memberIndex) {
-        log.info("판매 요청 시작 - Member Index: {}", memberIndex);
+        log.info("대금 수령 요청 시작 - Member Index: {}", memberIndex);
 
         Member member = memberRepository.findById(memberIndex)
                 .orElseThrow(() -> new RuntimeException("회원 정보가 존재하지 않습니다."));

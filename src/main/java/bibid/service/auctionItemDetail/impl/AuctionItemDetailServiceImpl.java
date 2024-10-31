@@ -251,6 +251,20 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
                 auctionDetail.setWinningBid(lastBidInfo.getBidAmount());
                 auctionDetail.setWinnerNickname(lastBidInfo.getBidder().getNickname());
 
+                // 기존의 AccountUseHistory에서 경매 인덱스와 일치하는 가장 높은 금액의 입찰 기록 찾기
+                Account account = lastBidInfo.getBidder().getAccount();
+                AccountUseHistory highestBidHistory = account.getAccountUseHistoryList()
+                        .stream()
+                        .filter(history -> history.getAuction() != null && // auction이 null이 아닌 경우만 필터링
+                                history.getAuction().getAuctionIndex().equals(auctionIndex) &&
+                                history.getUseType().equals("입찰"))
+                        .max(Comparator.comparing(AccountUseHistory::getChangeAccount)) // 가장 높은 금액의 입찰 기록 찾기
+                        .orElseThrow(() -> new RuntimeException("입찰 기록을 찾을 수 없습니다."));
+
+                // useType을 '낙찰'로 변경
+                highestBidHistory.setUseType("낙찰");
+                accountUseHistoryRepository.save(highestBidHistory); // 변경 사항 저장
+
                 auction.setAuctionStatus("낙찰"); // 상태를 '낙찰'로 변경
 
                 // 낙찰자와 판매자에게 알림 전송
