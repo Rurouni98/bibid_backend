@@ -15,4 +15,5 @@ public class AuctionResponseDto {
     private List<String> infoExtension;
     private SellerInfoDto sellerDetailInfo;
     private List<String> auctionImages;
+    private List<QnADto> qnAList;
 }

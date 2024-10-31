@@ -2,24 +2,26 @@ package bibid.service.auctionItemDetail.impl;
 
 import bibid.dto.*;
 import bibid.entity.*;
-import bibid.repository.AuctionImageRepository;
-import bibid.repository.SellerInfoRepository;
+import bibid.repository.account.AccountRepository;
+import bibid.repository.account.AccountUseHistoryRepository;
+import bibid.repository.auction.AuctionImageRepository;
+import bibid.repository.member.SellerInfoRepository;
 import bibid.repository.auction.AuctionRepository;
 import bibid.repository.member.MemberRepository;
 import bibid.repository.specialAuction.AuctionInfoRepository;
 import bibid.service.auctionItemDetail.AuctionItemDetailService;
 import bibid.service.notification.NotificationService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +33,8 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
     private final MemberRepository memberRepository;
     private final SellerInfoRepository sellerInfoRepository;
     private final AuctionImageRepository auctionImageRepository;
+    private final AccountRepository accountRepository;
+    private final AccountUseHistoryRepository accountUseHistoryRepository;
     private final NotificationService notificationService;
 
     @Override
@@ -70,7 +74,7 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
         return auctionBidInfo.stream()
                 .flatMap(info -> memberRepository.findByMemberIndex(info.getBidderIndex()).stream())
                 .map(Member::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -235,6 +239,69 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
                 });
 
         return imagePathList;
+    }
+
+    // 유효한 일반경매 요청인지 확인하는 메서드
+    @Override
+    public String auctionChecking(Long auctionIndex) {
+        String auctionChecking;
+
+        // 옥션 조회
+        Optional<Auction> auctionOpt = auctionRepository.findById(auctionIndex);
+
+        // 옥션이 존재하는지 확인
+        if (auctionOpt.isPresent()) {
+            Auction auction = auctionOpt.get();
+            // 옥션 타입이 "일반 경매"인지 확인
+            if (auction.getAuctionType().equals("일반 경매")) {
+                auctionChecking = "접속성공. 옥션번호 : " + auctionIndex;
+            } else {
+                auctionChecking = "잘못된 접근입니다.-잘못된 옥션접근";
+            }
+        } else {
+            auctionChecking = "잘못된 접근입니다.-존재하지 않는 옥션";
+        }
+
+        return auctionChecking;
+    }
+
+    @Override
+    public void plusAuctionView(Long auctionIndex) {
+//        auctionRepository.updateAuctionViewCnt(auctionIndex);
+    }
+
+    @Override
+    public String biddingItem(Long auctionIndex, BidRequestDto bidRequestDto, Long memberIndex) {
+        return "";
+    }
+
+    // 맴버 인덱스도 추가해주어야됨
+    @Override
+    public String biddingItem(Long auctionIndex, BidRequestDto bidRequestDto, MemberDto memberDto) {
+
+        log.info("auctionIndex : {}", auctionIndex);
+
+        Account account = accountRepository.findByMember_MemberIndex(memberDto.getMemberIndex())
+                .orElseThrow( () -> new RuntimeException("account not exist"));
+
+        // 유저 계좌조회
+        if (
+
+        Integer.parseInt(account.getUserMoney()) > 0
+        ){
+            // accountUseHistory 처리
+            // 조회한 accountUseHistory 객체에 auction_auctionIndex 와
+            // bidRequestDto 의 userBiddingItemName +" 경매 "+ userBiddingPrice (수수료 미포함) + " 원 입찰"
+            // setUseType = 구매
+//            accountUseHistoryRepository.findByMember_MemberIndex(memberDto.getMemberIndex());
+
+            return "success";
+        } else {
+            log.error("잔액부족입니다. 잔액을 충전하세요.");
+            return "fail";
+        }
+        // useType : "일반경매" + {입찰/즉시구매} "-" + bidRequestDto.userBiddingPrice
+        // useType 필드에 입찰가 만 보여지며 changeAccount 에 차액 증감 보여주기
     }
 
 }

@@ -1,4 +1,4 @@
-package bibid.repository;
+package bibid.repository.auction;
 
 import bibid.entity.AuctionImage;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -4,7 +4,7 @@ import bibid.dto.MemberDto;
 import bibid.entity.Account;
 import bibid.entity.Member;
 import bibid.entity.SellerInfo;
-import bibid.repository.SellerInfoRepository;
+import bibid.repository.member.SellerInfoRepository;
 import bibid.repository.account.AccountRepository;
 import bibid.repository.member.MemberRepository;
 import bibid.jwt.JwtProvider;

@@ -22,11 +22,17 @@ public class QQnA extends EntityPathBase<QnA> {
 
     public static final QQnA qnA = new QQnA("qnA");
 
+    public final QAuction auction;
+
     public final QMember member;
 
     public final StringPath qnaContent = createString("qnaContent");
 
     public final NumberPath<Long> qnaIndex = createNumber("qnaIndex", Long.class);
+
+    public final StringPath qnaTitle = createString("qnaTitle");
+
+    public final DateTimePath<java.time.LocalDateTime> regDate = createDateTime("regDate", java.time.LocalDateTime.class);
 
     public QQnA(String variable) {
         this(QnA.class, forVariable(variable), INITS);
@@ -46,6 +52,7 @@ public class QQnA extends EntityPathBase<QnA> {
 
     public QQnA(Class<? extends QnA> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.auction = inits.isInitialized("auction") ? new QAuction(forProperty("auction"), inits.get("auction")) : null;
         this.member = inits.isInitialized("member") ? new QMember(forProperty("member"), inits.get("member")) : null;
     }
 
