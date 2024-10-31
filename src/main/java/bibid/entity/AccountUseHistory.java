@@ -38,7 +38,7 @@ public class AccountUseHistory {
     @JoinColumn(name = "auctionIndex", nullable = true)
     private Auction auction;
 
-    private String useType; // 구매, 판매, 충전, 환전
+    private String useType; // 입찰(-), 반환(+), 충전(+), 환전(-)
     private String changeAccount;
 
     @ManyToOne
