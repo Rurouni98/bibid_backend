@@ -22,7 +22,7 @@ import lombok.*;
 public class QnA {
     @Id
     @GeneratedValue(
-            strategy = GenerationType.IDENTITY,
+            strategy = GenerationType.SEQUENCE,
             generator = "qnaSeqGenerator"
     )
     private Long qnaIndex;

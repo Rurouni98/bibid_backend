@@ -29,12 +29,12 @@ public class MemberDto {
     private String role;
     private String memberAddress;
     private String addressDetail;
-    private ProfileImage profileImage;
+    private ProfileImageDto profileImageDto;
+    private AccountDto accountDto;
     private Timestamp createTime;
     private String token;
     private String refreshToken;
     private Boolean rememberMe;
-
 
     public Member toEntity() {
         return Member.builder()
@@ -49,10 +49,12 @@ public class MemberDto {
                 .role(this.role)
                 .memberAddress(this.memberAddress)
                 .addressDetail(this.addressDetail)
-                .profileImage(this.profileImage)
+                .profileImage(null)
+                .account(null)
                 .createTime(this.createTime)
                 .refreshToken(this.refreshToken)
                 .rememberMe(this.rememberMe)
                 .build();
     }
+
 }

@@ -11,4 +11,8 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     List<Notification> findByMember_MemberIndexOrderByAlertDateDesc(Long memberIndex); // 특정 회원의 모든 알림 조회 (최근순)
 
     List<Notification> findByMember_MemberIndex(Long memberIndex);
+
+    List<Notification> findByIsSentFalse();
+
+    List<Notification> findByMember_MemberIndexAndIsSentTrue(Long memberIndex);
 }

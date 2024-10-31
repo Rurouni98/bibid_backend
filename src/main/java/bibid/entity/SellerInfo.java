@@ -19,7 +19,7 @@ import lombok.*;
 public class SellerInfo {
     @Id
     @GeneratedValue(
-            strategy = GenerationType.IDENTITY,
+            strategy = GenerationType.SEQUENCE,
             generator = "sellerInfoSeqGenerator"
     )
     private Long sellerInfoIndex;

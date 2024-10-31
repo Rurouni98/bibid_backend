@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 @ToString
 public class ProfileImageDto {
-    private Long profileIndex;
+    private Long profileImageIndex;
     private Long memberIndex;
     private String filepath;
     private String filetype;
@@ -23,7 +23,7 @@ public class ProfileImageDto {
 
     public ProfileImage toEntity(Member member) {
         return ProfileImage.builder()
-                .profileIndex(this.profileIndex)
+                .profileImageIndex(this.profileImageIndex)
                 .member(member)
                 .filepath(this.filepath)
                 .filetype(this.filetype)

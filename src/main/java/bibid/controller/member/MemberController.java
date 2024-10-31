@@ -3,8 +3,10 @@ package bibid.controller.member;
 
 import bibid.dto.MemberDto;
 import bibid.dto.ResponseDto;
+import bibid.entity.CustomUserDetails;
 import bibid.entity.Member;
 import bibid.oauth2.KakaoServiceImpl;
+import bibid.repository.member.MemberRepository;
 import bibid.service.member.MemberService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +31,7 @@ import java.util.Map;
 public class MemberController {
     private final MemberService memberService;
     private final KakaoServiceImpl kakaoService;
+    private final MemberRepository memberRepository;
 
     private Map<String, String> verificationCodes = new HashMap<>();
 
@@ -173,6 +177,33 @@ public class MemberController {
             return ResponseEntity.internalServerError().body(responseDto);
         }
     }
+
+    @GetMapping("/fetchMember")
+    public ResponseEntity<?> fetchMember(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        ResponseDto<MemberDto> responseDto = new ResponseDto<>();
+
+        if (customUserDetails == null) {
+            responseDto.setStatusCode(HttpStatus.UNAUTHORIZED.value());
+            responseDto.setStatusMessage("로그인이 필요합니다.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseDto);
+        }
+
+        try {
+            Member member = memberRepository.findById(customUserDetails.getMember().getMemberIndex())
+                            .orElseThrow(() -> new RuntimeException( "member not exist"));
+
+            responseDto.setItem(member.toDto());
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("멤버 정보 조회 성공");
+
+            return ResponseEntity.ok(responseDto);
+        } catch (Exception e) {
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage("멤버 정보를 가져오는 데 실패했습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDto);
+        }
+    }
+
 
 
 }

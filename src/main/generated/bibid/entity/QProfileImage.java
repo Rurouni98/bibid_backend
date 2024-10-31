@@ -36,7 +36,7 @@ public class QProfileImage extends EntityPathBase<ProfileImage> {
 
     public final StringPath originalname = createString("originalname");
 
-    public final NumberPath<Long> profileIndex = createNumber("profileIndex", Long.class);
+    public final NumberPath<Long> profileImageIndex = createNumber("profileImageIndex", Long.class);
 
     public QProfileImage(String variable) {
         this(ProfileImage.class, forVariable(variable), INITS);

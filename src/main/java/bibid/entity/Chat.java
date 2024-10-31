@@ -36,6 +36,7 @@ public class Chat {
     @JoinColumn(name = "memberIndex") // 외래 키: 스트리밍 ID
     private Member sender;
     private LocalDateTime sendTime;
+    private ChatMessageType messageType;
 
     public ChatDto toDto(){
         return ChatDto.builder()
@@ -45,6 +46,7 @@ public class Chat {
                 .senderIndex(this.sender.getMemberIndex())
                 .sendTime(this.sendTime)
                 .senderNickname(this.sender.getNickname())
+                .messageType(this.messageType)
                 .build();
     }
 }

@@ -24,4 +24,6 @@ public interface AuctionService {
     Page<AuctionDto> findConveyor(Pageable pageable);
 
     Page<AuctionDto> searchFind(String searchCondition, String searchKeyword, Pageable pageable);
+
+    void remove(Long auctionIndex);
 }

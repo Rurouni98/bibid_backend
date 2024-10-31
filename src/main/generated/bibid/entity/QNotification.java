@@ -30,6 +30,8 @@ public class QNotification extends EntityPathBase<Notification> {
 
     public final StringPath alertTitle = createString("alertTitle");
 
+    public final BooleanPath isSent = createBoolean("isSent");
+
     public final BooleanPath isViewed = createBoolean("isViewed");
 
     public final QMember member;

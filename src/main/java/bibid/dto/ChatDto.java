@@ -1,10 +1,9 @@
 package bibid.dto;
 
 import bibid.entity.Chat;
+import bibid.entity.ChatMessageType;
 import bibid.entity.ChatRoom;
 import bibid.entity.Member;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -25,6 +24,7 @@ public class ChatDto {
     private Long senderIndex;
     private String senderNickname;
     private LocalDateTime sendTime;
+    private ChatMessageType messageType;
 
     public Chat toEntity(ChatRoom chatRoom, Member sender) {
         return Chat.builder()
@@ -33,6 +33,7 @@ public class ChatDto {
                 .chatMessage(this.chatMessage)
                 .sender(sender)
                 .sendTime(this.sendTime)
+                .messageType(this.messageType)
                 .build();
     }
 }

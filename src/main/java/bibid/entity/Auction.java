@@ -41,6 +41,7 @@ public class Auction {
     private String subcategory; // 세부 카테고리 
 
     private String productName; // 물품 제목
+    @Column(length = 1000)
     private String productDescription; // 물품 설명
 
     private Long startingPrice; // 경매 시작가

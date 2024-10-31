@@ -9,8 +9,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @SequenceGenerator(
-        name = "profileSeqGenerator",
-        sequenceName = "NOTIFICATION_SEQ",
+        name = "profileImageSeqGenerator",
+        sequenceName = "PROFILEIMAGE_SEQ",
         initialValue = 1,
         allocationSize = 1
 )
@@ -23,13 +23,15 @@ public class ProfileImage {
     @Id
     @GeneratedValue(
             strategy = GenerationType.SEQUENCE,
-            generator = "profileSeqGenerator"
+            generator = "profileImageSeqGenerator"
     )
-    private Long profileIndex;
+    private Long profileImageIndex;
+
     @OneToOne
     @JoinColumn(name = "memberIndex")
     @JsonBackReference
     private Member member;
+
     private String filepath;
     private String filetype;
     private Long filesize;
@@ -39,7 +41,7 @@ public class ProfileImage {
 
     public ProfileImageDto toDto() {
         return ProfileImageDto.builder()
-                .profileIndex(this.profileIndex)
+                .profileImageIndex(this.profileImageIndex)
                 .memberIndex(this.member.getMemberIndex())
                 .filepath(this.filepath)
                 .filetype(this.filetype)

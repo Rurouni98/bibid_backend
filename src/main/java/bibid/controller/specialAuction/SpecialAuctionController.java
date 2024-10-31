@@ -4,7 +4,9 @@ import bibid.dto.AuctionDto;
 import bibid.dto.ResponseDto;
 import bibid.entity.Auction;
 import bibid.dto.livestation.LiveStationChannelDTO;
+import bibid.entity.CustomUserDetails;
 import bibid.entity.LiveStationChannel;
+import bibid.entity.Member;
 import bibid.repository.livestation.LiveStationChannelRepository;
 import bibid.service.livestation.LiveStationPoolManager;
 import bibid.repository.specialAuction.SpecialAuctionRepository;
@@ -17,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,9 +30,9 @@ public class SpecialAuctionController {
 
     private final SpecialAuctionService specialAuctionService;
     private final SpecialAuctionRepository specialAuctionRepository;
-    private final SpecialAuctionScheduler specialAuctionScheduler;
     private final LiveStationChannelRepository channelRepository;
     private final LiveStationPoolManager liveStationPoolManager;
+    private final SpecialAuctionScheduler specialAuctionScheduler;
 
     @GetMapping("/list")
     public ResponseEntity<?> getAuctionsByType(
@@ -130,36 +133,35 @@ public class SpecialAuctionController {
         }
     }
 
-    // 알림 등록 엔드포인트
-    @GetMapping("/registerAlarm/{auctionIndex}")
-    public ResponseEntity<?> registerAlarm(@PathVariable Long auctionIndex) {
+    @PostMapping("/registerAlarm/{auctionIndex}")
+    public ResponseEntity<ResponseDto<String>> registerAuctionAlarm(
+            @PathVariable Long auctionIndex,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
         ResponseDto<String> responseDto = new ResponseDto<>();
+        Member member = userDetails.getMember();
+        Auction auction = specialAuctionRepository.findById(auctionIndex).orElseThrow(
+                () -> new RuntimeException("해당 옥션은 없습니다.")
+        );
 
-        try {
-            Auction auction = specialAuctionRepository.findById(auctionIndex)
-                    .orElseThrow(() -> new RuntimeException("해당 옥션은 없습니다."));
+        if (auction == null) {
+            responseDto.setStatusCode(HttpStatus.NOT_FOUND.value());
+            responseDto.setStatusMessage("경매를 찾을 수 없습니다.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseDto);
+        }
 
-            // 알림 등록
-            boolean isScheduled = specialAuctionScheduler.registerAlarm(auction);
+        boolean isRegistered = specialAuctionScheduler.registerAlarmForUser(auction, member.getMemberIndex());
 
-            if (isScheduled) {
-                responseDto.setStatusCode(HttpStatus.OK.value());
-                responseDto.setStatusMessage("알림이 성공적으로 등록되었습니다.");
-            } else {
-                responseDto.setStatusCode(HttpStatus.CONFLICT.value());
-                responseDto.setStatusMessage("이미 등록된 알림입니다.");
-            }
-
+        if (isRegistered) {
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("알림 신청이 완료되었습니다.");
+            responseDto.setItem("알림 신청 성공");
             return ResponseEntity.ok(responseDto);
-
-        } catch (Exception e) {
-            log.error("알림 등록 오류: {}", e.getMessage());
-            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            responseDto.setStatusMessage("알림 등록 중 오류 발생: " + e.getMessage());
-            return ResponseEntity.internalServerError().body(responseDto);
+        } else {
+            responseDto.setStatusCode(HttpStatus.CONFLICT.value());
+            responseDto.setStatusMessage("이미 알림이 등록되어 있습니다.");
+            responseDto.setItem("알림 등록 중복");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(responseDto);
         }
     }
-
-
-
 }

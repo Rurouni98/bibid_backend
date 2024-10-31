@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
@@ -29,11 +30,13 @@ public class SpecialAuctionScheduler {
     private final TaskScheduler taskScheduler;
     private final LiveStationPoolManager liveStationPoolManager;
     private final NotificationService notificationService;
-    private final Map<Long, ScheduledFuture<?>> scheduledNotifications = new ConcurrentHashMap<>();
+    private final Map<Long, Map<Long, ScheduledFuture<?>>> scheduledNotifications = new ConcurrentHashMap<>();
+
 
     // 경매 채널 할당 스케줄링
     public void scheduleChannelAllocation(Long auctionIndex, LocalDateTime startingLocalDateTime) {
-        LocalDateTime allocationTime = startingLocalDateTime.minusMinutes(30);
+//        LocalDateTime allocationTime = startingLocalDateTime.minusMinutes(30);
+        LocalDateTime allocationTime = startingLocalDateTime.minusMinutes(5);
         Date scheduleDate = Date.from(allocationTime.atZone(ZoneId.systemDefault()).toInstant());
 
         ScheduledFuture<?> allocationTask = taskScheduler.schedule(() -> {
@@ -57,7 +60,8 @@ public class SpecialAuctionScheduler {
 
     // 경매 종료 후 채널 반납 스케줄링
     public void scheduleChannelRelease(Long auctionIndex, LocalDateTime startingLocalDateTime) {
-        LocalDateTime releaseTime = startingLocalDateTime.plusHours(1);
+        // LocalDateTime releaseTime = startingLocalDateTime.plusHours(1);
+        LocalDateTime releaseTime = startingLocalDateTime.plusMinutes(10);
         Date releaseDate = Date.from(releaseTime.atZone(ZoneId.systemDefault()).toInstant());
 
         taskScheduler.schedule(() -> {
@@ -71,9 +75,10 @@ public class SpecialAuctionScheduler {
                 }
                 liveStationPoolManager.releaseChannel(channel);
                 auction.setLiveStationChannel(null);
-                auction.setAuctionStatus("경매종료");
+                auction.setAuctionStatus("경매 완료");
                 auctionRepository.save(auction);
-                log.info("1시간 경과로 강제 채널 반납 완료: 경매 ID {}", auctionIndex);
+//                log.info("1시간 경과로 강제 채널 반납 완료: 경매 ID {}", auctionIndex);
+                log.info("10분 경과로 강제 채널 반납 완료: 경매 ID {}", auctionIndex);
             } catch (Exception e) {
                 log.error("채널 반납 중 오류 발생 for auctionIndex: {}. 오류: {}", auctionIndex, e.getMessage(), e);
             }
@@ -101,6 +106,7 @@ public class SpecialAuctionScheduler {
                     AuctionDetail auctionDetail = auction.getAuctionDetail();
                     auctionDetail.setWinnerIndex(lastBidInfo.getBidder().getMemberIndex());
                     auctionDetail.setWinningBid(lastBidInfo.getBidAmount());
+                    auctionDetail.setWinnerNickname(lastBidInfo.getBidder().getNickname());
 
                     auction.setAuctionStatus("낙찰"); // 경매 상태를 '낙찰'로 설정
 
@@ -126,23 +132,30 @@ public class SpecialAuctionScheduler {
         log.info("경매 종료 스케줄링 완료: auctionIndex={}, endDate={}", auctionIndex, endDate);
     }
 
-    // 알림 등록 및 스케줄링
-    public boolean registerAlarm(Auction auction) {
+    public boolean registerAlarmForUser(Auction auction, Long memberIndex) {
         Long auctionIndex = auction.getAuctionIndex();
-        LocalDateTime auctionStartTime = auction.getStartingLocalDateTime().minusMinutes(30);
+//        LocalDateTime auctionStartTime = auction.getStartingLocalDateTime().minusMinutes(30);
+        LocalDateTime auctionStartTime = auction.getStartingLocalDateTime().minusMinutes(10);
 
-        if (scheduledNotifications.containsKey(auctionIndex)) {
-            log.info("알림 스케줄이 이미 존재합니다. 경매 ID: {}", auctionIndex);
+        // 중복 스케줄링 확인
+        if (scheduledNotifications.containsKey(auctionIndex) && scheduledNotifications.get(auctionIndex).containsKey(memberIndex)) {
+            log.info("사용자가 이미 알림 신청을 완료했습니다. 경매 ID: {}, 사용자 ID: {}", auctionIndex, memberIndex);
             return false;
         }
 
+        // DB에 알림을 "전송 예정" 상태로 저장
+        Notification savedNotification = notificationService.createScheduledNotification(auction, memberIndex);
+        Long notificationIndex = savedNotification.getNotificationIndex();
+
+
+        // 예약된 시간에 알림 전송
         ScheduledFuture<?> scheduledTask = taskScheduler.schedule(
-                () -> notificationService.sendAuctionStartNotification(auction),
+                () -> notificationService.sendAuctionStartNotificationToUser(auction, memberIndex, notificationIndex),
                 Date.from(auctionStartTime.atZone(ZoneId.systemDefault()).toInstant())
         );
 
-        scheduledNotifications.put(auctionIndex, scheduledTask);
-        log.info("알림 스케줄링 등록 완료: 경매 ID {}", auctionIndex);
+        scheduledNotifications.computeIfAbsent(auctionIndex, k -> new HashMap<>()).put(memberIndex, scheduledTask);
+        log.info("알림 스케줄링 등록 완료: 경매 ID {}, 사용자 ID {}", auctionIndex, memberIndex);
         return true;
     }
 

@@ -26,9 +26,15 @@ public class QAccountUseHistory extends EntityPathBase<AccountUseHistory> {
 
     public final NumberPath<Long> accountUseHistoryIndex = createNumber("accountUseHistoryIndex", Long.class);
 
+    public final StringPath afterBalance = createString("afterBalance");
+
     public final QAuction auction;
 
+    public final StringPath beforeBalance = createString("beforeBalance");
+
     public final StringPath changeAccount = createString("changeAccount");
+
+    public final DateTimePath<java.time.LocalDateTime> createdTime = createDateTime("createdTime", java.time.LocalDateTime.class);
 
     public final QMember member;
 
