@@ -244,4 +244,24 @@ public class MypageController {
         }
     }
 
+    @PatchMapping("/updateProfile/{memberIndex}")
+    public ResponseEntity<?> updateProfile(@PathVariable Long memberIndex,
+                                           @RequestBody MemberDto memberDto) {
+        ResponseDto<MemberDto> responseDto = new ResponseDto<>();
+
+        try {
+            MemberDto updateMemberDto = mypageService.updateProfile(memberIndex, memberDto);
+
+            responseDto.setItem(updateMemberDto);
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("Profile updated successfully");
+
+            return ResponseEntity.ok(responseDto);
+        } catch (Exception e) {
+            log.error("updateProfile error: {}", e.getMessage());
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage(e.getMessage());
+            return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
 }

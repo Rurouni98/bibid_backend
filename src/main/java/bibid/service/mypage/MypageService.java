@@ -23,4 +23,5 @@ public interface MypageService {
 
     List<AuctionDto> findMyAuctions(Long memberIndex);
 
+    MemberDto updateProfile(Long memberIndex, MemberDto memberDto);
 }

@@ -70,13 +70,6 @@ public class ChatController {
 
     }
 
-//    @MessageMapping("/chat.enter/{auctionIndex}")
-//    @SendTo("/topic/public/{auctionIndex}")
-//    public ChatDto enter(ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor) {
-//        chatDto.setChatMessage(chatDto.getSenderIndex() + " 님이 입장하셨습니다.");
-//        return chatDto;  // 입장 메시지 전송
-//    }
-
     @MessageMapping("/chat.enter/{auctionIndex}")
     @SendTo("/topic/participants/enter/{auctionIndex}")
     public ChatDto enter(@DestinationVariable Long auctionIndex, @Payload ChatDto chatDto, Principal principal) {
@@ -132,6 +125,8 @@ public class ChatController {
         chatDto.setChatMessage(username + " 님이 나가셨습니다.");
         chatDto.setParticipantCount(participantCount); // 참가자 수 설정
         chatDto.setSendTime(LocalDateTime.now()); // 현재 시간을 메시지 전송 시간으로 설정
+
+        log.info("leave - 경매 ID: {}, 참여자 수: {}", auctionIndex, participantCount);
 
         return chatDto;  // 나가기 메시지를 클라이언트로 전송
     }
