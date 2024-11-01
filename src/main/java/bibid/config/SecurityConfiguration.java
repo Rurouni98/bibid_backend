@@ -11,6 +11,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.header.writers.StaticHeadersWriter;
 import org.springframework.web.filter.CorsFilter;
 
 @Configuration
@@ -53,6 +54,11 @@ public class SecurityConfiguration {
                     ).permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
                 })
+                .headers(httpSecurityHeadersConfigurer ->
+                        httpSecurityHeadersConfigurer.addHeaderWriter(new StaticHeadersWriter(
+                                "Set-Cookie",
+                                "cookieName=cookieValue; Secure; HttpOnly; SameSite=None"
+                        )))
                 .addFilterAfter(jwtAuthenticationFilter, CorsFilter.class)
                 .build();
     }
