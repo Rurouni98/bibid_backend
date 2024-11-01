@@ -32,12 +32,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-auctions")
-                .setAllowedOrigins(frontUrl + ":3000")
+//                .setAllowedOrigins(frontUrl + ":3000")
+                .setAllowedOriginPatterns("*")
                 .setHandshakeHandler(new CustomHandshakeHandler(jwtProvider))
                 .withSockJS();
 
         registry.addEndpoint("/ws-notifications")
-                .setAllowedOrigins(frontUrl + ":3000")
+//                .setAllowedOrigins(frontUrl + ":3000")
+                .setAllowedOriginPatterns("*")
                 .setHandshakeHandler(new CustomHandshakeHandler(jwtProvider))
                 .withSockJS();
     }
