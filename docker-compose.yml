@@ -13,7 +13,7 @@ services:
     environment:
       - SPRING_REDIS_HOST=redis
       - SPRING_REDIS_PORT=6379
-      - SPRING_REDIS_PASSWORD=!dkdlxl1234
+      - SPRING_REDIS_PASSWORD="!dkdlxl1234"
     depends_on:
       - redis
 
