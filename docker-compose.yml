@@ -10,7 +10,7 @@ services:
     environment:
       - SPRING_REDIS_HOST=redis  # Redis 호스트 설정 (서비스 이름)
       - SPRING_REDIS_PORT=6379   # Redis 포트 설정
-      - SPRING_REDIS_PASSWORD=!dkdlxl1234  # Redis 비밀번호 설정
+      - SPRING_REDIS_PASSWORD="!dkdlxl1234"  # Redis 비밀번호 설정
     depends_on:
       - redis                  # Redis가 먼저 실행되도록 설정
 
