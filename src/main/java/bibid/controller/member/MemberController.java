@@ -115,14 +115,16 @@ public class MemberController {
                 cookie.setPath("/");
                 cookie.setMaxAge(7 * 24 * 60 * 60);
                 cookie.setDomain("bibid.shop");
-                response.addCookie(cookie);
+//                response.addCookie(cookie);
+                response.addHeader("Set-Cookie", "ACCESS_TOKEN=" + jwtToken + "; Path=/; Secure; HttpOnly; SameSite=None");
             } else {
                 Cookie cookie = new Cookie("ACCESS_TOKEN", jwtToken);
                 cookie.setHttpOnly(true);
                 cookie.setSecure(true);
                 cookie.setPath("/");
                 cookie.setDomain("bibid.shop");
-                response.addCookie(cookie);
+//                response.addCookie(cookie);
+                response.addHeader("Set-Cookie", "ACCESS_TOKEN=" + jwtToken + "; Path=/; Secure; HttpOnly; SameSite=None");
             }
 
             responseDto.setStatusCode(HttpStatus.OK.value());
