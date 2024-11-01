@@ -36,23 +36,27 @@ public class SecurityConfiguration {
                 .sessionManagement(httpSecuritySessionManagementConfigurer -> {
                     httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
                 })
-                .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry -> {
-                    authorizationManagerRequestMatcherRegistry.requestMatchers(
-                            "/swagger-ui.html",
-                            "/swagger-ui/**",
-                            "/v3/api-docs/**",
-                            "/members/**",
-                            "/ws/**",
-                            "/auction/**",
-                            "/category/**",
-                            "/api/ncloud/**",
-                            "/mypage/**",
-                            "/auth/**",
-                            "/specialAuction/list",
-                            "/auctionDetail/**"
-                    ).permitAll();
-                    authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
-                })
+//                .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry -> {
+//                    authorizationManagerRequestMatcherRegistry.requestMatchers(
+//                            "/swagger-ui.html",
+//                            "/swagger-ui/**",
+//                            "/v3/api-docs/**",
+//                            "/members/**",
+//                            "/ws/**",
+//                            "/auction/**",
+//                            "/category/**",
+//                            "/api/ncloud/**",
+//                            "/mypage/**",
+//                            "/auth/**",
+//                            "/specialAuction/list",
+//                            "/auctionDetail/**"
+//                    ).permitAll();
+//                    authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
+//                })
+                .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry ->
+                        authorizationManagerRequestMatcherRegistry
+                                .anyRequest().permitAll() // 모든 요청 허용
+                )
                 .addFilterAfter(jwtAuthenticationFilter, CorsFilter.class)
                 .build();
     }
