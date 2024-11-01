@@ -54,11 +54,6 @@ public class SecurityConfiguration {
                     ).permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
                 })
-                .headers(httpSecurityHeadersConfigurer ->
-                        httpSecurityHeadersConfigurer.addHeaderWriter(new StaticHeadersWriter(
-                                "Set-Cookie",
-                                "cookieName=cookieValue; Secure; HttpOnly; SameSite=None"
-                        )))
                 .addFilterAfter(jwtAuthenticationFilter, CorsFilter.class)
                 .build();
     }
