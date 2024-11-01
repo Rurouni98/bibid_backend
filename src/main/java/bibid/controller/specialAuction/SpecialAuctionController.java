@@ -78,7 +78,6 @@ public class SpecialAuctionController {
         if (channel != null) {
             liveStationPoolManager.releaseChannel(channel);
 
-            auction.setAuctionStatus("경매종료");
             auction.setLiveStationChannel(null);
             specialAuctionRepository.save(auction);
             log.info("경매 종료로 채널 반납: auctionIndex : {} ", auctionIndex);

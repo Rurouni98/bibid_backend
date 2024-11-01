@@ -10,7 +10,7 @@ public enum AuctionStatus {
     READY("준비중"),                  // 실시간 경매가 30분 전에 준비 중 상태로 변경
     BROADCASTING("방송중"),           // 실시간 경매 방송 중
 
-    STARTED("경매 시작"),             // 경매 시작
+    STARTED("경매 시작"),             // 경매 시작 (일반 경매만)
 
     BID_COMPLETE("낙찰"),             // 입찰 성공, 낙찰 완료
     AUCTION_FAILED("유찰"),           // 유찰

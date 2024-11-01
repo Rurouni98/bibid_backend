@@ -80,7 +80,6 @@ public class SpecialAuctionSchedulerInitializer {
         for (Auction auction : auctionsToRelease) {
             liveStationPoolManager.releaseChannel(auction.getLiveStationChannel());
             auction.setLiveStationChannel(null);
-            auction.setAuctionStatus("종료");
             specialAuctionRepository.save(auction);
 //            log.info("1시간 경과로 강제 채널 반납: 경매 ID {}", auction.getAuctionIndex());
             log.info("10분 경과로 강제 채널 반납: 경매 ID {}", auction.getAuctionIndex());
