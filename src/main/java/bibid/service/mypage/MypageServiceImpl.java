@@ -10,6 +10,7 @@ import bibid.entity.Member;
 import bibid.entity.ProfileImage;
 
 import bibid.repository.auction.AuctionRepository;
+import bibid.repository.member.MemberRepository;
 import bibid.repository.mypage.MypageProfileRepository;
 import bibid.repository.mypage.MypageRepository;
 import bibid.repository.mypage.ProfileImageRepository;
@@ -34,6 +35,7 @@ public class MypageServiceImpl implements MypageService {
     private final AuctionInfoRepository auctionInfoRepository;
     private final ProfileImageRepository profileImageRepository;
     private final AuctionRepository auctionRepository;
+    private final MemberRepository memberRepository;
 
     @Override
     public MemberDto modify(MemberDto memberDto, MultipartFile[] uploadProfiles) {
@@ -185,5 +187,26 @@ public class MypageServiceImpl implements MypageService {
         return myAuctions.stream()
                 .map(Auction::toDto)
                 .toList();
+    }
+
+    @Override
+    public MemberDto updateProfile(Long memberIndex, MemberDto memberDto) {
+        // 사용자를 데이터베이스에서 조회
+        Member member = memberRepository.findById(memberIndex)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // 사용자의 정보 업데이트
+        member.setName(memberDto.getName());
+        member.setNickname(memberDto.getNickname());
+        member.setMemberPnum(memberDto.getMemberPnum());
+        member.setEmail(memberDto.getEmail());
+        member.setMemberAddress(memberDto.getMemberAddress());
+        member.setAddressDetail(memberDto.getAddressDetail());
+
+        // 변경된 사용자 정보 저장
+        memberRepository.save(member);
+
+        // 업데이트된 정보를 MemberDto로 변환하여 반환
+        return member.toDto(); // toDto 메소드 사용
     }
 }
