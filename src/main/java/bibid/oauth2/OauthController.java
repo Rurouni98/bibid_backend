@@ -48,13 +48,7 @@ public class OauthController {
 
         //(3)
         try {
-            Cookie cookie = new Cookie("ACCESS_TOKEN", jwtToken);
-            cookie.setHttpOnly(true);
-            cookie.setSecure(true);
-            cookie.setPath("/");
-            cookie.setDomain("bibid.shop");
-//                response.addCookie(cookie);
-            response.addHeader("Set-Cookie", "ACCESS_TOKEN=" + jwtToken + "; Path=/; Secure; HttpOnly; SameSite=None");
+            response.addHeader("Set-Cookie", "ACCESS_TOKEN=" + jwtToken + "; Path=/; Domain=bibid.shop; Secure; HttpOnly; SameSite=None");
 
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setStatusMessage("Sent to Client");
@@ -88,13 +82,7 @@ public class OauthController {
         Map<String, String> memberInfo = naverServiceImpl.getMember(jwtToken);
 
         try {
-            Cookie cookie = new Cookie("ACCESS_TOKEN", jwtToken);
-            cookie.setHttpOnly(true);
-            cookie.setSecure(true);
-            cookie.setPath("/");
-            cookie.setDomain("bibid.shop");
-//                response.addCookie(cookie);
-            response.addHeader("Set-Cookie", "ACCESS_TOKEN=" + jwtToken + "; Path=/; Secure; HttpOnly; SameSite=None");
+            response.addHeader("Set-Cookie", "ACCESS_TOKEN=" + jwtToken + "; Path=/; Domain=bibid.shop; Secure; HttpOnly; SameSite=None");
 
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setStatusMessage("Sent to Client");
@@ -122,13 +110,7 @@ public class OauthController {
         Map<String, String> memberInfo = googleServiceImpl.getMember(jwtToken);
 
         try {
-            Cookie cookie = new Cookie("ACCESS_TOKEN", jwtToken);
-            cookie.setHttpOnly(true);
-            cookie.setSecure(true);
-            cookie.setPath("/");
-            cookie.setDomain("bibid.shop");
-//                response.addCookie(cookie);
-            response.addHeader("Set-Cookie", "ACCESS_TOKEN=" + jwtToken + "; Path=/; Secure; HttpOnly; SameSite=None");
+            response.addHeader("Set-Cookie", "ACCESS_TOKEN=" + jwtToken + "; Path=/; Domain=bibid.shop; Secure; HttpOnly; SameSite=None");
 
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setStatusMessage("Access token received successfully.");
@@ -168,6 +150,10 @@ public class OauthController {
                         return ResponseEntity.ok(responseDto);
                     }
                 }
+            } else {
+                responseDto.setItem(hasAccessToken);
+
+                return ResponseEntity.ok(responseDto);
             }
 
             if (!hasAccessToken) {
