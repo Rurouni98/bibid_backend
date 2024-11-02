@@ -213,36 +213,36 @@ public class KakaoServiceImpl {
 
     }
 
-    public String checkLogin(Principal principal) {
-        if (principal == null) {
-            throw new IllegalStateException("현재 인증된 사용자를 찾을 수 없습니다.");
-        }
-
-        String username = principal.getName();
-        System.out.println("현재 사용자명:" + username);
-
-        CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(username);
-        if (userDetails == null) {
-            throw new RuntimeException("사용자를 찾을 수 없습니다.");
-        }
-
-        Member memberId = userDetails.getMember();
-        if (memberId == null) {
-            throw new RuntimeException("Member 정보를 찾을 수 없습니다.");
-        }
-
-        String findMemberId = memberId.getMemberId();
-
-        Optional <Member> member = memberRepository.findByMemberId(findMemberId);
-        if (!member.isPresent()) {
-            throw new RuntimeException("Member not found");
-        }
-
-        Member loginMember = member.get();
-
-        return loginMember.getRole();
-
-    }
+//    public String checkLogin(Principal principal) {
+//        if (principal == null) {
+//            throw new IllegalStateException("현재 인증된 사용자를 찾을 수 없습니다.");
+//        }
+//
+//        String username = principal.getName();
+//        System.out.println("현재 사용자명:" + username);
+//
+//        CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(username);
+//        if (userDetails == null) {
+//            throw new RuntimeException("사용자를 찾을 수 없습니다.");
+//        }
+//
+//        Member memberId = userDetails.getMember();
+//        if (memberId == null) {
+//            throw new RuntimeException("Member 정보를 찾을 수 없습니다.");
+//        }
+//
+//        String findMemberId = memberId.getMemberId();
+//
+//        Optional <Member> member = memberRepository.findByMemberId(findMemberId);
+//        if (!member.isPresent()) {
+//            throw new RuntimeException("Member not found");
+//        }
+//
+//        Member loginMember = member.get();
+//
+//        return loginMember.getRole();
+//
+//    }
 
 
 //    public String convertImageToBase64(String imageUrl) throws Exception {

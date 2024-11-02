@@ -8,11 +8,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.Map;
 
 @RestController //(1)
@@ -27,6 +29,9 @@ public class OauthController {
     private final JwtProvider jwtProvider;
     private final MemberServiceImpl memberServiceImpl;
     private OauthTokenDto oauthToken;
+
+    @Value("${cookie.secure}")
+    private String cookieSecure;
 
     // ㅁ 카카오
     // 프론트에서 인가코드 받아오는 url
@@ -47,12 +52,16 @@ public class OauthController {
 
         //(3)
         try {
-            log.info("login KakaoProfileDto: {}", jwtToken.toString());
-            Cookie cookie = new Cookie("ACCESS_TOKEN", jwtToken);
-            cookie.setHttpOnly(true);
-            cookie.setPath("/");
-            cookie.setMaxAge(7 * 24 * 60 * 60);
-            response.addCookie(cookie);
+            StringBuilder cookieHeader = new StringBuilder("ACCESS_TOKEN=" + jwtToken + "; Path=/; HttpOnly; ");
+
+            int maxAge = 7 * 24 * 60 * 60; // 7일
+            cookieHeader.append("Max-Age=").append(maxAge);
+
+            if ("true".equals(cookieSecure)) {
+                cookieHeader.append("; Secure"); // Secure 속성 추가
+            }
+
+            response.addHeader("Set-Cookie", cookieHeader.toString());
 
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setStatusMessage("Sent to Client");
@@ -86,12 +95,16 @@ public class OauthController {
         Map<String, String> memberInfo = naverServiceImpl.getMember(jwtToken);
 
         try {
-            log.info("login NaverProfileDto: {}", jwtToken.toString());
-            Cookie cookie = new Cookie("ACCESS_TOKEN", jwtToken);
-            cookie.setHttpOnly(true); // 클라이언트 측 JavaScript에서 쿠키 접근 방지
-            cookie.setPath("/"); // 쿠키의 유효 경로 설정
-            cookie.setMaxAge(7 * 24 * 60 * 60);
-            response.addCookie(cookie); // 쿠키 추가
+            StringBuilder cookieHeader = new StringBuilder("ACCESS_TOKEN=" + jwtToken + "; Path=/; HttpOnly; ");
+
+            int maxAge = 7 * 24 * 60 * 60; // 7일
+            cookieHeader.append("Max-Age=").append(maxAge);
+
+            if ("true".equals(cookieSecure)) {
+                cookieHeader.append("; Secure"); // Secure 속성 추가
+            }
+
+            response.addHeader("Set-Cookie", cookieHeader.toString());
 
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setStatusMessage("Sent to Client");
@@ -119,12 +132,17 @@ public class OauthController {
         Map<String, String> memberInfo = googleServiceImpl.getMember(jwtToken);
 
         try {
-            log.info("login NaverProfileDto: {}", jwtToken.toString());
-            Cookie cookie = new Cookie("ACCESS_TOKEN", jwtToken);
-            cookie.setHttpOnly(true); // 클라이언트 측 JavaScript에서 쿠키 접근 방지
-            cookie.setPath("/"); // 쿠키의 유효 경로 설정
-            cookie.setMaxAge(7 * 24 * 60 * 60);
-            response.addCookie(cookie); // 쿠키 추가
+
+            StringBuilder cookieHeader = new StringBuilder("ACCESS_TOKEN=" + jwtToken + "; Path=/; HttpOnly; ");
+
+            int maxAge = 7 * 24 * 60 * 60; // 7일
+            cookieHeader.append("Max-Age=").append(maxAge);
+
+            if ("true".equals(cookieSecure)) {
+                cookieHeader.append("; Secure"); // Secure 속성 추가
+            }
+
+            response.addHeader("Set-Cookie", cookieHeader.toString());
 
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setStatusMessage("Access token received successfully.");
@@ -138,31 +156,36 @@ public class OauthController {
     }
 
     @GetMapping("/checkLogin")
-    public ResponseEntity<?> checkLogin(HttpServletRequest request, Principal principal) {
+    public ResponseEntity<?> checkLogin(HttpServletRequest request) {
 
         ResponseDto<Boolean> responseDto = new ResponseDto<>();
 
         Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            log.info("Cookies: {}", Arrays.toString(cookies));
+        } else {
+            log.info("No cookies found.");
+        }
         try {
             boolean hasAccessToken = false;
 
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
+                    log.info("Found cookie: {} = {}", cookie.getName(), cookie.getValue());
                     if ("ACCESS_TOKEN".equals(cookie.getName())) {
+                        log.info("ACCESS_TOKEN이 있습니다.");
                         hasAccessToken = true;
+                        responseDto.setStatusMessage("ok");
+                        responseDto.setStatusCode(200);
+                        responseDto.setItem(hasAccessToken);
 
-                        if (principal != null) {
-                            responseDto.setStatusMessage("ok");
-                            responseDto.setStatusCode(200);
-                            responseDto.setItem(hasAccessToken);
-                        } else {
-                            responseDto.setStatusMessage("not logged in");
-                            responseDto.setStatusCode(401);
-                            responseDto.setItem(hasAccessToken);
-                        }
                         return ResponseEntity.ok(responseDto);
                     }
                 }
+            } else {
+                responseDto.setItem(hasAccessToken);
+
+                return ResponseEntity.ok(responseDto);
             }
 
             if (!hasAccessToken) {
@@ -183,3 +206,5 @@ public class OauthController {
         return ResponseEntity.internalServerError().body(responseDto);
     }
 }
+
+

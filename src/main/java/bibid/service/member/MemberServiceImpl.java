@@ -93,13 +93,12 @@ public class MemberServiceImpl implements MemberService {
             throw new RuntimeException("wrong memberPw");
         }
 
-        MemberDto loginMemberDto = member.toDto();
+        MemberDto loginMember = memberRepository.findByNickname(memberDto.getMemberId()).toDto();
 
-        loginMemberDto.setMemberPw("");
-        loginMemberDto.setRememberMe(memberDto.getRememberMe());
-        loginMemberDto.setToken(jwtProvider.createJwt(member));
+        loginMember.setMemberPw("");
+        loginMember.setRememberMe(memberDto.getRememberMe());
 
-        return loginMemberDto;
+        return loginMember;
     }
 
     @Override

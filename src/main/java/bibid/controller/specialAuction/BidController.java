@@ -58,7 +58,7 @@ public class BidController {
         redisBidService.placeBid(auctionIndex, auctionInfoDto.getBidAmount(), bidder.getNickname());
         log.info("Bid placed in Redis: auctionId={}, amount={}, user={}", auctionIndex, auctionInfoDto.getBidAmount(), bidder.getNickname());
 
-        // 최고 입찰가 업데이트 후 프론트로 전달
+//        // 최고 입찰가 업데이트 후 프론트로 전달
         Double highestBid = redisBidService.getHighestBid(auctionIndex);
         auctionInfoDto.setBidAmount(highestBid.longValue());
         auctionInfoDto.setBidderNickname(bidder.getNickname());

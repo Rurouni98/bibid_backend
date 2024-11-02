@@ -81,6 +81,7 @@ public class ChatController {
         String username = principal.getName();
         
         // participants 맵에 사용자를 추가 (중복 체크 없이)
+
         participants.computeIfAbsent(auctionIndex, k -> new HashSet<>()).add(username);
         log.info("enter_participants: {}", participants);
         int participantCount = participants.get(auctionIndex).size();
