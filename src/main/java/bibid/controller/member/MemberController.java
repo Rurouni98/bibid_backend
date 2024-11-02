@@ -9,7 +9,6 @@ import bibid.jwt.JwtProvider;
 import bibid.oauth2.KakaoServiceImpl;
 import bibid.repository.member.MemberRepository;
 import bibid.service.member.MemberService;
-import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -39,11 +38,6 @@ public class MemberController {
 
     @Value("${cookie.secure}")
     private String cookieSecure;
-
-    @PostConstruct
-    public void init() {
-        System.out.println("COOKIE_SECURE: " + cookieSecure);
-    }
 
     private Map<String, String> verificationCodes = new HashMap<>();
 
