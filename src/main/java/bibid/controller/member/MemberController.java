@@ -5,6 +5,7 @@ import bibid.dto.MemberDto;
 import bibid.dto.ResponseDto;
 import bibid.entity.CustomUserDetails;
 import bibid.entity.Member;
+import bibid.jwt.JwtProvider;
 import bibid.oauth2.KakaoServiceImpl;
 import bibid.repository.member.MemberRepository;
 import bibid.service.member.MemberService;
@@ -13,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -32,6 +34,10 @@ public class MemberController {
     private final MemberService memberService;
     private final KakaoServiceImpl kakaoService;
     private final MemberRepository memberRepository;
+    private final JwtProvider jwtProvider;
+
+    @Value("${cookie.secure}")
+    private String cookieSecure;
 
     private Map<String, String> verificationCodes = new HashMap<>();
 
@@ -104,24 +110,29 @@ public class MemberController {
 
         try {
             log.info("login memberDto: {}", memberDto.toString());
-            MemberDto loginMemberDto = memberService.login(memberDto);
-            String jwtToken = loginMemberDto.getToken();
-            Boolean rememberMe = loginMemberDto.getRememberMe();
+            MemberDto loginMember = memberService.login(memberDto);
+            log.info("login Data: {}", memberService.login(memberDto));
+            String jwtToken = jwtProvider.createJwt(loginMember.toEntity());
+            Boolean rememberMe = loginMember.getRememberMe();
             log.info("rememberMe: {}", rememberMe);
+
+            // 쿠키 설정
+            StringBuilder cookieHeader = new StringBuilder("ACCESS_TOKEN=" + jwtToken + "; Path=/; HttpOnly; ");
+
             if (rememberMe) {
+                int maxAge = 7 * 24 * 60 * 60; // 7일
+                cookieHeader.append("Max-Age=").append(maxAge);
 
-                int maxAge = 7 * 24 * 60 * 60;
-
-                response.addHeader("Set-Cookie", "ACCESS_TOKEN=" + jwtToken + "; Max-Age=" + maxAge + "; Path=/; Domain=bibid.shop; Secure; HttpOnly; SameSite=None");
-
-            } else {
-                response.addHeader("Set-Cookie", "ACCESS_TOKEN=" + jwtToken + "; Path=/; Domain=bibid.shop; Secure; HttpOnly; SameSite=None");
-
+                if ("true".equals(cookieSecure)) {
+                    cookieHeader.append("; Secure"); // Secure 속성 추가
+                }
             }
+
+            response.addHeader("Set-Cookie", cookieHeader.toString());
 
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setStatusMessage("ok");
-            responseDto.setItem(loginMemberDto);
+            responseDto.setItem(loginMember);
 
             return ResponseEntity.ok(responseDto);
 
@@ -159,7 +170,7 @@ public class MemberController {
                 for (Cookie cookie : cookies) {
                     if ("ACCESS_TOKEN".equals(cookie.getName())) {
                         response.addHeader("Set-Cookie",
-                                "ACCESS_TOKEN=null; Max-Age=0; Path=/; Domain=bibid.shop; Secure; HttpOnly; SameSite=None");
+                                "ACCESS_TOKEN=null; Max-Age=0; Path=/; Secure; HttpOnly; SameSite=None");
                     }
                 }
             }
@@ -185,7 +196,7 @@ public class MemberController {
 
         try {
             Member member = memberRepository.findById(customUserDetails.getMember().getMemberIndex())
-                            .orElseThrow(() -> new RuntimeException( "member not exist"));
+                    .orElseThrow(() -> new RuntimeException("member not exist"));
 
             responseDto.setItem(member.toDto());
             responseDto.setStatusCode(HttpStatus.OK.value());
@@ -198,7 +209,6 @@ public class MemberController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDto);
         }
     }
-
 
 
 }

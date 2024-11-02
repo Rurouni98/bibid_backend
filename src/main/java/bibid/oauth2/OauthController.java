@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +30,9 @@ public class OauthController {
     private final MemberServiceImpl memberServiceImpl;
     private OauthTokenDto oauthToken;
 
+    @Value("${cookie.secure}")
+    private String cookieSecure;
+
     // ㅁ 카카오
     // 프론트에서 인가코드 받아오는 url
     @GetMapping("/kakao/callback") // (3)
@@ -48,7 +52,16 @@ public class OauthController {
 
         //(3)
         try {
-            response.addHeader("Set-Cookie", "ACCESS_TOKEN=" + jwtToken + "; Path=/; Domain=bibid.shop; Secure; HttpOnly; SameSite=None");
+            StringBuilder cookieHeader = new StringBuilder("ACCESS_TOKEN=" + jwtToken + "; Path=/; HttpOnly; ");
+
+            int maxAge = 7 * 24 * 60 * 60; // 7일
+            cookieHeader.append("Max-Age=").append(maxAge);
+
+            if ("true".equals(cookieSecure)) {
+                cookieHeader.append("; Secure"); // Secure 속성 추가
+            }
+
+            response.addHeader("Set-Cookie", cookieHeader.toString());
 
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setStatusMessage("Sent to Client");
@@ -82,7 +95,16 @@ public class OauthController {
         Map<String, String> memberInfo = naverServiceImpl.getMember(jwtToken);
 
         try {
-            response.addHeader("Set-Cookie", "ACCESS_TOKEN=" + jwtToken + "; Path=/; Domain=bibid.shop; Secure; HttpOnly; SameSite=None");
+            StringBuilder cookieHeader = new StringBuilder("ACCESS_TOKEN=" + jwtToken + "; Path=/; HttpOnly; ");
+
+            int maxAge = 7 * 24 * 60 * 60; // 7일
+            cookieHeader.append("Max-Age=").append(maxAge);
+
+            if ("true".equals(cookieSecure)) {
+                cookieHeader.append("; Secure"); // Secure 속성 추가
+            }
+
+            response.addHeader("Set-Cookie", cookieHeader.toString());
 
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setStatusMessage("Sent to Client");
@@ -110,7 +132,17 @@ public class OauthController {
         Map<String, String> memberInfo = googleServiceImpl.getMember(jwtToken);
 
         try {
-            response.addHeader("Set-Cookie", "ACCESS_TOKEN=" + jwtToken + "; Path=/; Domain=bibid.shop; Secure; HttpOnly; SameSite=None");
+
+            StringBuilder cookieHeader = new StringBuilder("ACCESS_TOKEN=" + jwtToken + "; Path=/; HttpOnly; ");
+
+            int maxAge = 7 * 24 * 60 * 60; // 7일
+            cookieHeader.append("Max-Age=").append(maxAge);
+
+            if ("true".equals(cookieSecure)) {
+                cookieHeader.append("; Secure"); // Secure 속성 추가
+            }
+
+            response.addHeader("Set-Cookie", cookieHeader.toString());
 
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setStatusMessage("Access token received successfully.");
