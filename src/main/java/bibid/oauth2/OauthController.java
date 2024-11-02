@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.Map;
 
 @RestController //(1)
@@ -141,28 +142,29 @@ public class OauthController {
     }
 
     @GetMapping("/checkLogin")
-    public ResponseEntity<?> checkLogin(HttpServletRequest request, Principal principal) {
+    public ResponseEntity<?> checkLogin(HttpServletRequest request) {
 
         ResponseDto<Boolean> responseDto = new ResponseDto<>();
 
         Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            log.info("Cookies: {}", Arrays.toString(cookies));
+        } else {
+            log.info("No cookies found.");
+        }
         try {
             boolean hasAccessToken = false;
 
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
+                    log.info("Found cookie: {} = {}", cookie.getName(), cookie.getValue());
                     if ("ACCESS_TOKEN".equals(cookie.getName())) {
+                        log.info("ACCESS_TOKEN이 있습니다.");
                         hasAccessToken = true;
+                        responseDto.setStatusMessage("ok");
+                        responseDto.setStatusCode(200);
+                        responseDto.setItem(hasAccessToken);
 
-                        if (principal != null) {
-                            responseDto.setStatusMessage("ok");
-                            responseDto.setStatusCode(200);
-                            responseDto.setItem(hasAccessToken);
-                        } else {
-                            responseDto.setStatusMessage("not logged in");
-                            responseDto.setStatusCode(401);
-                            responseDto.setItem(hasAccessToken);
-                        }
                         return ResponseEntity.ok(responseDto);
                     }
                 }
