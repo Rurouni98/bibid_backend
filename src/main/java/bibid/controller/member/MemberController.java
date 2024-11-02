@@ -122,11 +122,9 @@ public class MemberController {
             if (rememberMe) {
                 int maxAge = 7 * 24 * 60 * 60; // 7일
                 cookieHeader.append("Max-Age=").append(maxAge);
-
-                if ("true".equals(cookieSecure)) {
-                    cookieHeader.append("; Secure"); // Secure 속성 추가
-                }
             }
+
+            cookieHeader.append("Secure; SameSite=None");
 
             response.addHeader("Set-Cookie", cookieHeader.toString());
 
