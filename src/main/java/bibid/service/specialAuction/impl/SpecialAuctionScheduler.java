@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -36,8 +37,19 @@ public class SpecialAuctionScheduler {
     // 경매 채널 할당 스케줄링
     public void scheduleChannelAllocation(Long auctionIndex, LocalDateTime startingLocalDateTime) {
 //        LocalDateTime allocationTime = startingLocalDateTime.minusMinutes(30);
-        LocalDateTime allocationTime = startingLocalDateTime.minusMinutes(5);
-        Date scheduleDate = Date.from(allocationTime.atZone(ZoneId.systemDefault()).toInstant());
+//        LocalDateTime allocationTime = startingLocalDateTime.minusMinutes(5);
+
+        // 5분 전으로 설정 (KST)
+        LocalDateTime allocationTimeKST = startingLocalDateTime.minusMinutes(5);
+
+//        Date scheduleDate = Date.from(allocationTime.atZone(ZoneId.systemDefault()).toInstant());
+
+        // KST를 UTC로 변환
+        ZonedDateTime allocationTimeUTC = allocationTimeKST.atZone(ZoneId.of("Asia/Seoul"))
+                .withZoneSameInstant(ZoneId.of("UTC"));
+
+        Date scheduleDate = Date.from(allocationTimeUTC.toInstant());
+
 
         ScheduledFuture<?> allocationTask = taskScheduler.schedule(() -> {
             try {
