@@ -52,14 +52,11 @@ public class OauthController {
 
         //(3)
         try {
+            // 쿠키 설정
             StringBuilder cookieHeader = new StringBuilder("ACCESS_TOKEN=" + jwtToken + "; Path=/; HttpOnly; ");
 
-            int maxAge = 7 * 24 * 60 * 60; // 7일
-            cookieHeader.append("Max-Age=").append(maxAge);
 
-            if ("true".equals(cookieSecure)) {
-                cookieHeader.append("; Secure"); // Secure 속성 추가
-            }
+            cookieHeader.append("Secure; SameSite=None");
 
             response.addHeader("Set-Cookie", cookieHeader.toString());
 
@@ -95,14 +92,11 @@ public class OauthController {
         Map<String, String> memberInfo = naverServiceImpl.getMember(jwtToken);
 
         try {
+            // 쿠키 설정
             StringBuilder cookieHeader = new StringBuilder("ACCESS_TOKEN=" + jwtToken + "; Path=/; HttpOnly; ");
 
-            int maxAge = 7 * 24 * 60 * 60; // 7일
-            cookieHeader.append("Max-Age=").append(maxAge);
 
-            if ("true".equals(cookieSecure)) {
-                cookieHeader.append("; Secure"); // Secure 속성 추가
-            }
+            cookieHeader.append("Secure; SameSite=None");
 
             response.addHeader("Set-Cookie", cookieHeader.toString());
 
@@ -133,14 +127,11 @@ public class OauthController {
 
         try {
 
+            // 쿠키 설정
             StringBuilder cookieHeader = new StringBuilder("ACCESS_TOKEN=" + jwtToken + "; Path=/; HttpOnly; ");
 
-            int maxAge = 7 * 24 * 60 * 60; // 7일
-            cookieHeader.append("Max-Age=").append(maxAge);
 
-            if ("true".equals(cookieSecure)) {
-                cookieHeader.append("; Secure"); // Secure 속성 추가
-            }
+            cookieHeader.append("Secure; SameSite=None");
 
             response.addHeader("Set-Cookie", cookieHeader.toString());
 
