@@ -1,14 +1,20 @@
 package bibid.config;
 
 import bibid.jwt.JwtProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.*;
 
+
+
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+    @Value("${front.url}")
+    private String frontUrl;
 
     private final JwtProvider jwtProvider;
 
@@ -26,12 +32,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-auctions")
-                .setAllowedOrigins("http://localhost:3000")
+//                .setAllowedOrigins(frontUrl + ":3000")
+                .setAllowedOriginPatterns("*")
                 .setHandshakeHandler(new CustomHandshakeHandler(jwtProvider))
                 .withSockJS();
 
         registry.addEndpoint("/ws-notifications")
-                .setAllowedOrigins("http://localhost:3000")
+//                .setAllowedOrigins(frontUrl + ":3000")
+                .setAllowedOriginPatterns("*")
                 .setHandshakeHandler(new CustomHandshakeHandler(jwtProvider))
                 .withSockJS();
     }
