@@ -111,14 +111,20 @@ public class MemberController {
             if (rememberMe) {
                 Cookie cookie = new Cookie("ACCESS_TOKEN", jwtToken);
                 cookie.setHttpOnly(true);
+                cookie.setSecure(true);
                 cookie.setPath("/");
                 cookie.setMaxAge(7 * 24 * 60 * 60);
-                response.addCookie(cookie);
+                cookie.setDomain("bibid.shop");
+//                response.addCookie(cookie);
+                response.addHeader("Set-Cookie", "ACCESS_TOKEN=" + jwtToken + "; Path=/; Secure; HttpOnly; SameSite=None");
             } else {
                 Cookie cookie = new Cookie("ACCESS_TOKEN", jwtToken);
                 cookie.setHttpOnly(true);
+                cookie.setSecure(true);
                 cookie.setPath("/");
-                response.addCookie(cookie);
+                cookie.setDomain("bibid.shop");
+//                response.addCookie(cookie);
+                response.addHeader("Set-Cookie", "ACCESS_TOKEN=" + jwtToken + "; Path=/; Secure; HttpOnly; SameSite=None");
             }
 
             responseDto.setStatusCode(HttpStatus.OK.value());
@@ -190,7 +196,7 @@ public class MemberController {
 
         try {
             Member member = memberRepository.findById(customUserDetails.getMember().getMemberIndex())
-                            .orElseThrow(() -> new RuntimeException( "member not exist"));
+                    .orElseThrow(() -> new RuntimeException( "member not exist"));
 
             responseDto.setItem(member.toDto());
             responseDto.setStatusCode(HttpStatus.OK.value());
