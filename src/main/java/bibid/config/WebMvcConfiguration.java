@@ -13,7 +13,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry corsregistry) {
         corsregistry.addMapping("/**")
-                .allowedOriginPatterns("*")
+                .allowedOriginPatterns("https://bibid.shop")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH")
                 .allowedHeaders("*")
                 .allowCredentials(true)
