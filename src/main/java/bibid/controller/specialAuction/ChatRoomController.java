@@ -32,7 +32,7 @@ public class ChatRoomController {
         log.info("User {} attempting to enter auction {}", nickname, auctionIndex);
 
         // Redis에 참가자 추가
-        redisParticipantService.enterAuction(auctionIndex, nickname);
+//        redisParticipantService.enterAuction(auctionIndex, nickname);
         log.info("Added {} to Redis for auction {}", nickname, auctionIndex);
 
         // DB에 입장 기록 추가
@@ -66,7 +66,7 @@ public class ChatRoomController {
         }
 
         // 참가자 수 업데이트 및 입장 메시지 브로드캐스트
-        redisParticipantService.sendParticipantCountUpdate(auctionIndex);
+//        redisParticipantService.sendParticipantCountUpdate(auctionIndex);
         log.info("Broadcasted participant count update for auction {}", auctionIndex);
     }
 
@@ -76,7 +76,7 @@ public class ChatRoomController {
         log.info("User {} attempting to leave auction {}", nickname, auctionIndex);
 
         // Redis에서 참가자 제거
-        redisParticipantService.leaveAuction(auctionIndex, nickname);
+//        redisParticipantService.leaveAuction(auctionIndex, nickname);
         log.info("Removed {} from Redis for auction {}", nickname, auctionIndex);
 
         // DB에 퇴장 기록 추가
@@ -102,7 +102,7 @@ public class ChatRoomController {
         }
 
         // 참가자 수 업데이트 및 퇴장 메시지 브로드캐스트
-        redisParticipantService.sendParticipantCountUpdate(auctionIndex);
+//        redisParticipantService.sendParticipantCountUpdate(auctionIndex);
         log.info("Broadcasted participant count update for auction {}", auctionIndex);
     }
 }
