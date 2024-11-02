@@ -41,8 +41,6 @@ public class KakaoServiceImpl {
     // ㅁ [1번] 코드로 카카오에서 토큰 받기
     public OauthTokenDto getAccessToken(String code) {
 
-
-
         //(2)
         RestTemplate rt = new RestTemplate();
 
@@ -54,7 +52,7 @@ public class KakaoServiceImpl {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
         params.add("client_id", kakoClientId);
-        params.add("redirect_uri", frontUrl + ":3000/auth/kakao/callback");
+        params.add("redirect_uri", frontUrl + "/auth/kakao/callback");
         params.add("code", code);
 
         //(5)
