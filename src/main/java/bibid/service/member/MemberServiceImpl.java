@@ -97,7 +97,14 @@ public class MemberServiceImpl implements MemberService {
 
         loginMemberDto.setMemberPw("");
         loginMemberDto.setRememberMe(memberDto.getRememberMe());
-        loginMemberDto.setToken(jwtProvider.createJwt(member));
+        loginMemberDto.setMemberId(memberDto.getMemberId());
+        loginMemberDto.setMemberAddress(memberDto.getMemberAddress());
+        loginMemberDto.setMemberIndex(memberDto.getMemberIndex());
+        loginMemberDto.setAddressDetail(member.getAddressDetail());
+        loginMemberDto.setEmail(member.getEmail());
+        loginMemberDto.setRole(member.getRole());
+        loginMemberDto.setNickname(member.getNickname());
+        loginMemberDto.setName(member.getName());
 
         return loginMemberDto;
     }
