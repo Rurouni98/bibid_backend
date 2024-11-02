@@ -11,16 +11,6 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class WebMvcConfiguration implements WebMvcConfigurer {
     @Override
-    public void addCorsMappings(CorsRegistry corsregistry) {
-        corsregistry.addMapping("/**")
-                .allowedOriginPatterns("https://bibid.shop")
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
-                .allowedHeaders("*")
-                .allowCredentials(true)
-                .maxAge(3600);
-    }
-
-    @Override
     public void addResourceHandlers(final ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/**")
                 .addResourceLocations("classpath:/templates/", "classpath:/static/")
