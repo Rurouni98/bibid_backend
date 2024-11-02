@@ -140,7 +140,7 @@ public class OauthController {
     @GetMapping("/checkLogin")
     public ResponseEntity<?> checkLogin(HttpServletRequest request, Principal principal) {
 
-        ResponseDto<String> responseDto = new ResponseDto<>();
+        ResponseDto<Boolean> responseDto = new ResponseDto<>();
 
         Cookie[] cookies = request.getCookies();
         try {
@@ -150,19 +150,15 @@ public class OauthController {
                 for (Cookie cookie : cookies) {
                     if ("ACCESS_TOKEN".equals(cookie.getName())) {
                         hasAccessToken = true;
-                        String jwtTokenValue = cookie.getValue();
-                        System.out.println("토큰밸류:" + jwtTokenValue);
 
                         if (principal != null) {
-                            String checkLogin = kakaoServiceImpl.checkLogin(principal);
-                            System.out.println("checkLogin:" + checkLogin);
                             responseDto.setStatusMessage("ok");
                             responseDto.setStatusCode(200);
-                            responseDto.setItem(checkLogin);
+                            responseDto.setItem(hasAccessToken);
                         } else {
                             responseDto.setStatusMessage("not logged in");
                             responseDto.setStatusCode(401);
-                            responseDto.setItem("notLogin");
+                            responseDto.setItem(hasAccessToken);
                         }
                         return ResponseEntity.ok(responseDto);
                     }
@@ -172,7 +168,7 @@ public class OauthController {
             if (!hasAccessToken) {
                 responseDto.setStatusMessage("no cookie");
                 responseDto.setStatusCode(401);
-                responseDto.setItem("notLogin");
+                responseDto.setItem(hasAccessToken);
                 return ResponseEntity.ok(responseDto);
             }
 
@@ -187,5 +183,3 @@ public class OauthController {
         return ResponseEntity.internalServerError().body(responseDto);
     }
 }
-
-
