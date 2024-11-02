@@ -49,7 +49,9 @@ public class SecurityConfiguration {
                             "/mypage/**",
                             "/auth/**",
                             "/specialAuction/list",
-                            "/auctionDetail/**"
+                            "/auctionDetail/**",
+                            "/ws-auctions/**",
+                            "/ws-notifications/**"
                     ).permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
                 })
