@@ -7,6 +7,7 @@ import bibid.repository.member.MemberRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -31,6 +32,12 @@ public class KakaoServiceImpl {
     private final JwtProvider jwtProvider;
     private final UserDetailsService userDetailsService;
 
+    @Value("${front.url}")
+    private String frontUrl;
+
+    @Value("${kakao.client.id}")
+    private String kakoClientId;
+
     // ㅁ [1번] 코드로 카카오에서 토큰 받기
     public OauthTokenDto getAccessToken(String code) {
 
@@ -44,8 +51,8 @@ public class KakaoServiceImpl {
         //(4)
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
-        params.add("client_id", "29e81fa9fda262c573f312af9934fa5c");
-        params.add("redirect_uri", "http://localhost:3000/auth/kakao/callback");
+        params.add("client_id", kakoClientId);
+        params.add("redirect_uri", frontUrl + "/auth/kakao/callback");
         params.add("code", code);
 
         //(5)
