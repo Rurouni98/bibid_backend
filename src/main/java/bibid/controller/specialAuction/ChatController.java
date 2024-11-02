@@ -62,7 +62,7 @@ public class ChatController {
         log.info("savedChat : {}", savedChat);
 
         // Redis에 메시지 저장
-//        redisChatService.saveChatMessage(auctionIndex, savedChat.toDto());
+        redisChatService.saveChatMessage(auctionIndex, savedChat.toDto());
         log.info("saveChatMessage 호출됨: auctionIndex={}, message={}", auctionIndex, chatDto.getChatMessage());
 
 
