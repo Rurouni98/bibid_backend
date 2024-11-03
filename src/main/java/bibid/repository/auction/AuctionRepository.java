@@ -59,4 +59,14 @@ public interface AuctionRepository extends JpaRepository<Auction, Long>, Auction
     @Transactional
     @Query("UPDATE Auction a SET a.viewCnt = a.viewCnt + 1 WHERE a.auctionIndex = :auctionIndex")
     void updateAuctionViewCnt(Long auctionIndex);
+
+    @Query("SELECT a FROM Auction a " +
+            "LEFT JOIN FETCH a.auctionInfoList " +
+            "LEFT JOIN FETCH a.auctionDetail " +
+            "LEFT JOIN FETCH a.liveStationChannel " +
+            "WHERE a.auctionIndex = :auctionIndex")
+    Optional<Auction> findByIdWithAllDetails(@Param("auctionIndex") Long auctionIndex);
+
+    @Query("SELECT a FROM Auction a LEFT JOIN FETCH a.liveStationChannel WHERE a.auctionIndex = :auctionIndex")
+    Optional<Auction> findByIdWithChannel(@Param("auctionIndex") Long auctionIndex);
 }

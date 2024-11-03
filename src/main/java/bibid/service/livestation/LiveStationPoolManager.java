@@ -8,7 +8,6 @@ import bibid.repository.livestation.LiveStationChannelRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
@@ -31,7 +30,6 @@ public class LiveStationPoolManager {
 
     @PostConstruct
     public void initializePool() {
-
         List<LiveStationChannel> existingChannels = channelRepository.findAll();
 
         if (existingChannels.isEmpty()) {
@@ -48,7 +46,8 @@ public class LiveStationPoolManager {
         // 서버 재시작 시, CDN이 아직 준비되지 않은 채널들을 다시 확인
         List<LiveStationChannel> channelsNeedingCdnUpdate = channelRepository.findAllByIsAvailableFalse();
         for (LiveStationChannel channel : channelsNeedingCdnUpdate) {
-            checkCdnStatusAndUpdate(channel);  // CDN 상태를 다시 확인하여 업데이트 작업 재시작
+            channel.getServiceUrlList().size(); // Lazy Loading 방지
+            scheduleCdnStatusCheck(channel);  // 스케줄링 작업으로 상태 확인 및 업데이트
         }
     }
 
@@ -79,28 +78,24 @@ public class LiveStationPoolManager {
 
     @Transactional
     public LiveStationChannel allocateChannel() {
-        LiveStationChannel allocatedChannel =
-                channelRepository.findFirstByIsAllocatedFalseAndIsAvailableTrue()
-                .orElseGet(() -> {
-                    log.info("가용 및 할당 가능한 채널이 없으므로 새 채널을 생성합니다.");
-                    return createNewChannel();
-                });
+        List<LiveStationChannel> availableChannels = channelRepository.findAllByIsAllocatedFalseAndIsAvailableTrue();
 
-//        allocatedChannel.setChannelStatus("PUBLISH");
+        LiveStationChannel allocatedChannel = availableChannels.isEmpty() ? createNewChannel() : availableChannels.get(0);
+
+        allocatedChannel.getServiceUrlList().size(); // Lazy Loading 방지
         allocatedChannel.setAllocated(true);
         log.info("채널 할당: Channel ID: {}", allocatedChannel.getChannelId());
 
         if (!allocatedChannel.getCdnStatusName().equals("RUNNING")) {
             log.info("CDN 준비 중, 상태 업데이트 대기: Channel ID: {}", allocatedChannel.getChannelId());
-            checkCdnStatusAndUpdate(allocatedChannel);
+            scheduleCdnStatusCheck(allocatedChannel);  // 스케줄링 작업 호출
         }
 
         return channelRepository.save(allocatedChannel);
     }
 
+    @Transactional
     private LiveStationChannel createNewChannel() {
-
-        // 랜덤으로 생성한 채널 이름
         String channelName = createNewChannelName();
         String channelId = liveStationService.createChannel(channelName);
         LiveStationInfoDTO liveStationInfoDTO = liveStationService.getChannelInfo(channelId);
@@ -120,56 +115,63 @@ public class LiveStationPoolManager {
         return channelRepository.save(createdChannel);
     }
 
+    @Transactional
     public LiveStationChannel testCreateNewChannel() {
-
         LiveStationChannel allocatedChannel = createNewChannel();
 
+        allocatedChannel.getServiceUrlList().size(); // Lazy Loading 방지
         allocatedChannel.setAllocated(true);
         log.info("채널 할당: Channel ID: {}", allocatedChannel.getChannelId());
 
         if (!allocatedChannel.getCdnStatusName().equals("RUNNING")) {
             log.info("CDN 준비 중, 상태 업데이트 대기: Channel ID: {}", allocatedChannel.getChannelId());
-            checkCdnStatusAndUpdate(allocatedChannel);
+            scheduleCdnStatusCheck(allocatedChannel);  // 스케줄링 작업 호출
         }
 
         return channelRepository.save(allocatedChannel);
     }
 
-    private void checkCdnStatusAndUpdate(LiveStationChannel channel) {
+    // 스케줄링된 작업을 관리하는 메서드
+    private void scheduleCdnStatusCheck(LiveStationChannel channel) {
         final long CHECK_INTERVAL_MS = 5 * 60 * 1000;  // 5분
 
-        taskScheduler.schedule(() -> {
-            try {
-                LiveStationInfoDTO channelInfo = liveStationService.getChannelInfo(channel.getChannelId());
-                String cdnStatusName = channelInfo.getCdnStatusName();
-                String channelStatus = channelInfo.getChannelStatus();
-
-                if ("RUNNING".equals(cdnStatusName) && "PUBLISH".equals(channelStatus)) {
-                    List<LiveStationServiceUrl> serviceUrlList = liveStationService.getServiceURL(channel.getChannelId(), "GENERAL")
-                            .stream()
-                            .map(liveStationUrlDTO -> LiveStationServiceUrl.builder()
-                                    .liveStationChannel(channel)
-                                    .serviceUrl(liveStationUrlDTO.getUrl())
-                                    .build()
-                            )
-                            .toList();
-                    channel.setServiceUrlList(serviceUrlList);
-                    channel.setCdnStatusName("RUNNING");
-
-                    channelRepository.save(channel);
-
-                    messagingTemplate.convertAndSend("/topic/cdn-updates", channel.getServiceUrlList());
-                    log.info("CDN 상태 업데이트 및 서비스 URL 저장 완료: {}", channel.getChannelId());
-                } else {
-                    log.info("CDN 생성 중 또는 채널 상태 대기 중: Channel ID: {}", channel.getChannelId());
-                    taskScheduler.schedule(() -> checkCdnStatusAndUpdate(channel), new Date(System.currentTimeMillis() + CHECK_INTERVAL_MS));
-                }
-            } catch (Exception e) {
-                log.error("CDN 상태 확인 중 오류 발생: {} (Channel ID: {})", e.getMessage(), channel.getChannelId());
-            }
-        }, new Date(System.currentTimeMillis() + CHECK_INTERVAL_MS));  // 5분 후 첫 확인
+        taskScheduler.schedule(() -> checkCdnStatusAndUpdate(channel), new Date(System.currentTimeMillis() + CHECK_INTERVAL_MS));
     }
 
+    // 트랜잭션이 적용된 CDN 상태 확인 및 업데이트 메서드
+    @Transactional
+    public void checkCdnStatusAndUpdate(LiveStationChannel channel) {
+        try {
+            LiveStationInfoDTO channelInfo = liveStationService.getChannelInfo(channel.getChannelId());
+            String cdnStatusName = channelInfo.getCdnStatusName();
+            String channelStatus = channelInfo.getChannelStatus();
+
+            if ("RUNNING".equals(cdnStatusName) && "PUBLISH".equals(channelStatus)) {
+                List<LiveStationServiceUrl> serviceUrlList = liveStationService.getServiceURL(channel.getChannelId(), "GENERAL")
+                        .stream()
+                        .map(liveStationUrlDTO -> LiveStationServiceUrl.builder()
+                                .liveStationChannel(channel)
+                                .serviceUrl(liveStationUrlDTO.getUrl())
+                                .build()
+                        )
+                        .toList();
+                channel.setServiceUrlList(serviceUrlList);
+                channel.setCdnStatusName("RUNNING");
+
+                channelRepository.save(channel);
+
+                messagingTemplate.convertAndSend("/topic/cdn-updates", channel.getServiceUrlList());
+                log.info("CDN 상태 업데이트 및 서비스 URL 저장 완료: {}", channel.getChannelId());
+            } else {
+                log.info("CDN 생성 중 또는 채널 상태 대기 중: Channel ID: {}", channel.getChannelId());
+                scheduleCdnStatusCheck(channel);  // 상태 업데이트가 필요하면 다시 스케줄링
+            }
+        } catch (Exception e) {
+            log.error("CDN 상태 확인 중 오류 발생: {} (Channel ID: {})", e.getMessage(), channel.getChannelId());
+        }
+    }
+
+    @Transactional
     public void releaseChannel(LiveStationChannel channel) {
         channel.setChannelStatus("READY");
         channel.setAllocated(false);
@@ -178,13 +180,8 @@ public class LiveStationPoolManager {
     }
 
     private String createNewChannelName() {
-        // 현재 시간을 'YYYYMMDDHHMMSS' 형식으로 포맷
         String dateTime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-
-        // UUID를 생성하고 랜덤 문자열 부분을 가져옴
-        String randomString = UUID.randomUUID().toString().substring(0, 5); // 5글자 랜덤 문자열
-
-        // 채널 이름 생성
+        String randomString = UUID.randomUUID().toString().substring(0, 5);
         return "ls-" + dateTime + "-" + randomString;
     }
 }

@@ -9,25 +9,23 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface SpecialAuctionRepository extends JpaRepository<Auction, Long> {
-
-    @Query("SELECT b FROM Auction b WHERE b.startingLocalDateTime BETWEEN :now AND :thirtyMinutesLater")
-    List<Auction> findAuctionsStartingWithinThirtyMinutes(@Param("now") LocalDateTime now, @Param("thirtyMinutesLater") LocalDateTime thirtyMinutesLater);
 
     @Query("SELECT a FROM Auction a WHERE a.auctionType = :auctionType AND a.endingLocalDateTime > :oneDayAgo")
     Page<Auction> findAuctionsByType(@Param("auctionType") String auctionType,
                                      @Param("oneDayAgo") LocalDateTime oneDayAgo,
                                      Pageable pageable);
 
-    @Query("SELECT COUNT(m) FROM Auction a JOIN a.member m WHERE a.auctionIndex = :auctionId AND m.memberIndex = :memberIndex")
-    Long countMembersByAuctionIdAndType(@Param("auctionId") Long auctionId);
+    @Query("SELECT a FROM Auction a JOIN FETCH a.liveStationChannel WHERE a.auctionIndex = :auctionIndex")
+    Optional<Auction> findByIdWithChannel(@Param("auctionIndex") Long auctionIndex);
 
-    List<Auction> findByAuctionStatusInAndAuctionType(List<String> statusList, String auctionType);
+    @Query("SELECT a FROM Auction a JOIN FETCH a.liveStationChannel WHERE a.auctionType = :auctionType AND a.startingLocalDateTime > :now")
+    List<Auction> findAllWithChannelByAuctionTypeAndStartingLocalDateTimeAfter(@Param("auctionType") String auctionType,
+                                                                               @Param("now") LocalDateTime now);
 
-    List<Auction> findAllByAuctionTypeAndStartingLocalDateTimeAfter(String auctionType, LocalDateTime now);
+    List<Auction> findAllByAuctionTypeAndStartingLocalDateTimeBeforeAndLiveStationChannelIsNotNull(String auctionType, LocalDateTime time);
 
-    List<Auction> findAllByAuctionTypeAndStartingLocalDateTimeBeforeAndLiveStationChannelIsNotNull(String auctionType, LocalDateTime localDateTime);
-
-    List<Auction> findAllByAuctionTypeAndEndingLocalDateTimeAfter(String auctionType, LocalDateTime now);
+    List<Auction> findAllByAuctionTypeAndEndingLocalDateTimeAfter(String auctionType, LocalDateTime time);
 }
