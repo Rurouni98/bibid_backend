@@ -133,10 +133,8 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
         List<AuctionInfo> previousBids = auctionInfoRepository.findByAuctionOrderByBidTimeDesc(auction);
 
         Long higherBid = auctionInfo.getBidAmount();
-        AuctionInfo previousBidInfo = previousBids.stream()
-                .filter(info -> !info.getBidder().equals(member)) // 현재 입찰자를 제외한 입찰 정보
-                .findFirst()
-                .orElse(null); // 직전 입찰자가 없을 경우 null
+        // 이전 입찰자 정보 가져오기 (최신 입찰 정보를 가져옴)
+        AuctionInfo previousBidInfo = previousBids.isEmpty() ? null : previousBids.get(0);
 
         // 이전 입찰자가 있을 경우, 해당 입찰자의 입찰 금액 및 정보를 사용
         if (previousBidInfo != null) {
@@ -168,8 +166,14 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
 
             log.info("이전 입찰자 {}에게 {} 원 환불 완료 및 히스토리 기록", previousBidInfo.getBidder().getNickname(), lowerBid);
 
-            // lowerBid와 이전 입찰자가 존재할 경우 알림 전송
-            notificationService.notifyHigherBid(previousHighestBidder, auctionIndex, higherBid, lowerBid);
+            // 현재 입찰자와 직전 입찰자가 다른 경우에만 알림 전송
+            if (!previousHighestBidder.getNickname().equals(member.getNickname())) {
+                // 알림 전송
+                notificationService.notifyHigherBid(previousHighestBidder, auctionIndex, higherBid, lowerBid);
+            } else{
+                currentBidderAccount.setUserMoney(previousBidderAccount.getUserMoney());
+                currentBalance = Integer.parseInt(currentBidderAccount.getUserMoney());
+            }
         }
 
         currentBidderAccount.setUserMoney(String.valueOf(currentBalance - bidAmount));

@@ -1,7 +1,9 @@
 package bibid.service.specialAuction.impl;
 
+import bibid.dto.AccountUseHistoryDto;
 import bibid.entity.*;
 import bibid.repository.account.AccountRepository;
+import bibid.repository.account.AccountUseHistoryRepository;
 import bibid.repository.specialAuction.SpecialAuctionRepository;
 import bibid.service.livestation.LiveStationPoolManager;
 import bibid.repository.auction.AuctionRepository;
@@ -34,6 +36,7 @@ public class SpecialAuctionScheduler {
     private final NotificationService notificationService;
     private final Map<Long, Map<Long, ScheduledFuture<?>>> scheduledNotifications = new ConcurrentHashMap<>();
     private final AccountRepository accountRepository;
+    private final AccountUseHistoryRepository accountUseHistoryRepository;
 
     @Transactional
     public void scheduleChannelAllocation(Long auctionIndex, LocalDateTime startingLocalDateTime) {
@@ -137,6 +140,22 @@ public class SpecialAuctionScheduler {
                 log.info("낙찰자 계좌 차감 완료: 차감 후 잔액={}", winningBidderAccount.getUserMoney());
 
                 auction.setAuctionStatus("낙찰");
+
+                // AccountUseHistoryDto 생성 및 저장 (입찰)
+                AccountUseHistoryDto bidHistoryDto = AccountUseHistoryDto.builder()
+                        .auctionType("실시간 경매")
+                        .accountIndex(winningBidderAccount.getAccountIndex())
+                        .afterBalance(String.valueOf(winningBalance - winningBidAmount))
+                        .beforeBalance(String.valueOf(winningBalance))
+                        .createdTime(LocalDateTime.now())
+                        .productName(auction.getProductName())
+                        .changeAccount(String.valueOf(winningBidAmount))
+                        .useType("낙찰")
+                        .memberIndex(winningBidder.getMemberIndex())
+                        .auctionIndex(auctionIndex)
+                        .build();
+                accountUseHistoryRepository.save(bidHistoryDto.toEntity(winningBidder, auction, winningBidderAccount));
+                
                 notificationService.notifyAuctionWin(lastBidInfo.getBidder(), auctionIndex);
                 notificationService.notifyAuctionSold(auction.getMember(), lastBidInfo, auctionIndex);
                 log.info("알림 전송 완료: 낙찰자={}, 판매자={}", lastBidInfo.getBidder().getMemberIndex(), auction.getMember().getMemberIndex());
