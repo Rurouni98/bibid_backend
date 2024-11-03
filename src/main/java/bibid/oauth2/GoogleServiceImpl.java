@@ -1,8 +1,10 @@
 package bibid.oauth2;
 
 import bibid.dto.ResponseDto;
+import bibid.entity.Account;
 import bibid.entity.CustomUserDetails;
 import bibid.entity.Member;
+import bibid.entity.SellerInfo;
 import bibid.jwt.JwtProvider;
 import bibid.repository.member.MemberRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -75,6 +77,18 @@ public class GoogleServiceImpl {
                     .role("ROLE_USER")
                     .oauthType("Google")
                     .build();
+
+            // SellerInfo와 Account를 생성하여 Member에 설정
+            SellerInfo sellerInfo = SellerInfo.builder()
+                    .member(googleMember)
+                    .build();
+            googleMember.setSellerInfo(sellerInfo);
+
+            Account account = Account.builder()
+                    .member(googleMember)
+                    .userMoney("1000000")
+                    .build();
+            googleMember.setAccount(account);
 
             memberRepository.save(googleMember);
         }
