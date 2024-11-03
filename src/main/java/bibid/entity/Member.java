@@ -77,11 +77,11 @@ public class Member {
                 .memberAddress(this.memberAddress)
                 .addressDetail(this.addressDetail)
                 .profileImageDto(this.profileImage != null ? this.profileImage.toDto() : null)
-                .accountDto(this.account.toDto())
+                .accountDto(this.account != null ? this.account.toDto() : null) // null 체크 추가
                 .createTime(this.createTime)
                 .refreshToken(this.refreshToken)
                 .rememberMe(this.rememberMe)
-                .sellerInfoDto(this.sellerInfo.toDto())
+                .sellerInfoDto(this.sellerInfo != null ? this.sellerInfo.toDto() : null) // null 체크 추가
                 .build();
     }
 }

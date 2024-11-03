@@ -1,8 +1,10 @@
 package bibid.oauth2;
 
 import bibid.dto.ResponseDto;
+import bibid.entity.Account;
 import bibid.entity.CustomUserDetails;
 import bibid.entity.Member;
+import bibid.entity.SellerInfo;
 import bibid.jwt.JwtProvider;
 import bibid.repository.member.MemberRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -149,6 +151,18 @@ public class NaverServiceImpl {
                     .oauthType("Naver")
                     .build();
 
+            // SellerInfo와 Account를 생성하여 Member에 설정
+            SellerInfo sellerInfo = SellerInfo.builder()
+                    .member(naverMember)
+                    .build();
+            naverMember.setSellerInfo(sellerInfo);
+
+            Account account = Account.builder()
+                    .member(naverMember)
+                    .userMoney("1000000")
+                    .build();
+            naverMember.setAccount(account);
+            
             memberRepository.save(naverMember);
         }
 

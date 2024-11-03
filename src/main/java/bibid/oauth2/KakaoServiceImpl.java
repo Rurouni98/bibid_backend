@@ -1,7 +1,9 @@
 package bibid.oauth2;
 
+import bibid.entity.Account;
 import bibid.entity.CustomUserDetails;
 import bibid.entity.Member;
+import bibid.entity.SellerInfo;
 import bibid.jwt.JwtProvider;
 import bibid.repository.member.MemberRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -140,6 +142,18 @@ public class KakaoServiceImpl {
                     .role("ROLE_USER")
                     .oauthType("Kakao")
                     .build();
+
+            // SellerInfo와 Account를 생성하여 Member에 설정
+            SellerInfo sellerInfo = SellerInfo.builder()
+                    .member(kakaoMember)
+                    .build();
+            kakaoMember.setSellerInfo(sellerInfo);
+
+            Account account = Account.builder()
+                    .member(kakaoMember)
+                    .userMoney("1000000")
+                    .build();
+            kakaoMember.setAccount(account);
 
             memberRepository.save(kakaoMember);
 
