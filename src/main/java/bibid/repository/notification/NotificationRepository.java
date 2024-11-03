@@ -1,6 +1,7 @@
 package bibid.repository.notification;
 
 import bibid.entity.Notification;
+import bibid.entity.NotificationType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Collection;
@@ -15,4 +16,10 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     List<Notification> findByIsSentFalse();
 
     List<Notification> findByMember_MemberIndexAndIsSentTrue(Long memberIndex);
+
+    // 수정된 메서드: alertCategory 사용
+    List<Notification> findByMember_MemberIndexAndIsSentTrueAndAlertCategory(Long memberIndex, NotificationType alertCategory);
+
+    // 수정된 메서드: alertCategory 사용
+    List<Notification> findByMember_MemberIndexAndAlertCategoryNot(Long memberIndex, NotificationType alertCategory);
 }

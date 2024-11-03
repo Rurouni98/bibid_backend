@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,8 +34,17 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public List<NotificationDto> getNotificationsForMember(Long memberIndex) {
-        List<Notification> notifications = notificationRepository.findByMember_MemberIndexAndIsSentTrue(memberIndex);
-        return notifications.stream()
+        // 실시간 알림 타입인 AUCTION_START만 isSent가 true인 경우 가져오기
+        List<Notification> auctionStartNotifications = notificationRepository.findByMember_MemberIndexAndIsSentTrueAndAlertCategory(memberIndex, NotificationType.AUCTION_START);
+
+        // 다른 알림 타입들은 isSent 여부와 상관없이 모두 가져오기
+        List<Notification> otherNotifications = notificationRepository.findByMember_MemberIndexAndAlertCategoryNot(memberIndex, NotificationType.AUCTION_START);
+
+        // 두 리스트를 합치기
+        List<Notification> allNotifications = new ArrayList<>();
+        allNotifications.addAll(auctionStartNotifications);
+        allNotifications.addAll(otherNotifications);
+        return allNotifications.stream()
                 .map(NotificationDto::new)
                 .collect(Collectors.toList());
     }
@@ -204,7 +214,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void notifyAuctionSold(Member seller, Long auctionIndex) {
+    public void notifyAuctionSold(Member seller, AuctionInfo lastBidInfo, Long auctionIndex) {
         Auction auction = auctionRepository.findById(auctionIndex)
                 .orElseThrow(() -> new RuntimeException("경매가 없습니다."));
 
@@ -212,8 +222,8 @@ public class NotificationServiceImpl implements NotificationService {
         notificationData.put("title", "등록한 경매 낙찰 공지");
         notificationData.put("auctionType", auction.getAuctionType());
         notificationData.put("productName", auction.getProductName());
-        notificationData.put("winningBid", auction.getAuctionDetail().getWinningBid());
-        notificationData.put("winnerNickname", auction.getAuctionDetail().getWinnerNickname());
+        notificationData.put("winningBid", lastBidInfo.getBidAmount());
+        notificationData.put("winnerNickname", lastBidInfo.getBidder().getNickname());
         notificationData.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd a hh:mm")));
         notificationData.put("notificationType", NotificationType.AUCTION_SOLD);
         notificationData.put("referenceIndex", auctionIndex);

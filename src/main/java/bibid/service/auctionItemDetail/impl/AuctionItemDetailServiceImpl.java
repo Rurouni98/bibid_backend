@@ -272,7 +272,7 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
 
                 // 낙찰자와 판매자에게 알림 전송
                 notificationService.notifyAuctionWin(lastBidInfo.getBidder(), auctionIndex);
-                notificationService.notifyAuctionSold(auction.getMember(), auctionIndex);
+                notificationService.notifyAuctionSold(auction.getMember(), lastBidInfo, auctionIndex);
 
                 log.info("Auction finalized with winner for auction ID: {}, winner ID: {}, winning bid: {}",
                         auctionIndex, lastBidInfo.getBidder().getMemberIndex(), lastBidInfo.getBidAmount());

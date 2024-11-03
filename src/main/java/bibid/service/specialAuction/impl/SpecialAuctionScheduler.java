@@ -138,7 +138,7 @@ public class SpecialAuctionScheduler {
 
                 auction.setAuctionStatus("낙찰");
                 notificationService.notifyAuctionWin(lastBidInfo.getBidder(), auctionIndex);
-                notificationService.notifyAuctionSold(auction.getMember(), auctionIndex);
+                notificationService.notifyAuctionSold(auction.getMember(), lastBidInfo, auctionIndex);
                 log.info("알림 전송 완료: 낙찰자={}, 판매자={}", lastBidInfo.getBidder().getMemberIndex(), auction.getMember().getMemberIndex());
 
             } else {

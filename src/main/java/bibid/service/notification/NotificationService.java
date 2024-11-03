@@ -1,10 +1,7 @@
 package bibid.service.notification;
 
 import bibid.dto.NotificationDto;
-import bibid.entity.Auction;
-import bibid.entity.Member;
-import bibid.entity.Notification;
-import bibid.entity.NotificationType;
+import bibid.entity.*;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -28,9 +25,6 @@ public interface NotificationService {
     // 서버 점검 알림 등록
     void notifyServerMaintenance(String title, String content);
 
-    // 내가 올린 경매가 낙찰된 경우 알림
-    void notifyAuctionSold(Member seller, Long auctionIndex);
-
     void sendAuctionStartNotificationToUser(Auction auction, Long memberIndex, Long notificationIndex);
 
     Notification createScheduledNotification(Auction auction, Long memberIndex);
@@ -39,6 +33,8 @@ public interface NotificationService {
     void notifyAuctionWin(Member winner, Long auctionIndex);
 
     List<NotificationDto> getNotificationsForMember(Long memberIndex);
+
+    void notifyAuctionSold(Member seller, AuctionInfo lastBidInfo, Long auctionIndex);
 
     void notifyHigherBid(Member bidder, Long auctionIndex, Long higherBid, Long lowerBid);
 
