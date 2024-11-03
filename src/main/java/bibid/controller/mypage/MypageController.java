@@ -80,7 +80,7 @@ public class MypageController {
 
         try {
             MemberDto findMember = mypageService.findByMemberIndex(memberIndex);
-            log.info("fingMember : {}", findMember);
+            log.info("Found member: {}", findMember); // 로그 추가
 
             responseDto.setItem(findMember);
             responseDto.setStatusCode(HttpStatus.OK.value());
@@ -88,11 +88,12 @@ public class MypageController {
 
             return ResponseEntity.ok(responseDto);
         } catch (RuntimeException e) {
+            log.error("RuntimeException occurred: {}", e.getMessage()); // 로그 추가
             responseDto.setStatusCode(HttpStatus.NOT_FOUND.value());
             responseDto.setStatusMessage(e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseDto);
         } catch (Exception e) {
-            log.error("getMemberByMemberIndex error: ", e);
+            log.error("getMemberByMemberIndex error: ", e); // 이미 존재하는 로그
             responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
             responseDto.setStatusMessage("An error occurred");
             return ResponseEntity.internalServerError().body(responseDto);

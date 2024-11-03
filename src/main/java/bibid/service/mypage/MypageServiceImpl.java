@@ -103,8 +103,15 @@ public class MypageServiceImpl implements MypageService {
         Member member = mypageRepository.findById(memberIndex)
                 .orElseThrow(() -> new RuntimeException("Member not found"));
 
+        // 로그 추가
+        log.info("Found member: {}", member);
+
         MemberDto memberDto = member.toDto();
+        log.info("Converted memberDto: {}", memberDto);
+
         memberDto.setMemberPw(""); // 비밀번호를 숨김
+        log.info("MemberDto after hiding password: {}", memberDto);
+
         return memberDto;
     }
 
