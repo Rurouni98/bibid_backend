@@ -138,18 +138,26 @@ public class AuctionServiceImpl implements AuctionService {
         // 현재 시간
         LocalDateTime now = LocalDateTime.now();
 
-        // 경매 상태와 시작 시간을 확인하여 삭제 가능 여부 판단
-        if ("대기중".equals(auction.getAuctionStatus()) && auction.getStartingLocalDateTime().isAfter(now)) {
-            // AuctionDetail을 수동으로 삭제
-            if (auction.getAuctionDetail() != null) {
-                auctionDetailRepository.delete(auction);
-            }
+//        // 경매 상태와 시작 시간을 확인하여 삭제 가능 여부 판단
+//        if ("대기중".equals(auction.getAuctionStatus()) && auction.getStartingLocalDateTime().isAfter(now)) {
+//            // AuctionDetail을 수동으로 삭제
+//            if (auction.getAuctionDetail() != null) {
+//                auctionDetailRepository.delete(auction);
+//            }
+//
+//            // Auction 삭제
+//            auctionRepository.delete(auction);
+//        } else {
+//            throw new RuntimeException("Auction cannot be deleted because it is either completed or has already started.");
+//        }
 
-            // Auction 삭제
-            auctionRepository.delete(auction);
-        } else {
-            throw new RuntimeException("Auction cannot be deleted because it is either completed or has already started.");
+        // AuctionDetail을 수동으로 삭제
+        if (auction.getAuctionDetail() != null) {
+            auctionDetailRepository.delete(auction);
         }
+
+        // Auction 삭제
+        auctionRepository.delete(auction);
 
     }
 }
