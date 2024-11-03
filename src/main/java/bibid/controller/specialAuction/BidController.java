@@ -1,15 +1,14 @@
 package bibid.controller.specialAuction;
 
 import bibid.dto.AuctionInfoDto;
-import bibid.entity.Auction;
-import bibid.entity.AuctionInfo;
-import bibid.entity.CustomUserDetails;
-import bibid.entity.Member;
+import bibid.entity.*;
+import bibid.repository.account.AccountRepository;
 import bibid.repository.auction.AuctionRepository;
 import bibid.repository.specialAuction.AuctionInfoRepository;
 import bibid.service.specialAuction.RedisBidService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.Acceleration;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -28,6 +27,7 @@ public class BidController {
     private final AuctionInfoRepository auctionInfoRepository;
     private final UserDetailsService userDetailsService;
     private final RedisBidService redisBidService;
+    private final AccountRepository accountRepository;
 
     @MessageMapping("/auction.bid/{auctionIndex}")
     @SendTo("/topic/auction/{auctionIndex}")
@@ -52,6 +52,18 @@ public class BidController {
         // 경매 상태 확인
         if (!"방송중".equals(auction.getAuctionStatus())) {
             throw new IllegalStateException("이 경매는 현재 입찰할 수 없습니다.");
+        }
+
+        // 계좌 정보 조회
+        Account bidderAccount = accountRepository.findByMember_MemberIndex(bidder.getMemberIndex())
+                .orElseThrow(() -> new RuntimeException("계좌 정보를 찾을 수 없습니다."));
+
+        int currentBalance = Integer.parseInt(bidderAccount.getUserMoney());
+        int bidAmount = auctionInfoDto.getBidAmount().intValue();
+
+        // 계좌 금액 확인: 잔액이 입찰 금액보다 적으면 예외 발생
+        if (currentBalance < bidAmount) {
+            throw new RuntimeException("잔액이 부족하여 입찰할 수 없습니다.");
         }
 
         // 새로운 입찰을 Redis에 기록

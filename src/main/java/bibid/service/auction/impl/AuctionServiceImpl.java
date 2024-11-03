@@ -150,5 +150,6 @@ public class AuctionServiceImpl implements AuctionService {
         } else {
             throw new RuntimeException("Auction cannot be deleted because it is either completed or has already started.");
         }
+
     }
 }

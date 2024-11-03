@@ -110,6 +110,17 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
                 .orElseThrow(() -> new RuntimeException("Auction not found with index: " + auctionIndex));
         auctionInfo.setAuction(auction);
 
+        // 현재 입찰자의 계좌 금액 확인 및 차감
+        Account currentBidderAccount = accountRepository.findByMember_MemberIndex(member.getMemberIndex())
+                .orElseThrow(() -> new RuntimeException("현재 입찰자의 계좌 정보를 찾을 수 없습니다."));
+        int currentBalance = Integer.parseInt(currentBidderAccount.getUserMoney());
+        int bidAmount = bidRequestDto.getUserBiddingPrice().intValue();
+
+        // 계좌 금액 확인: 잔액이 입찰 금액보다 적으면 예외 발생
+        if (currentBalance < bidAmount) {
+            throw new RuntimeException("잔액이 부족합니다.");
+        }
+
         // 입찰자 정보 조회 및 할당
         auctionInfo.setBidder(member);
 
@@ -161,14 +172,6 @@ public class AuctionItemDetailServiceImpl implements AuctionItemDetailService {
             notificationService.notifyHigherBid(previousHighestBidder, auctionIndex, higherBid, lowerBid);
         }
 
-        // 현재 입찰자의 금액 차감
-        Account currentBidderAccount = accountRepository.findByMember_MemberIndex(member.getMemberIndex())
-                .orElseThrow(() -> new RuntimeException("현재 입찰자의 계좌 정보를 찾을 수 없습니다."));
-        int currentBalance = Integer.parseInt(currentBidderAccount.getUserMoney());
-        int bidAmount = bidRequestDto.getUserBiddingPrice().intValue();
-        if (currentBalance < bidAmount) {
-            throw new RuntimeException("잔액이 부족합니다.");
-        }
         currentBidderAccount.setUserMoney(String.valueOf(currentBalance - bidAmount));
         accountRepository.save(currentBidderAccount);
         log.info("현재 입찰자 {}의 계좌에서 {} 원 차감 완료", member.getNickname(), bidAmount);
