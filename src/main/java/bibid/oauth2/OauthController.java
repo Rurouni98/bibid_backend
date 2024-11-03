@@ -74,28 +74,26 @@ public class OauthController {
         }
     }
 
-    // ㅁ 네이버
+    // 네이버
     @GetMapping("/naver/callback") // (3)
     public ResponseEntity<?> getNaverJwtToken(@RequestParam("code") String code, HttpServletResponse response) {
 
         // 넘어온 인가 코드를 통해 access_token 발급
         oauthToken = naverServiceImpl.getAccessToken(code);
-        System.out.println("oauthToken" + oauthToken);
+        log.info("OAuth Token issued: {}", oauthToken);
 
-        //(2)
-        // 발급 받은 accessToken 으로 카카오 회원 정보 DB 저장 후 JWT 를 생성
+        // 발급 받은 accessToken으로 네이버 회원 정보 DB 저장 후 JWT 생성
         String jwtToken = naverServiceImpl.saveUserAndGetToken(oauthToken.getAccess_token());
+        log.info("Generated JWT Token: {}", jwtToken);
 
-        //(3)
         // 프론트에 넘겨 줄 회원정보 조회
         ResponseDto<Map<String, String>> responseDto = new ResponseDto<>();
         Map<String, String> memberInfo = naverServiceImpl.getMember(jwtToken);
+        log.info("Member information: {}", memberInfo);
 
         try {
             // 쿠키 설정
             StringBuilder cookieHeader = new StringBuilder("ACCESS_TOKEN=" + jwtToken + "; Path=/; HttpOnly; ");
-
-
             cookieHeader.append("Secure; SameSite=None");
 
             response.addHeader("Set-Cookie", cookieHeader.toString());
@@ -106,7 +104,7 @@ public class OauthController {
 
             return ResponseEntity.ok(responseDto);
         } catch (Exception e) {
-            log.error("login error: {}", e.getMessage());
+            log.error("Login error: {}", e.getMessage());
             responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
             responseDto.setStatusMessage(e.getMessage());
 

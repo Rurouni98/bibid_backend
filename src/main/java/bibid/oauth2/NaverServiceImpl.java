@@ -186,7 +186,7 @@ public class NaverServiceImpl {
             item.put("email", member.getEmail());
             item.put("memberAddress", "***");
             item.put("memberId", member.getMemberId());
-            item.put("nickname", member.getName());
+            item.put("nickname", member.getNickname());
             item.put("name", member.getName());
             item.put("memberPnum", member.getMemberPnum());
 
