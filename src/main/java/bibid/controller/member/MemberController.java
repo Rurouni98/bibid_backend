@@ -109,23 +109,26 @@ public class MemberController {
         ResponseDto<MemberDto> responseDto = new ResponseDto<>();
 
         try {
-            log.info("login memberDto: {}", memberDto.toString());
+            log.info("Received login request: {}", memberDto.toString());
             MemberDto loginMember = memberService.login(memberDto);
-            log.info("login Data: {}", memberService.login(memberDto));
+            log.info("Login data: {}", loginMember);
+
             String jwtToken = jwtProvider.createJwt(loginMember.toEntity());
             Boolean rememberMe = loginMember.getRememberMe();
-            log.info("rememberMe: {}", rememberMe);
+            log.info("Remember Me flag: {}", rememberMe);
 
             // 쿠키 설정
             StringBuilder cookieHeader = new StringBuilder("ACCESS_TOKEN=" + jwtToken + "; Path=/; HttpOnly; ");
 
             if (rememberMe) {
                 int maxAge = 7 * 24 * 60 * 60; // 7일
-                cookieHeader.append("Max-Age=").append(maxAge);
+                log.info("Setting Max-Age for cookie: {}", maxAge);
+                cookieHeader.append("Max-Age=").append(maxAge).append("; ");
             }
 
             cookieHeader.append("Secure; SameSite=None");
 
+            log.info("Cookie header: {}", cookieHeader.toString());
             response.addHeader("Set-Cookie", cookieHeader.toString());
 
             responseDto.setStatusCode(HttpStatus.OK.value());
@@ -135,7 +138,7 @@ public class MemberController {
             return ResponseEntity.ok(responseDto);
 
         } catch (Exception e) {
-            log.error("login error: {}", e.getMessage());
+            log.error("Login error: {}", e.getMessage());
             responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
             responseDto.setStatusMessage(e.getMessage());
             return ResponseEntity.internalServerError().body(responseDto);
