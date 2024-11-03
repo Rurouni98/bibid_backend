@@ -15,8 +15,10 @@ COPY nginx.conf /etc/nginx/nginx.conf
 # Spring Boot JAR 파일 복사
 COPY --from=build /app/app.jar /app/app.jar
 
-# Install OpenJDK for running Spring Boot and Supervisor for process management
-RUN apk add --no-cache openjdk17-jre supervisor
+# Install OpenJDK, Supervisor, and tzdata for time zone
+RUN apk add --no-cache openjdk17-jre supervisor tzdata && \
+    ln -snf /usr/share/zoneinfo/Asia/Seoul /etc/localtime && \
+    echo "Asia/Seoul" > /etc/timezone
 
 # Supervisor 설정 파일 복사
 COPY supervisord.conf /etc/supervisord.conf
