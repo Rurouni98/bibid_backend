@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +38,7 @@ public class SpecialAuctionController {
     @GetMapping("/list")
     public ResponseEntity<?> getAuctionsByType(
             @RequestParam("auctionType") String auctionType,
-            @PageableDefault(page = 0, size = 100) Pageable pageable) {
+            @PageableDefault(page = 0, size = 100, sort = "moddate", direction = Sort.Direction.DESC) Pageable pageable) {
 
         // 응답 데이터를 담을 Map 선언
         ResponseDto<AuctionDto> responseDto = new ResponseDto<>();
