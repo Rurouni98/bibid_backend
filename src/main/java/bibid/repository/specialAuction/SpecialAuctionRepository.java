@@ -9,16 +9,23 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface SpecialAuctionRepository extends JpaRepository<Auction, Long> {
-    // 경매 시작 시간이 30분 이내인 경매들 찾기
-    @Query("SELECT b FROM Auction b WHERE b.startingLocalDateTime BETWEEN :past AND :now")
-    List<Auction> findAuctionsStartingBefore(@Param("past") LocalDateTime past, @Param("now") LocalDateTime now);
 
-
-    // 경매 타입과 시작 시간이 현재 이후인 경매 목록을 페이징 처리하여 조회
-    @Query("SELECT a FROM Auction a WHERE a.auctionType = :auctionType AND a.startingLocalDateTime > :currentTime")
+    @Query("SELECT a FROM Auction a WHERE a.auctionType = :auctionType AND a.endingLocalDateTime > :oneDayAgo")
     Page<Auction> findAuctionsByType(@Param("auctionType") String auctionType,
-                                     @Param("currentTime") LocalDateTime currentTime,
+                                     @Param("oneDayAgo") LocalDateTime oneDayAgo,
                                      Pageable pageable);
+
+    @Query("SELECT a FROM Auction a JOIN FETCH a.liveStationChannel WHERE a.auctionIndex = :auctionIndex")
+    Optional<Auction> findByIdWithChannel(@Param("auctionIndex") Long auctionIndex);
+
+    @Query("SELECT a FROM Auction a JOIN FETCH a.liveStationChannel WHERE a.auctionType = :auctionType AND a.startingLocalDateTime > :now")
+    List<Auction> findAllWithChannelByAuctionTypeAndStartingLocalDateTimeAfter(@Param("auctionType") String auctionType,
+                                                                               @Param("now") LocalDateTime now);
+
+    List<Auction> findAllByAuctionTypeAndStartingLocalDateTimeBeforeAndLiveStationChannelIsNotNull(String auctionType, LocalDateTime time);
+
+    List<Auction> findAllByAuctionTypeAndEndingLocalDateTimeAfter(String auctionType, LocalDateTime time);
 }

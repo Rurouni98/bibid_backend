@@ -22,7 +22,7 @@ public class QNotification extends EntityPathBase<Notification> {
 
     public static final QNotification notification = new QNotification("notification");
 
-    public final StringPath alertCat = createString("alertCat");
+    public final EnumPath<NotificationType> alertCategory = createEnum("alertCategory", NotificationType.class);
 
     public final StringPath alertContent = createString("alertContent");
 
@@ -30,11 +30,15 @@ public class QNotification extends EntityPathBase<Notification> {
 
     public final StringPath alertTitle = createString("alertTitle");
 
+    public final BooleanPath isSent = createBoolean("isSent");
+
+    public final BooleanPath isViewed = createBoolean("isViewed");
+
     public final QMember member;
 
     public final NumberPath<Long> notificationIndex = createNumber("notificationIndex", Long.class);
 
-    public final BooleanPath viewEd = createBoolean("viewEd");
+    public final NumberPath<Long> referenceIndex = createNumber("referenceIndex", Long.class);
 
     public QNotification(String variable) {
         this(Notification.class, forVariable(variable), INITS);
@@ -54,7 +58,7 @@ public class QNotification extends EntityPathBase<Notification> {
 
     public QNotification(Class<? extends Notification> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.member = inits.isInitialized("member") ? new QMember(forProperty("member")) : null;
+        this.member = inits.isInitialized("member") ? new QMember(forProperty("member"), inits.get("member")) : null;
     }
 
 }

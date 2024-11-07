@@ -16,7 +16,7 @@ public class EvaluationDto {
     private String evaluationItem;
     private String evaluationRate;
 
-    public Evaluation toEntiy(Member member) {
+    public Evaluation toEntity(Member member) {
         return Evaluation.builder()
                 .evaluationIndex(this.evaluationIndex)
                 .member(member)

@@ -21,7 +21,7 @@ public class SellerInfoDto {
     private String businessLocation;
     private String salesCnt;
 
-    public SellerInfo toEntiy(Member member) {
+    public SellerInfo toEntity(Member member) {
         return SellerInfo.builder()
                 .member(member)
                 .businessName(this.businessName)

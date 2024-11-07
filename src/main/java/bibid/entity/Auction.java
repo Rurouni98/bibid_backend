@@ -22,7 +22,6 @@ import java.util.Optional;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-
 public class Auction {
 
     @Id
@@ -31,7 +30,7 @@ public class Auction {
             generator = "auctionSeqGenerator"
     )
     private Long auctionIndex;
-    
+
     // 경매 등록 멤버
     @ManyToOne
     @JoinColumn(name = "memberIndex")
@@ -42,6 +41,7 @@ public class Auction {
     private String subcategory; // 세부 카테고리 
 
     private String productName; // 물품 제목
+    @Column(length = 1000)
     private String productDescription; // 물품 설명
 
     private Long startingPrice; // 경매 시작가
@@ -65,19 +65,10 @@ public class Auction {
     @JsonManagedReference
     private List<AuctionImage> auctionImageList;
 
-    // 스트리밍과의 비식별 1:1 관계
-    @OneToOne(mappedBy = "auction", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference
-    private Streaming streaming;
-
-    private boolean isStreamingCreated;
-
     // 채팅방과의 비식별 1:1 관계
     @OneToOne(mappedBy = "auction", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
     private ChatRoom chatRoom;
-
-    private boolean isChatRoomCreated;
 
     // 경매 정보
     @OneToMany(mappedBy = "auction", cascade = CascadeType.ALL)
@@ -88,6 +79,16 @@ public class Auction {
     @OneToOne(mappedBy = "auction", cascade = CascadeType.ALL)
     @JsonManagedReference
     private AuctionDetail auctionDetail;
+
+    @OneToOne
+    @JoinColumn(name = "liveStationChannelIndex")
+    private LiveStationChannel liveStationChannel;
+
+    // 검색 키워드
+    @Transient
+    private String searchKeyword;
+    @Transient
+    private String searchCondition;
 
     public AuctionDto toDto() {
         return AuctionDto.builder()
@@ -111,10 +112,6 @@ public class Auction {
                 .viewCnt(this.viewCnt)
                 .regdate(this.regdate)
                 .moddate(this.moddate)
-                .streamingDto(this.streaming != null ? this.streaming.toDto() : null)
-                .isStreamingCreated(this.isStreamingCreated)
-                .chatRoomDto(this.chatRoom != null ? this.chatRoom.toDto() : null)
-                .isChatRoomCreated(this.isChatRoomCreated)
                 .auctionImageDtoList(
                         Optional.ofNullable(auctionImageList).map(list -> list.stream().map(AuctionImage::toDto).toList())
                                 .orElse(new ArrayList<>()))
@@ -122,6 +119,8 @@ public class Auction {
                         Optional.ofNullable(auctionInfoList).map(list -> list.stream().map(AuctionInfo::toDto).toList())
                                 .orElse(new ArrayList<>()))
                 .auctionDetailDto(this.auctionDetail != null ? this.auctionDetail.toDto() : null)
+                .searchKeyword(this.searchKeyword)
+                .searchCondition(this.searchCondition)
                 .build();
     }
 

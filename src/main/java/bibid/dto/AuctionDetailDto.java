@@ -23,6 +23,7 @@ public class AuctionDetailDto {
     private String costResponsibility; // 비용 부담 ('선불', '착불')
     private Long winnerIndex; // 낙찰자 id
     private Long winningBid; // 낙찰 금액
+    private String winnerNickname; // 낙찰자 닉네임
 
     public AuctionDetail toEntity(Auction auction){
         return AuctionDetail.builder()
@@ -32,6 +33,7 @@ public class AuctionDetailDto {
                 .costResponsibility(this.costResponsibility)
                 .winnerIndex(this.winnerIndex)
                 .winningBid(this.winningBid)
+                .winnerNickname(this.winnerNickname)
                 .build();
     }
 

@@ -1,6 +1,7 @@
 package bibid.service.specialAuction;
 
 import bibid.dto.AuctionDto;
+import bibid.entity.Auction;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
