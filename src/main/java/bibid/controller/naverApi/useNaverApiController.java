@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class useNaverApiController {
 
-    private final NcloudApiService ncloudApiService;
-
-    @PostMapping("/check")
-    public ResponseEntity<?> checkNcloudApi(@RequestBody NcloudApiRequestDTO requestDTO) {
-        log.info("Dto : {}", requestDTO);
-        String response = ncloudApiService.callNcloudApi(requestDTO);
-        return ResponseEntity.ok(response);
-    }
+//    private final NcloudApiService ncloudApiService;
+//
+//    @PostMapping("/check")
+//    public ResponseEntity<?> checkNcloudApi(@RequestBody NcloudApiRequestDTO requestDTO) {
+//        log.info("Dto : {}", requestDTO);
+//        String response = ncloudApiService.callNcloudApi(requestDTO);
+//        return ResponseEntity.ok(response);
+//    }
 
 }

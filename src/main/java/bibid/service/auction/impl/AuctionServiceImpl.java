@@ -83,11 +83,11 @@ public class AuctionServiceImpl implements AuctionService {
 
         Auction savedAuction = auctionRepository.save(auction);
 
-        if(auctionDto.getAuctionType().equals("실시간 경매")){
-            specialAuctionScheduler.scheduleChannelAllocation(savedAuction.getAuctionIndex(), auctionDto.getStartingLocalDateTime());
-            specialAuctionScheduler.scheduleChannelRelease(savedAuction.getAuctionIndex(), auctionDto.getStartingLocalDateTime());
-            specialAuctionScheduler.scheduleAuctionEnd(savedAuction.getAuctionIndex(), auctionDto.getEndingLocalDateTime());
-        }
+//        if(auctionDto.getAuctionType().equals("실시간 경매")){
+//            specialAuctionScheduler.scheduleChannelAllocation(savedAuction.getAuctionIndex(), auctionDto.getStartingLocalDateTime());
+//            specialAuctionScheduler.scheduleChannelRelease(savedAuction.getAuctionIndex(), auctionDto.getStartingLocalDateTime());
+//            specialAuctionScheduler.scheduleAuctionEnd(savedAuction.getAuctionIndex(), auctionDto.getEndingLocalDateTime());
+//        }
 
         return auctionRepository.findAll(pageable).map(Auction::toDto);
     }
