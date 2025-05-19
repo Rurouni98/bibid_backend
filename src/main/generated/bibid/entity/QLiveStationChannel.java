@@ -7,7 +7,6 @@ import com.querydsl.core.types.dsl.*;
 import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
-import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
@@ -20,25 +19,17 @@ public class QLiveStationChannel extends EntityPathBase<LiveStationChannel> {
 
     public static final QLiveStationChannel liveStationChannel = new QLiveStationChannel("liveStationChannel");
 
-    public final NumberPath<Integer> cdnInstanceNo = createNumber("cdnInstanceNo", Integer.class);
-
-    public final StringPath cdnStatusName = createString("cdnStatusName");
-
-    public final StringPath channelId = createString("channelId");
-
-    public final StringPath channelStatus = createString("channelStatus");
-
     public final BooleanPath isAllocated = createBoolean("isAllocated");
 
     public final BooleanPath isAvailable = createBoolean("isAvailable");
 
     public final NumberPath<Long> liveStationChannelIndex = createNumber("liveStationChannelIndex", Long.class);
 
-    public final StringPath publishUrl = createString("publishUrl");
+    public final StringPath youtubeStreamKey = createString("youtubeStreamKey");
 
-    public final ListPath<LiveStationServiceUrl, QLiveStationServiceUrl> serviceUrlList = this.<LiveStationServiceUrl, QLiveStationServiceUrl>createList("serviceUrlList", LiveStationServiceUrl.class, QLiveStationServiceUrl.class, PathInits.DIRECT2);
+    public final StringPath youtubeStreamUrl = createString("youtubeStreamUrl");
 
-    public final StringPath streamKey = createString("streamKey");
+    public final StringPath youtubeWatchUrl = createString("youtubeWatchUrl");
 
     public QLiveStationChannel(String variable) {
         super(LiveStationChannel.class, forVariable(variable));

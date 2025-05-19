@@ -3,7 +3,6 @@ package bibid.service.livestation;
 import bibid.dto.livestation.LiveStationChannelDTO;
 import bibid.dto.livestation.LiveStationInfoDTO;
 import bibid.entity.LiveStationChannel;
-import bibid.entity.LiveStationServiceUrl;
 import bibid.repository.livestation.LiveStationChannelRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;

@@ -1,25 +1,27 @@
 package bibid.repository.livestation;
 
 import bibid.entity.LiveStationChannel;
-import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface LiveStationChannelRepository extends JpaRepository<LiveStationChannel, Long> {
 
-    // 채널 ID로 채널을 찾을 때 serviceUrlList도 함께 로드
-    @Query("SELECT c FROM LiveStationChannel c LEFT JOIN FETCH c.serviceUrlList WHERE c.channelId = :channelId")
-    Optional<LiveStationChannel> findByChannelId(@Param("channelId") String channelId);
+    // YouTube 스트림 키로 채널 조회 (기존의 channelId 대체)
+    Optional<LiveStationChannel> findByYoutubeStreamKey(String youtubeStreamKey);
 
-    // 사용 가능하지 않은 모든 채널과 관련된 serviceUrlList를 함께 로드
-    @Query("SELECT c FROM LiveStationChannel c LEFT JOIN FETCH c.serviceUrlList WHERE c.isAvailable = false")
+    // 사용 가능하지 않은 채널 조회
     List<LiveStationChannel> findAllByIsAvailableFalse();
 
-    // 할당되지 않았고 사용 가능한 첫 번째 채널을 serviceUrlList와 함께 로드
-    @Query("SELECT c FROM LiveStationChannel c LEFT JOIN FETCH c.serviceUrlList WHERE c.isAllocated = false AND c.isAvailable = true ORDER BY c.channelId")
-    List<LiveStationChannel> findAllByIsAllocatedFalseAndIsAvailableTrue();
+    // 사용 가능 + 미할당된 채널 목록 조회 (우선순위 높은 순 정렬)
+    List<LiveStationChannel> findAllByIsAllocatedFalseAndIsAvailableTrueOrderByLiveStationChannelIndexAsc();
 
+    // YouTube 시청 URL로 채널 조회 (옵션: 시청 URL로 접근하는 경우에 대비)
+    Optional<LiveStationChannel> findByYoutubeWatchUrl(String youtubeWatchUrl);
+
+    // YouTube 송출 주소로 채널 조회 (특정 서버 송출 주소 기반으로 찾고 싶을 때)
+    Optional<LiveStationChannel> findByYoutubeStreamUrl(String youtubeStreamUrl);
 }

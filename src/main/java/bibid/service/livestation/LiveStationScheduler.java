@@ -2,7 +2,6 @@ package bibid.service.livestation;
 
 import bibid.dto.livestation.LiveStationChannelDTO;
 import bibid.entity.LiveStationChannel;
-import bibid.entity.LiveStationServiceUrl;
 import bibid.repository.livestation.LiveStationChannelRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
