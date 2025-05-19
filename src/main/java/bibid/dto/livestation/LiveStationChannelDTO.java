@@ -3,9 +3,6 @@ package bibid.dto.livestation;
 import bibid.entity.LiveStationChannel;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Getter
 @Setter
 @AllArgsConstructor
@@ -15,31 +12,29 @@ public class LiveStationChannelDTO {
 
     private Long liveStationChannelIndex;
 
-    private String channelId;
-    private String channelStatus;
-    private int cdnInstanceNo;
-    private String cdnStatusName;
+    // YouTube RTMP 송출용 주소
+    private String youtubeStreamUrl;
 
-    private String publishUrl;
-    private String streamKey;
-    private List<String> serviceUrlList;
+    // YouTube 스트림 키
+    private String youtubeStreamKey;
 
+    // YouTube 라이브 시청용 URL
+    private String youtubeWatchUrl;
+
+    // 채널 사용 가능 여부
     private boolean isAvailable;
+
+    // 현재 채널이 사용 중인지 여부
     private boolean isAllocated;
 
     public LiveStationChannel toEntity() {
         return LiveStationChannel.builder()
                 .liveStationChannelIndex(this.liveStationChannelIndex)
-                .channelId(this.channelId)
-                .channelStatus(this.channelStatus)
-                .cdnInstanceNo(this.cdnInstanceNo)
-                .cdnStatusName(this.cdnStatusName)
-                .publishUrl(this.publishUrl)
-                .streamKey(this.streamKey)
+                .youtubeStreamUrl(this.youtubeStreamUrl)
+                .youtubeStreamKey(this.youtubeStreamKey)
+                .youtubeWatchUrl(this.youtubeWatchUrl)
                 .isAvailable(this.isAvailable)
                 .isAllocated(this.isAllocated)
-                .serviceUrlList(new ArrayList<>())
                 .build();
     }
-
 }

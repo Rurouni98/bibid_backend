@@ -4,10 +4,6 @@ import bibid.dto.livestation.LiveStationChannelDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -29,34 +25,48 @@ public class LiveStationChannel {
     )
     private Long liveStationChannelIndex;
 
-    private String channelId;
-    private String channelStatus;
-    private int cdnInstanceNo;
-    private String cdnStatusName;
+    /**
+     * YouTube RTMP 송출 주소
+     * 예: rtmp://a.rtmp.youtube.com/live2
+     */
+    @Column(nullable = false)
+    private String youtubeStreamUrl;
 
-    private String publishUrl;
-    private String streamKey;
+    /**
+     * YouTube 스트림 키
+     * 예: 7s1a-xxxx-xxxx-xxxx
+     */
+    @Column(nullable = false)
+    private String youtubeStreamKey;
 
-    @OneToMany(mappedBy = "liveStationChannel", cascade = CascadeType.ALL)
-    private List<LiveStationServiceUrl> serviceUrlList;
+    /**
+     * 시청자가 접속할 YouTube 라이브 주소
+     * 예: https://www.youtube.com/watch?v=abcdefghijk
+     */
+    @Column(nullable = false)
+    private String youtubeWatchUrl;
 
-    private boolean isAvailable;
+    /**
+     * 해당 채널이 현재 사용 중인지 여부
+     */
     private boolean isAllocated;
 
+    /**
+     * 현재 사용 가능한지 여부
+     */
+    private boolean isAvailable;
+
+    /**
+     * DTO 변환 메서드
+     */
     public LiveStationChannelDTO toDto(){
         return LiveStationChannelDTO.builder()
                 .liveStationChannelIndex(this.liveStationChannelIndex)
-                .channelId(this.channelId)
-                .channelStatus(this.channelStatus)
-                .cdnInstanceNo(this.cdnInstanceNo)
-                .cdnStatusName(this.cdnStatusName)
-                .publishUrl(this.publishUrl)
-                .streamKey(this.streamKey)
-                .isAvailable(this.isAvailable)
+                .youtubeStreamUrl(this.youtubeStreamUrl)
+                .youtubeStreamKey(this.youtubeStreamKey)
+                .youtubeWatchUrl(this.youtubeWatchUrl)
                 .isAllocated(this.isAllocated)
-                .serviceUrlList(this.serviceUrlList != null ?
-                        this.serviceUrlList.stream().map(LiveStationServiceUrl::getServiceUrl)
-                                .collect(Collectors.toList()) : new ArrayList<>())
+                .isAvailable(this.isAvailable)
                 .build();
     }
 }
